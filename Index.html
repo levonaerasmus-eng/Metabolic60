@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>60-Day Metabolic Reboot • Visual Edition</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    body { background-color: #020617; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
+    .timer-circle { transition: stroke-dashoffset 1s linear; transform: rotate(-90deg); transform-origin: 50% 50%; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    const WORKOUT_VISUALS = {
+      phase1: {
+        A: {
+          title: "Workout A: Lower Body & Push",
+          focus: "Foundation & Hypertrophy",
+          exercises: [
+            { id: "p1_a1", name: "DB Goblet Squats", primary: "Quads & Glutes", secondary: "Core", sets: 3, reps: "10-12", weight: 7.5, tempo: "3-0-1", visualIcon: "🦵" },
+            { id: "p1_a2", name: "DB Floor Press", primary: "Chest", secondary: "Triceps / Shoulders", sets: 3, reps: "10-12", weight: 5.0, tempo: "2-0-1", visualIcon: "💪" },
+            { id: "p1_a3", name: "DB Romanian Deadlifts", primary: "Hamstrings & Glutes", secondary: "Lower Back", sets: 3, reps: "12", weight: 7.5, tempo: "3-1-1", visualIcon: "🍑" },
+            { id: "p1_a4", name: "Seated DB Overhead Press", primary: "Deltoids", secondary: "Triceps", sets: 3, reps: "10", weight: 4.0, tempo: "2-0-1", visualIcon: "🏋️‍♀️" },
+            { id: "p1_a5", name: "DB Lateral Raises", primary: "Lateral Delts", secondary: "Traps", sets: 3, reps: "12", weight: 2.5, tempo: "2-1-1", visualIcon: "🦅" }
+          ]
+        },
+        B: {
+          title: "Workout B: Pull & Posterior Chain",
+          focus: "Back, Glutes & Posture",
+          exercises: [
+            { id: "p1_b1", name: "DB Glute Bridges", primary: "Glutes", secondary: "Hamstrings", sets: 3, reps: "15", weight: 10.0, tempo: "2-2-1", visualIcon: "🍑" },
+            { id: "p1_b2", name: "DB Single-Arm Rows", primary: "Lats & Upper Back", secondary: "Biceps", sets: 3, reps: "10/side", weight: 6.0, tempo: "2-1-1", visualIcon: "🚣" },
+            { id: "p1_b3", name: "DB Reverse Lunges", primary: "Glutes & Quads", secondary: "Calves", sets: 3, reps: "8-10/leg", weight: 5.0, tempo: "2-0-1", visualIcon: "🦵" },
+            { id: "p1_b4", name: "DB Floor Chest Flyes", primary: "Pectorals", secondary: "Anterior Delts", sets: 3, reps: "12", weight: 4.0, tempo: "3-0-1", visualIcon: "🦋" },
+            { id: "p1_b5", name: "Banded Face Pulls", primary: "Rear Delts & Rotators", secondary: "Upper Back", sets: 3, reps: "15", weight: 0, tempo: "2-2-1", visualIcon: "🎯" }
+          ]
+        }
+      }
+    };
+
+    function App() {
+      const [phase] = useState('phase1');
+      const [activeDay, setActiveDay] = useState('A');
+      const [completedSets, setCompletedSets] = useState({});
+      const [timerSeconds, setTimerSeconds] = useState(60);
+      const [isTimerRunning, setIsTimerRunning] = useState(false);
+      const [selectedExercise, setSelectedExercise] = useState(null);
+
+      // SVG Timer Calculations
+      const radius = 28;
+      const circumference = 2 * Math.PI * radius;
+      const strokeDashoffset = circumference - (timerSeconds / 60) * circumference;
+
+      useEffect(() => {
+        let interval = null;
+        if (isTimerRunning && timerSeconds > 0) {
+          interval = setInterval(() => setTimerSeconds(prev => prev - 1), 1000);
+        } else if (timerSeconds === 0) {
+          setIsTimerRunning(false);
+          setTimerSeconds(60);
+        }
+        return () => clearInterval(interval);
+      }, [isTimerRunning, timerSeconds]);
+
+      const toggleSet = (key) => {
+        const next = !completedSets[key];
+        setCompletedSets(prev => ({ ...prev, [key]: next }));
+        if (next) {
+          setTimerSeconds(60);
+          setIsTimerRunning(true);
+        }
+      };
+
+      const currentWorkout = WORKOUT_VISUALS[phase][activeDay] || WORKOUT_VISUALS[phase]['A'];
+
+      return (
+        <div className="min-h-screen max-w-lg mx-auto p-4 pb-28">
+          {/* Header */}
+          <div className="flex justify-between items-center mb-4">
+            <div>
+              <h1 className="text-xl font-black text-white flex items-center gap-2">
+                <span className="text-orange-500">🔥</span> 60-Day Visual Coach
+              </h1>
+              <p className="text-xs text-slate-400">Tap any exercise for visual form cues</p>
+            </div>
+            <div className="flex gap-1 bg-slate-900 p-1 rounded-lg border border-slate-800">
+              {['A', 'B'].map((day) => (
+                <button
+                  key={day}
+                  onClick={() => setActiveDay(day)}
+                  className={`px-3 py-1 text-xs font-bold rounded-md ${activeDay === day ? 'bg-orange-600 text-white' : 'text-slate-400'}`}
+                >
+                  Day {day}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Exercise List with Visual Muscle Targets */}
+          <div className="space-y-3">
+            {currentWorkout.exercises.map((ex) => (
+              <div key={ex.id} className="bg-slate-900 border border-slate-800 rounded-xl p-3.5 shadow-lg">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start gap-3 cursor-pointer flex-1" onClick={() => setSelectedExercise(ex)}>
+                    <div className="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-lg">
+                      {ex.visualIcon}
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-bold text-white flex items-center gap-1.5 hover:text-orange-400">
+                        {ex.name} <span className="text-[10px] text-slate-500">ℹ️</span>
+                      </h3>
+                      {/* Visual Muscle Heatmap Badges */}
+                      <div className="flex flex-wrap gap-1.5 mt-1.5">
+                        <span className="text-[9px] font-bold bg-orange-950/80 text-orange-400 border border-orange-800/60 px-2 py-0.5 rounded-full">
+                          Target: {ex.primary}
+                        </span>
+                        <span className="text-[9px] font-medium bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full">
+                          Secondary: {ex.secondary}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Set Trackers */}
+                <div className="flex gap-2 mt-3 pt-3 border-t border-slate-800/80">
+                  {Array.from({ length: ex.sets }).map((_, idx) => {
+                    const setKey = `${ex.id}_s_${idx}`;
+                    const done = !!completedSets[setKey];
+                    return (
+                      <button
+                        key={idx}
+                        onClick={() => toggleSet(setKey)}
+                        className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${
+                          done ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                        }`}
+                      >
+                        {done ? "✓" : `Set ${idx + 1}`}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Floating Circular SVG Rest Timer */}
+          <div className="fixed bottom-4 left-4 right-4 max-w-lg mx-auto bg-slate-900/95 backdrop-blur border border-slate-800 rounded-2xl p-3.5 flex justify-between items-center shadow-2xl z-40">
+            <div className="flex items-center gap-3">
+              <svg width="68" height="68" className="w-12 h-12">
+                <circle cx="24" cy="24" r={radius} stroke="#1e293b" strokeWidth="4" fill="transparent" />
+                <circle
+                  cx="24"
+                  cy="24"
+                  r={radius}
+                  stroke="#ea580c"
+                  strokeWidth="4"
+                  fill="transparent"
+                  strokeDasharray={circumference}
+                  strokeDashoffset={strokeDashoffset}
+                  strokeLinecap="round"
+                  className="timer-circle"
+                />
+                <text x="24" y="27" textAnchor="middle" fill="#ffffff" fontSize="10" fontWeight="bold">
+                  {timerSeconds}s
+                </text>
+              </svg>
+              <div>
+                <p className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Rest Recovery</p>
+                <p className="text-xs text-slate-200 font-medium">
+                  {isTimerRunning ? "Oxidizing lactic acid..." : "Interval paused"}
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setIsTimerRunning(!isTimerRunning)}
+                className="bg-orange-600 text-white text-xs font-bold px-4 py-2 rounded-xl"
+              >
+                {isTimerRunning ? "Pause" : "Start"}
+              </button>
+              <button
+                onClick={() => { setIsTimerRunning(false); setTimerSeconds(60); }}
+                className="bg-slate-800 text-slate-300 text-xs font-bold px-3 py-2 rounded-xl"
+              >
+                ↺
+              </button>
+            </div>
+          </div>
+
+          {/* Visual Exercise Cue Modal */}
+          {selectedExercise && (
+            <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+              <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-5 space-y-4">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-base font-bold text-white">{selectedExercise.name}</h3>
+                  <button onClick={() => setSelectedExercise(null)} className="text-slate-400 hover:text-white text-sm font-bold">✕</button>
+                </div>
+                <div className="h-32 bg-slate-950 rounded-xl border border-slate-800 flex flex-col items-center justify-center text-4xl">
+                  {selectedExercise.visualIcon}
+                  <span className="text-[11px] text-orange-400 font-mono mt-2">Tempo: {selectedExercise.tempo}</span>
+                </div>
+                <div className="space-y-1.5 text-xs text-slate-300">
+                  <p>• <strong>Primary Muscle:</strong> <span className="text-orange-400">{selectedExercise.primary}</span></p>
+                  <p>• <strong>Form Rule:</strong> Brace core and control the eccentric (lowering) phase for 3 seconds.</p>
+                </div>
+                <button
+                  onClick={() => setSelectedExercise(null)}
+                  className="w-full bg-slate-800 text-slate-200 py-2.5 rounded-xl font-bold text-xs hover:bg-slate-700"
+                >
+                  Got It
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
+
