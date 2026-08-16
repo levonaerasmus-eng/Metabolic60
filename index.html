@@ -4,16 +4,29 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>FemMetabolic Pro • Cycle & Workout Suite</title>
-  <!-- Tailwind CSS CDN -->
+  
+  <!-- Global Error Logger (Displays errors on screen instead of a blank screen) -->
+  <script>
+    window.onerror = function(msg, url, line) {
+      var errDiv = document.getElementById('debug-error');
+      if (!errDiv) {
+        errDiv = document.createElement('div');
+        errDiv.id = 'debug-error';
+        errDiv.style = 'position:fixed;top:0;left:0;right:0;background:#991b1b;color:#fff;padding:16px;z-index:99999;font-family:monospace;font-size:12px;word-break:break-all;';
+        document.body.appendChild(errDiv);
+      }
+      errDiv.innerHTML = '<strong>App Error:</strong> ' + msg + '<br><small>Line: ' + line + '</small>';
+    };
+  </script>
+
+  <!-- CDNs -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- React 18 & Babel CDNs -->
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <!-- Three.js CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <!-- Canvas Confetti CDN -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
   <style>
     body {
       background-color: #020617;
@@ -41,10 +54,37 @@
   </style>
 </head>
 <body class="hero-glow">
-  <div id="root"></div>
+  <div id="root">
+    <!-- Initial Loading State while React boots -->
+    <div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#94a3b8;font-family:sans-serif;">
+      <div style="width:36px;height:36px;border:3px solid #1e293b;border-top-color:#f43f5e;border-radius:50%;animation:spin 1s linear infinite;margin-bottom:12px;"></div>
+      <p style="font-size:13px;font-weight:600;">Loading FemMetabolic Pro...</p>
+      <style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
+    </div>
+  </div>
 
-  <script type="text/babel" data-presets="react">
+  <script type="text/babel">
     const { useState, useEffect, useRef } = React;
+
+    // --- Safe LocalStorage Access Helper ---
+    const safeGetJSON = (key, fallback) => {
+      try {
+        const item = localStorage.getItem(key);
+        if (!item || item === "undefined") return fallback;
+        return JSON.parse(item);
+      } catch (e) {
+        return fallback;
+      }
+    };
+
+    const safeGetString = (key, fallback) => {
+      try {
+        const item = localStorage.getItem(key);
+        return (item !== null && item !== undefined && item !== "undefined") ? item : fallback;
+      } catch (e) {
+        return fallback;
+      }
+    };
 
     // --- Audio Synthesizer & Speech Utilities ---
     const playTone = (freq, type, duration) => {
@@ -79,10 +119,10 @@
     };
 
     const CYCLE_MODES = {
-      menstrual: { name: "Menstrual Phase", tag: "Deload & Mobility", color: "text-sky-400 border-sky-500/40 bg-sky-950/60", badgeColor: "bg-sky-500", modifier: 0.8, carbTip: "Focus on warm anti-inflammatory meals, iron-rich foods, and hydration." },
-      follicular: { name: "Follicular Phase", tag: "Peak Strength & Power", color: "text-rose-400 border-rose-500/40 bg-rose-950/60", badgeColor: "bg-rose-500", modifier: 1.0, carbTip: "High insulin sensitivity: place complex carbs directly around training." },
-      ovulatory: { name: "Ovulatory Phase", tag: "Smash Personal Records", color: "text-fuchsia-400 border-fuchsia-500/40 bg-fuchsia-950/60", badgeColor: "bg-fuchsia-500", modifier: 1.05, carbTip: "Estrogen peak provides maximum energy. Try progressive load increases." },
-      luteal: { name: "Luteal Phase", tag: "Recovery & Steady Tempo", color: "text-amber-400 border-amber-500/40 bg-amber-950/60", badgeColor: "bg-amber-500", modifier: 0.9, carbTip: "Higher core body temp: prioritize magnesium, healthy fats, and 3L+ hydration." }
+      menstrual: { name: "Menstrual Phase", tag: "Deload & Mobility", color: "text-sky-400 border-sky-500/40 bg-sky-950/60", modifier: 0.8, carbTip: "Focus on warm anti-inflammatory meals, iron-rich greens, and hydration." },
+      follicular: { name: "Follicular Phase", tag: "Peak Strength & Power", color: "text-rose-400 border-rose-500/40 bg-rose-950/60", modifier: 1.0, carbTip: "High insulin sensitivity: place complex carbs around your workouts." },
+      ovulatory: { name: "Ovulatory Phase", tag: "Smash Personal Records", color: "text-fuchsia-400 border-fuchsia-500/40 bg-fuchsia-950/60", modifier: 1.05, carbTip: "Estrogen peak provides peak strength. Try progressive weight jumps." },
+      luteal: { name: "Luteal Phase", tag: "Recovery & Steady Tempo", color: "text-amber-400 border-amber-500/40 bg-amber-950/60", modifier: 0.9, carbTip: "Elevated core temp: prioritize magnesium, healthy fats, and 3L+ hydration." }
     };
 
     const MASTER_EXERCISE_DATA = {
@@ -216,13 +256,17 @@
       useEffect(() => {
         const container = mountRef.current;
         if (!container) return;
+        
+        const w = container.clientWidth || 340;
+        const h = container.clientHeight || 224;
+
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+        const camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 1000);
         camera.position.set(0, 0, 8.5);
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        renderer.setSize(container.clientWidth, container.clientHeight);
-        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(w, h);
+        renderer.setPixelRatio(window.devicePixelRatio || 1);
         container.innerHTML = '';
         container.appendChild(renderer.domElement);
 
@@ -324,8 +368,8 @@
     // --- Main App Component ---
     function App() {
       const [activeTab, setActiveTab] = useState('workout');
-      const [difficulty, setDifficulty] = useState(() => localStorage.getItem('fm_difficulty') || 'intermediate');
-      const [activeDay, setActiveDay] = useState(() => localStorage.getItem('fm_day') || 'A');
+      const [difficulty, setDifficulty] = useState(() => safeGetString('fm_difficulty', 'intermediate'));
+      const [activeDay, setActiveDay] = useState(() => safeGetString('fm_day', 'A'));
 
       // --- Menstrual Calendar State ---
       const defaultStartDate = () => {
@@ -333,26 +377,26 @@
         d.setDate(d.getDate() - 10);
         return d.toISOString().slice(0, 10);
       };
-      const [periodStartDate, setPeriodStartDate] = useState(() => localStorage.getItem('fm_period_start') || defaultStartDate());
-      const [cycleLengthDays, setCycleLengthDays] = useState(() => parseInt(localStorage.getItem('fm_cycle_len') || '28', 10));
-      const [periodDurationDays, setPeriodDurationDays] = useState(() => parseInt(localStorage.getItem('fm_period_dur') || '5', 10));
+      const [periodStartDate, setPeriodStartDate] = useState(() => safeGetString('fm_period_start', defaultStartDate()));
+      const [cycleLengthDays, setCycleLengthDays] = useState(() => parseInt(safeGetString('fm_cycle_len', '28'), 10));
+      const [periodDurationDays, setPeriodDurationDays] = useState(() => parseInt(safeGetString('fm_period_dur', '5'), 10));
 
       // Voice & Audio
-      const [voiceEnabled, setVoiceEnabled] = useState(() => localStorage.getItem('fm_voice') !== 'false');
+      const [voiceEnabled, setVoiceEnabled] = useState(() => safeGetString('fm_voice', 'true') !== 'false');
       const [handsFreeListening, setHandsFreeListening] = useState(false);
       const recognitionRef = useRef(null);
 
       // Tailored workout state
-      const [customSets, setCustomSets] = useState(() => JSON.parse(localStorage.getItem('fm_custom_sets') || '{}'));
-      const [customReps, setCustomReps] = useState(() => JSON.parse(localStorage.getItem('fm_custom_reps') || '{}'));
-      const [customRest, setCustomRest] = useState(() => JSON.parse(localStorage.getItem('fm_custom_rest') || '{}'));
-      const [weightLogs, setWeightLogs] = useState(() => JSON.parse(localStorage.getItem('fm_weights') || '{}'));
-      const [completedSets, setCompletedSets] = useState(() => JSON.parse(localStorage.getItem('fm_sets') || '{}'));
-      const [streakHistory, setStreakHistory] = useState(() => JSON.parse(localStorage.getItem('fm_streak') || '[]'));
+      const [customSets, setCustomSets] = useState(() => safeGetJSON('fm_custom_sets', {}));
+      const [customReps, setCustomReps] = useState(() => safeGetJSON('fm_custom_reps', {}));
+      const [customRest, setCustomRest] = useState(() => safeGetJSON('fm_custom_rest', {}));
+      const [weightLogs, setWeightLogs] = useState(() => safeGetJSON('fm_weights', {}));
+      const [completedSets, setCompletedSets] = useState(() => safeGetJSON('fm_sets', {}));
+      const [streakHistory, setStreakHistory] = useState(() => safeGetJSON('fm_streak', []));
 
       // Daily Dashboard & Body Measurements
-      const [dailyLog, setDailyLog] = useState(() => JSON.parse(localStorage.getItem('fm_daily_log') || '{"sleep":8,"stress":4,"soreness":3}'));
-      const [bodyMetrics, setBodyMetrics] = useState(() => JSON.parse(localStorage.getItem('fm_body_metrics') || '{"weight":75.0,"waist":78,"hips":102,"thigh":58}'));
+      const [dailyLog, setDailyLog] = useState(() => safeGetJSON('fm_daily_log', { sleep: 8, stress: 4, soreness: 3 }));
+      const [bodyMetrics, setBodyMetrics] = useState(() => safeGetJSON('fm_body_metrics', { weight: 75.0, waist: 78, hips: 102, thigh: 58 }));
       
       const [focusedExerciseId, setFocusedExerciseId] = useState('i_a1');
       const [selectedExercise, setSelectedExercise] = useState(null);
