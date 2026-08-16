@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>FemMetabolic Pro • Cycle & Workout Suite</title>
+  <title>FemMetabolic 3D • Next-Day & Anatomical Suite</title>
   
-  <!-- Global Error Logger (Displays errors on screen instead of a blank screen) -->
+  <!-- On-Screen Debugger -->
   <script>
     window.onerror = function(msg, url, line) {
       var errDiv = document.getElementById('debug-error');
@@ -55,10 +55,9 @@
 </head>
 <body class="hero-glow">
   <div id="root">
-    <!-- Initial Loading State while React boots -->
     <div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#94a3b8;font-family:sans-serif;">
       <div style="width:36px;height:36px;border:3px solid #1e293b;border-top-color:#f43f5e;border-radius:50%;animation:spin 1s linear infinite;margin-bottom:12px;"></div>
-      <p style="font-size:13px;font-weight:600;">Loading FemMetabolic Pro...</p>
+      <p style="font-size:13px;font-weight:600;">Loading 3D Engine & Workouts...</p>
       <style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
     </div>
   </div>
@@ -66,7 +65,7 @@
   <script type="text/babel">
     const { useState, useEffect, useRef } = React;
 
-    // --- Safe LocalStorage Access Helper ---
+    // --- Safe LocalStorage Utilities ---
     const safeGetJSON = (key, fallback) => {
       try {
         const item = localStorage.getItem(key);
@@ -204,65 +203,21 @@
       { name: "Banded Clamshells / Squat Hold", dur: 30, cue: "Prime gluteus medius for stability before lifting loads." }
     ];
 
-    function MuscleHeatmap({ activeMuscles, scale }) {
-      const targetMuscles = activeMuscles || [];
-      const s = scale || 1.0;
-      const isLit = (group) => targetMuscles.includes(group);
-      const activeColor = "#f43f5e";
-      const baseColor = "#1e293b";
-      return (
-        <div className="bg-slate-950/90 p-3.5 rounded-2xl border border-slate-800/80 flex items-center justify-around shadow-inner" style={{ transform: `scale(${s})`, transformOrigin: 'center' }}>
-          <div className="flex flex-col items-center">
-            <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Anterior</span>
-            <svg width="68" height="116" viewBox="0 0 100 180" className="drop-shadow-lg">
-              <circle cx="50" cy="16" r="10" fill="#334155" />
-              <path d="M 28 35 Q 50 30 72 35 L 78 50 L 22 50 Z" fill={isLit('shoulders') ? activeColor : baseColor} />
-              <rect x="30" y="48" width="40" height="20" rx="4" fill={isLit('chest') ? activeColor : baseColor} />
-              <rect x="34" y="70" width="32" height="26" rx="3" fill={isLit('core') ? activeColor : baseColor} />
-              <path d="M 28 100 L 46 100 L 42 145 L 26 145 Z" fill={isLit('quads') ? activeColor : baseColor} />
-              <path d="M 54 100 L 72 100 L 74 145 L 58 145 Z" fill={isLit('quads') ? activeColor : baseColor} />
-              <rect x="28" y="148" width="12" height="24" rx="2" fill="#334155" />
-              <rect x="60" y="148" width="12" height="24" rx="2" fill="#334155" />
-            </svg>
-          </div>
-          <div className="flex flex-col items-center">
-            <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Posterior</span>
-            <svg width="68" height="116" viewBox="0 0 100 180" className="drop-shadow-lg">
-              <circle cx="50" cy="16" r="10" fill="#334155" />
-              <path d="M 26 35 Q 50 32 74 35 L 70 70 L 30 70 Z" fill={isLit('lats') ? activeColor : baseColor} />
-              <rect x="36" y="72" width="28" height="16" rx="2" fill={isLit('core') ? activeColor : baseColor} />
-              <rect x="28" y="90" width="44" height="24" rx="6" fill={isLit('glutes') ? activeColor : baseColor} />
-              <path d="M 28 116 L 46 116 L 43 148 L 27 148 Z" fill={isLit('glutes') || isLit('hamstrings') ? activeColor : baseColor} />
-              <path d="M 54 116 L 72 116 L 73 148 L 57 148 Z" fill={isLit('glutes') || isLit('hamstrings') ? activeColor : baseColor} />
-              <rect x="28" y="150" width="12" height="22" rx="2" fill="#334155" />
-              <rect x="60" y="150" width="12" height="22" rx="2" fill="#334155" />
-            </svg>
-          </div>
-        </div>
-      );
-    }
-
-    function Dynamic3DDumbbell({ activeWeight, exerciseName }) {
+    // --- Interactive 3D Anatomical Humanoid Mannequin ---
+    function Interactive3DHumanoid({ activeMuscle, exerciseName }) {
       const mountRef = useRef(null);
-      const platesRef = useRef([]);
-      const ringRef = useRef(null);
-      const targetScaleRef = useRef({ r: 1.0, w: 1.0 });
-
-      const safeWeight = Math.max(0.5, Math.min(30, activeWeight || 7.5));
-      const radiusScale = Math.max(0.45, Math.min(2.3, Math.sqrt(safeWeight / 5.0)));
-      const widthScale = Math.max(0.5, Math.min(2.0, Math.pow(safeWeight / 5.0, 0.4)));
-      targetScaleRef.current = { r: radiusScale, w: widthScale };
+      const muscleMeshesRef = useRef({});
 
       useEffect(() => {
         const container = mountRef.current;
         if (!container) return;
-        
+
         const w = container.clientWidth || 340;
-        const h = container.clientHeight || 224;
+        const h = container.clientHeight || 230;
 
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 1000);
-        camera.position.set(0, 0, 8.5);
+        camera.position.set(0, 0, 7.2);
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setSize(w, h);
@@ -270,44 +225,116 @@
         container.innerHTML = '';
         container.appendChild(renderer.domElement);
 
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
         scene.add(ambientLight);
-        const pinkLight = new THREE.PointLight(0xf43f5e, 2.5, 30);
-        pinkLight.position.set(4, 5, 5);
-        scene.add(pinkLight);
-        const blueBacklight = new THREE.PointLight(0x38bdf8, 1.8, 30);
-        blueBacklight.position.set(-4, -4, 4);
-        scene.add(blueBacklight);
 
-        const mainGroup = new THREE.Group();
-        const barGeo = new THREE.CylinderGeometry(0.12, 0.12, 4.6, 32);
-        const barMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.25, metalness: 0.85 });
-        const barMesh = new THREE.Mesh(barGeo, barMat);
-        barMesh.rotation.z = Math.PI / 2;
-        mainGroup.add(barMesh);
+        const frontLight = new THREE.PointLight(0xf43f5e, 2.0, 30);
+        frontLight.position.set(2, 4, 4);
+        scene.add(frontLight);
 
-        const plateMat = new THREE.MeshStandardMaterial({ color: 0xf43f5e, roughness: 0.25, metalness: 0.45, emissive: 0x9f1239, emissiveIntensity: 0.55 });
-        const plateGeo = new THREE.CylinderGeometry(1.15, 1.15, 0.35, 36);
-        const createdPlates = [];
-        const platePositions = [-1.55, -1.95, 1.55, 1.95];
-        platePositions.forEach((pos, idx) => {
-          const plate = new THREE.Mesh(plateGeo, plateMat);
-          plate.rotation.z = Math.PI / 2;
-          plate.position.x = pos;
-          plate.userData = { baseX: pos, isOuter: idx === 1 || idx === 3 };
-          mainGroup.add(plate);
-          createdPlates.push(plate);
-        });
-        platesRef.current = createdPlates;
+        const backLight = new THREE.PointLight(0x38bdf8, 1.5, 30);
+        backLight.position.set(-2, -3, -4);
+        scene.add(backLight);
 
-        const ringGeo = new THREE.TorusGeometry(2.5, 0.035, 16, 100);
-        const ringMat = new THREE.MeshBasicMaterial({ color: 0xfb7185, transparent: true, opacity: 0.8 });
+        const bodyGroup = new THREE.Group();
+        const baseMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.5, metalness: 0.3 });
+        const glowMat = new THREE.MeshStandardMaterial({ color: 0xf43f5e, roughness: 0.2, metalness: 0.6, emissive: 0x9f1239, emissiveIntensity: 0.9 });
+
+        // Head & Neck
+        const head = new THREE.Mesh(new THREE.SphereGeometry(0.38, 24, 24), baseMat);
+        head.position.y = 2.1;
+        bodyGroup.add(head);
+
+        const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.16, 0.3, 16), baseMat);
+        neck.position.y = 1.75;
+        bodyGroup.add(neck);
+
+        // Chest / Upper Torso
+        const chest = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.55, 0.45), baseMat.clone());
+        chest.position.y = 1.35;
+        bodyGroup.add(chest);
+
+        // Core / Abs
+        const core = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.55, 0.38), baseMat.clone());
+        core.position.y = 0.85;
+        bodyGroup.add(core);
+
+        // Lats / Upper Back
+        const lats = new THREE.Mesh(new THREE.BoxGeometry(0.92, 0.55, 0.2), baseMat.clone());
+        lats.position.set(0, 1.35, -0.15);
+        bodyGroup.add(lats);
+
+        // Shoulders (Left & Right)
+        const leftShoulder = new THREE.Mesh(new THREE.SphereGeometry(0.24, 16, 16), baseMat.clone());
+        leftShoulder.position.set(-0.62, 1.45, 0);
+        bodyGroup.add(leftShoulder);
+
+        const rightShoulder = new THREE.Mesh(new THREE.SphereGeometry(0.24, 16, 16), baseMat.clone());
+        rightShoulder.position.set(0.62, 1.45, 0);
+        bodyGroup.add(rightShoulder);
+
+        // Arms
+        const leftArm = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.1, 0.9, 16), baseMat);
+        leftArm.position.set(-0.65, 0.9, 0);
+        bodyGroup.add(leftArm);
+
+        const rightArm = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.1, 0.9, 16), baseMat);
+        rightArm.position.set(0.65, 0.9, 0);
+        bodyGroup.add(rightArm);
+
+        // Glutes / Pelvis
+        const glutes = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.45, 0.48), baseMat.clone());
+        glutes.position.set(0, 0.4, -0.05);
+        bodyGroup.add(glutes);
+
+        // Quads (Front Thighs)
+        const leftQuad = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.16, 1.1, 16), baseMat.clone());
+        leftQuad.position.set(-0.25, -0.35, 0.05);
+        bodyGroup.add(leftQuad);
+
+        const rightQuad = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.16, 1.1, 16), baseMat.clone());
+        rightQuad.position.set(0.25, -0.35, 0.05);
+        bodyGroup.add(rightQuad);
+
+        // Hamstrings (Back Thighs)
+        const leftHam = new THREE.Mesh(new THREE.CylinderGeometry(0.19, 0.15, 1.1, 16), baseMat.clone());
+        leftHam.position.set(-0.25, -0.35, -0.06);
+        bodyGroup.add(leftHam);
+
+        const rightHam = new THREE.Mesh(new THREE.CylinderGeometry(0.19, 0.15, 1.1, 16), baseMat.clone());
+        rightHam.position.set(0.25, -0.35, -0.06);
+        bodyGroup.add(rightHam);
+
+        // Calves & Lower Legs
+        const leftCalf = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.11, 1.0, 16), baseMat);
+        leftCalf.position.set(-0.25, -1.35, 0);
+        bodyGroup.add(leftCalf);
+
+        const rightCalf = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.11, 1.0, 16), baseMat);
+        rightCalf.position.set(0.25, -1.35, 0);
+        bodyGroup.add(rightCalf);
+
+        // Orbital Neon Energy Ring
+        const ringGeo = new THREE.TorusGeometry(2.3, 0.03, 16, 80);
+        const ringMat = new THREE.MeshBasicMaterial({ color: 0xf43f5e, transparent: true, opacity: 0.65 });
         const ringMesh = new THREE.Mesh(ringGeo, ringMat);
-        ringRef.current = ringMesh;
-        mainGroup.add(ringMesh);
+        ringMesh.rotation.x = Math.PI / 3;
+        bodyGroup.add(ringMesh);
 
-        scene.add(mainGroup);
+        scene.add(bodyGroup);
 
+        muscleMeshesRef.current = {
+          chest: [chest],
+          core: [core],
+          shoulders: [leftShoulder, rightShoulder],
+          lats: [lats],
+          glutes: [glutes],
+          quads: [leftQuad, rightQuad],
+          hamstrings: [leftHam, rightHam]
+        };
+
+        // Touch & Drag Handling
         let isDragging = false;
         let prevPos = { x: 0, y: 0 };
         const onStart = (e) => { isDragging = true; prevPos = { x: e.clientX || (e.touches && e.touches[0].clientX), y: e.clientY || (e.touches && e.touches[0].clientY) }; };
@@ -315,8 +342,8 @@
           if (!isDragging) return;
           const clientX = e.clientX || (e.touches && e.touches[0].clientX);
           const clientY = e.clientY || (e.touches && e.touches[0].clientY);
-          mainGroup.rotation.y += (clientX - prevPos.x) * 0.01;
-          mainGroup.rotation.x += (clientY - prevPos.y) * 0.01;
+          bodyGroup.rotation.y += (clientX - prevPos.x) * 0.012;
+          bodyGroup.rotation.x += (clientY - prevPos.y) * 0.008;
           prevPos = { x: clientX, y: clientY };
         };
         const onEnd = () => { isDragging = false; };
@@ -330,23 +357,37 @@
         let reqId;
         const animate = () => {
           reqId = requestAnimationFrame(animate);
-          if (!isDragging) { mainGroup.rotation.y += 0.007; mainGroup.rotation.x += 0.003; }
-          if (ringRef.current) { ringRef.current.rotation.z += 0.012; ringRef.current.rotation.x += 0.005; }
-          const targetR = targetScaleRef.current.r, targetW = targetScaleRef.current.w;
-          platesRef.current.forEach((plate) => {
-            plate.scale.y += (targetR - plate.scale.y) * 0.1;
-            plate.scale.z += (targetR - plate.scale.z) * 0.1;
-            plate.scale.x += (targetW - plate.scale.x) * 0.1;
-            if (plate.userData.isOuter) {
-              const targetX = plate.userData.baseX + (plate.userData.baseX > 0 ? 1 : -1) * (targetW - 1) * 0.35;
-              plate.position.x += (targetX - plate.position.x) * 0.1;
-            }
-          });
+          if (!isDragging) {
+            bodyGroup.rotation.y += 0.008;
+          }
+          ringMesh.rotation.z += 0.015;
           renderer.render(scene, camera);
         };
         animate();
-        return () => { cancelAnimationFrame(reqId); container.innerHTML = ''; };
+
+        return () => {
+          cancelAnimationFrame(reqId);
+          container.innerHTML = '';
+        };
       }, []);
+
+      // Dynamic Shading: Highlight active muscle
+      useEffect(() => {
+        const groups = muscleMeshesRef.current;
+        if (!groups) return;
+        const baseMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.5, metalness: 0.3 });
+        const glowMat = new THREE.MeshStandardMaterial({ color: 0xf43f5e, roughness: 0.2, metalness: 0.6, emissive: 0x9f1239, emissiveIntensity: 0.9 });
+
+        Object.keys(groups).forEach(key => {
+          const meshes = groups[key];
+          if (meshes) {
+            const isTarget = key === activeMuscle;
+            meshes.forEach(m => {
+              m.material = isTarget ? glowMat : baseMat;
+            });
+          }
+        });
+      }, [activeMuscle]);
 
       return (
         <div className="relative w-full h-56 bg-slate-950/90 rounded-2xl border border-slate-800 overflow-hidden shadow-2xl">
@@ -354,24 +395,27 @@
           <div className="absolute top-3 left-3 bg-slate-900/80 backdrop-blur px-3 py-1.5 rounded-xl border border-slate-700/60 shadow-lg flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse"></span>
             <div>
-              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-tight">3D Load Gauge</p>
-              <p className="text-xs font-black text-rose-400 font-mono">{safeWeight.toFixed(1)} kg <span className="text-[10px] text-slate-300 font-normal">({(radiusScale).toFixed(2)}x Scale)</span></p>
+              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-tight">3D Muscle Target</p>
+              <p className="text-xs font-black text-rose-400 capitalize">{activeMuscle || "Full Body"}</p>
             </div>
           </div>
           <div className="absolute bottom-2.5 left-3 text-[10px] text-slate-300 font-semibold bg-slate-900/70 backdrop-blur px-2.5 py-1 rounded-lg border border-slate-800">
-            Selected: <span className="text-rose-300">{exerciseName || "Exercise"}</span>
+            Active: <span className="text-rose-300">{exerciseName || "Exercise"}</span>
+          </div>
+          <div className="absolute bottom-2.5 right-3 text-[9px] text-slate-500 font-medium">
+            Drag 360° to rotate
           </div>
         </div>
       );
     }
 
-    // --- Main App Component ---
+    // --- Main Application Engine ---
     function App() {
-      const [activeTab, setActiveTab] = useState('workout');
+      const [activeTab, setActiveTab] = useState('workout'); // 'dashboard', 'workout', 'tempo', 'history'
       const [difficulty, setDifficulty] = useState(() => safeGetString('fm_difficulty', 'intermediate'));
       const [activeDay, setActiveDay] = useState(() => safeGetString('fm_day', 'A'));
 
-      // --- Menstrual Calendar State ---
+      // Cycle Calendar
       const defaultStartDate = () => {
         const d = new Date();
         d.setDate(d.getDate() - 10);
@@ -386,13 +430,14 @@
       const [handsFreeListening, setHandsFreeListening] = useState(false);
       const recognitionRef = useRef(null);
 
-      // Tailored workout state
+      // Tailored workout state & Persistent History
       const [customSets, setCustomSets] = useState(() => safeGetJSON('fm_custom_sets', {}));
       const [customReps, setCustomReps] = useState(() => safeGetJSON('fm_custom_reps', {}));
       const [customRest, setCustomRest] = useState(() => safeGetJSON('fm_custom_rest', {}));
       const [weightLogs, setWeightLogs] = useState(() => safeGetJSON('fm_weights', {}));
       const [completedSets, setCompletedSets] = useState(() => safeGetJSON('fm_sets', {}));
       const [streakHistory, setStreakHistory] = useState(() => safeGetJSON('fm_streak', []));
+      const [sessionArchive, setSessionArchive] = useState(() => safeGetJSON('fm_session_archive', []));
 
       // Daily Dashboard & Body Measurements
       const [dailyLog, setDailyLog] = useState(() => safeGetJSON('fm_daily_log', { sleep: 8, stress: 4, soreness: 3 }));
@@ -401,25 +446,23 @@
       const [focusedExerciseId, setFocusedExerciseId] = useState('i_a1');
       const [selectedExercise, setSelectedExercise] = useState(null);
 
-      // Warm-up Guided Player State
+      // Warmup & Timers
       const [showWarmupPlayer, setShowWarmupPlayer] = useState(false);
       const [warmupIndex, setWarmupIndex] = useState(0);
       const [warmupTimer, setWarmupTimer] = useState(45);
       const [warmupRunning, setWarmupRunning] = useState(false);
 
-      // Rest Countdown State
       const [timerSeconds, setTimerSeconds] = useState(60);
       const [targetTimerSec, setTargetTimerSec] = useState(60);
       const [isTimerRunning, setIsTimerRunning] = useState(false);
 
-      // Metronome
       const [metronomeRunning, setMetronomeRunning] = useState(false);
       const [tempoPhase, setTempoPhase] = useState('Lower (3s)');
       const [tempoCount, setTempoCount] = useState(3);
 
       const fileInputRef = useRef(null);
 
-      // Compute Menstrual Cycle Day & Phase Dynamically
+      // Dynamic Cycle Phasing Math
       const computeCycleData = () => {
         try {
           const today = new Date();
@@ -432,24 +475,13 @@
           const ovulationDay = Math.max(10, cycleLengthDays - 14);
           let calculatedPhase = 'follicular';
 
-          if (positiveDay <= periodDurationDays) {
-            calculatedPhase = 'menstrual';
-          } else if (positiveDay <= ovulationDay - 2) {
-            calculatedPhase = 'follicular';
-          } else if (positiveDay <= ovulationDay + 1) {
-            calculatedPhase = 'ovulatory';
-          } else {
-            calculatedPhase = 'luteal';
-          }
+          if (positiveDay <= periodDurationDays) calculatedPhase = 'menstrual';
+          else if (positiveDay <= ovulationDay - 2) calculatedPhase = 'follicular';
+          else if (positiveDay <= ovulationDay + 1) calculatedPhase = 'ovulatory';
+          else calculatedPhase = 'luteal';
 
           const daysUntilNextPeriod = cycleLengthDays - positiveDay + 1;
-
-          return {
-            cycleDay: positiveDay,
-            phaseKey: calculatedPhase,
-            ovulationDay,
-            daysUntilNextPeriod
-          };
+          return { cycleDay: positiveDay, phaseKey: calculatedPhase, ovulationDay, daysUntilNextPeriod };
         } catch (e) {
           return { cycleDay: 10, phaseKey: 'follicular', ovulationDay: 14, daysUntilNextPeriod: 18 };
         }
@@ -457,7 +489,7 @@
 
       const { cycleDay, phaseKey: activeCyclePhase, ovulationDay, daysUntilNextPeriod } = computeCycleData();
 
-      // Persistence
+      // LocalStorage Persistence Sync
       useEffect(() => {
         localStorage.setItem('fm_difficulty', difficulty);
         localStorage.setItem('fm_day', activeDay);
@@ -470,10 +502,11 @@
         localStorage.setItem('fm_weights', JSON.stringify(weightLogs));
         localStorage.setItem('fm_sets', JSON.stringify(completedSets));
         localStorage.setItem('fm_streak', JSON.stringify(streakHistory));
+        localStorage.setItem('fm_session_archive', JSON.stringify(sessionArchive));
         localStorage.setItem('fm_daily_log', JSON.stringify(dailyLog));
         localStorage.setItem('fm_body_metrics', JSON.stringify(bodyMetrics));
         localStorage.setItem('fm_voice', voiceEnabled.toString());
-      }, [difficulty, activeDay, periodStartDate, cycleLengthDays, periodDurationDays, customSets, customReps, customRest, weightLogs, completedSets, streakHistory, dailyLog, bodyMetrics, voiceEnabled]);
+      }, [difficulty, activeDay, periodStartDate, cycleLengthDays, periodDurationDays, customSets, customReps, customRest, weightLogs, completedSets, streakHistory, sessionArchive, dailyLog, bodyMetrics, voiceEnabled]);
 
       // Speech Recognition
       useEffect(() => {
@@ -483,13 +516,11 @@
           rec.continuous = true;
           rec.interimResults = false;
           rec.lang = 'en-US';
-
           rec.onresult = (e) => {
             const last = e.results.length - 1;
             const command = e.results[last][0].transcript.trim().toLowerCase();
             handleVoiceCommand(command);
           };
-
           rec.onerror = () => setHandsFreeListening(false);
           recognitionRef.current = rec;
         }
@@ -529,7 +560,7 @@
         }
       };
 
-      // Rest Timer
+      // Rest Timer Interval
       useEffect(() => {
         let interval = null;
         if (isTimerRunning && timerSeconds > 0) {
@@ -551,7 +582,7 @@
         return () => clearInterval(interval);
       }, [isTimerRunning, timerSeconds, voiceEnabled, targetTimerSec]);
 
-      // Warmup Timer
+      // Warmup Player Interval
       useEffect(() => {
         let timer = null;
         if (warmupRunning && warmupTimer > 0) {
@@ -572,7 +603,7 @@
         return () => clearInterval(timer);
       }, [warmupRunning, warmupTimer, warmupIndex, voiceEnabled]);
 
-      // Metronome
+      // Metronome Interval
       useEffect(() => {
         let timer = null;
         if (metronomeRunning) {
@@ -588,14 +619,13 @@
         return () => clearInterval(timer);
       }, [metronomeRunning]);
 
-      // Readiness & Modifiers
+      // Readiness Calculations
       const readinessScore = Math.max(1, Math.min(10, Math.round(dailyLog.sleep - dailyLog.stress * 0.4 - dailyLog.soreness * 0.4 + 4)));
       const isHighCortisol = readinessScore <= 5;
       const loadMultiplier = (isHighCortisol ? 0.85 : 1.0) * (CYCLE_MODES[activeCyclePhase] ? CYCLE_MODES[activeCyclePhase].modifier : 1.0);
 
       const currentExercises = MASTER_EXERCISE_DATA[difficulty][activeDay] || MASTER_EXERCISE_DATA.intermediate.A;
       const activeExerciseObj = currentExercises.find(e => e.id === focusedExerciseId) || currentExercises[0];
-      const activeExerciseWeight = (weightLogs[activeExerciseObj.id] ?? activeExerciseObj.defaultWeight) * loadMultiplier;
 
       const autoScrollToNextExercise = () => {
         for (const ex of currentExercises) {
@@ -644,28 +674,43 @@
           if (!streakHistory.includes(today)) {
             setStreakHistory([...streakHistory, today]);
           }
-
-          checkWorkoutCompletion(updated);
         }
       };
 
-      const checkWorkoutCompletion = (allSets) => {
-        let total = 0;
-        let done = 0;
+      // --- NEXT DAY WORKOUT & ARCHIVE ENGINE ---
+      const advanceToNextWorkout = () => {
+        const nextDayMap = { 'A': 'B', 'B': 'C', 'C': 'A' };
+        const nextDay = nextDayMap[activeDay] || 'A';
+
+        // Archive completed workout
+        const newRecord = {
+          date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+          workoutDay: activeDay,
+          difficulty: difficulty,
+          tonnage: totalSessionTonnage,
+          timestamp: Date.now()
+        };
+        setSessionArchive([newRecord, ...sessionArchive]);
+
+        // Clear checkmarks for this current workout so it's fresh when repeated
+        const cleanSets = { ...completedSets };
         currentExercises.forEach(ex => {
           const sCount = customSets[ex.id] ?? ex.defaultSets;
           for (let i = 0; i < sCount; i++) {
-            total++;
-            if (allSets[`${ex.id}_set_${i}`]) done++;
+            delete cleanSets[`${ex.id}_set_${i}`];
           }
         });
+        setCompletedSets(cleanSets);
 
-        if (total > 0 && total === done) {
-          if (window.confetti) {
-            window.confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
-          }
-          speakCoach("Workout Completed! 100% Volume Locked In!", voiceEnabled);
+        // Switch to Next Day Workout
+        setActiveDay(nextDay);
+        const nextExercises = MASTER_EXERCISE_DATA[difficulty][nextDay] || [];
+        if (nextExercises.length > 0) setFocusedExerciseId(nextExercises[0].id);
+
+        if (window.confetti) {
+          window.confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
         }
+        speakCoach(`Session logged! Advanced to Workout ${nextDay}.`, voiceEnabled);
       };
 
       const adjustSetCount = (exId, delta, defaultCount) => {
@@ -688,7 +733,7 @@
 
       const exportUserData = () => {
         const backupObj = {
-          difficulty, activeDay, periodStartDate, cycleLengthDays, periodDurationDays, customSets, customReps, customRest, weightLogs, completedSets, streakHistory, dailyLog, bodyMetrics, date: new Date().toISOString()
+          difficulty, activeDay, periodStartDate, cycleLengthDays, periodDurationDays, customSets, customReps, customRest, weightLogs, completedSets, streakHistory, sessionArchive, dailyLog, bodyMetrics, date: new Date().toISOString()
         };
         const blob = new Blob([JSON.stringify(backupObj, null, 2)], { type: "application/json" });
         const url = URL.createObjectURL(blob);
@@ -716,6 +761,7 @@
             if (data.weightLogs) setWeightLogs(data.weightLogs);
             if (data.completedSets) setCompletedSets(data.completedSets);
             if (data.streakHistory) setStreakHistory(data.streakHistory);
+            if (data.sessionArchive) setSessionArchive(data.sessionArchive);
             if (data.bodyMetrics) setBodyMetrics(data.bodyMetrics);
             alert("Backup restored successfully!");
           } catch (err) {
@@ -724,6 +770,28 @@
         };
         reader.readAsText(file);
       };
+
+      // Tonnage & Volume Math
+      const totalSessionTonnage = currentExercises.reduce((total, ex) => {
+        const loggedW = (weightLogs[ex.id] ?? ex.defaultWeight) * loadMultiplier;
+        const sCount = customSets[ex.id] ?? ex.defaultSets;
+        const reps = customReps[ex.id] ?? ex.defaultReps;
+        let completedCount = 0;
+        for (let i = 0; i < sCount; i++) if (completedSets[`${ex.id}_set_${i}`]) completedCount++;
+        return total + Math.round(completedCount * reps * loggedW);
+      }, 0);
+
+      // Check if current workout is 100% complete
+      let totalSetsCount = 0;
+      let completedSetsCount = 0;
+      currentExercises.forEach(ex => {
+        const sCount = customSets[ex.id] ?? ex.defaultSets;
+        for (let i = 0; i < sCount; i++) {
+          totalSetsCount++;
+          if (completedSets[`${ex.id}_set_${i}`]) completedSetsCount++;
+        }
+      });
+      const isWorkoutFullyCompleted = totalSetsCount > 0 && totalSetsCount === completedSetsCount;
 
       const radius = 22;
       const circumference = 2 * Math.PI * radius;
@@ -737,9 +805,9 @@
             <header className="flex justify-between items-center">
               <div>
                 <h1 className="text-lg font-black text-white tracking-tight flex items-center gap-1.5">
-                  <span className="text-rose-500">🌸</span> FemMetabolic Pro
+                  <span className="text-rose-500">🌸</span> FemMetabolic 3D
                 </h1>
-                <p className="text-[10px] text-slate-400">Autonomous Cycle & Biomechanics Suite</p>
+                <p className="text-[10px] text-slate-400">3D Biomechanics & Next-Day Flow</p>
               </div>
               <div className="flex items-center gap-2">
                 <button
@@ -762,15 +830,13 @@
             {/* TAB 1: DASHBOARD & MENSTRUAL CALENDAR */}
             {activeTab === 'dashboard' && (
               <div className="space-y-4">
-
-                {/* Interactive Menstrual Calendar Card */}
                 <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
                   <div className="flex justify-between items-center">
                     <div>
                       <h2 className="text-base font-black text-white flex items-center gap-2">
                         <span>🗓️</span> Menstrual Cycle Calendar
                       </h2>
-                      <p className="text-[11px] text-slate-400">Input dates to automate training & macro syncing</p>
+                      <p className="text-[11px] text-slate-400">Automates workout loads & carb timing</p>
                     </div>
                     <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border ${CYCLE_MODES[activeCyclePhase].color}`}>
                       Day {cycleDay} of {cycleLengthDays}
@@ -824,20 +890,18 @@
                     </div>
                   </div>
 
-                  {/* Visual Horizontal Cycle Bar */}
+                  {/* Visual Segmented Progress Bar */}
                   <div>
                     <div className="flex justify-between text-[10px] text-slate-400 font-bold uppercase mb-1.5">
-                      <span>Day 1 (Period)</span>
+                      <span>Day 1</span>
                       <span>Day {ovulationDay} (Ovulation)</span>
-                      <span>Day {cycleLengthDays} (Next)</span>
+                      <span>Day {cycleLengthDays}</span>
                     </div>
-                    
                     <div className="h-3 w-full bg-slate-950 rounded-full overflow-hidden flex border border-slate-800 relative">
-                      <div style={{ width: `${(periodDurationDays / cycleLengthDays) * 100}%` }} className="bg-sky-500 h-full" title="Menstrual"></div>
-                      <div style={{ width: `${((ovulationDay - 2 - periodDurationDays) / cycleLengthDays) * 100}%` }} className="bg-rose-500 h-full" title="Follicular"></div>
-                      <div style={{ width: `${(3 / cycleLengthDays) * 100}%` }} className="bg-fuchsia-500 h-full" title="Ovulatory"></div>
-                      <div style={{ width: `${((cycleLengthDays - (ovulationDay + 1)) / cycleLengthDays) * 100}%` }} className="bg-amber-500 h-full" title="Luteal"></div>
-
+                      <div style={{ width: `${(periodDurationDays / cycleLengthDays) * 100}%` }} className="bg-sky-500 h-full"></div>
+                      <div style={{ width: `${((ovulationDay - 2 - periodDurationDays) / cycleLengthDays) * 100}%` }} className="bg-rose-500 h-full"></div>
+                      <div style={{ width: `${(3 / cycleLengthDays) * 100}%` }} className="bg-fuchsia-500 h-full"></div>
+                      <div style={{ width: `${((cycleLengthDays - (ovulationDay + 1)) / cycleLengthDays) * 100}%` }} className="bg-amber-500 h-full"></div>
                       <div
                         style={{ left: `${Math.min(98, Math.max(2, (cycleDay / cycleLengthDays) * 100))}%` }}
                         className="absolute top-0 bottom-0 w-1 bg-white shadow-[0_0_8px_#ffffff] rounded-full transform -translate-x-1/2"
@@ -845,11 +909,11 @@
                     </div>
                   </div>
 
-                  {/* Calculated Active Phase Status Card */}
+                  {/* Phase Status Card */}
                   <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-1.5">
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-black text-white">{CYCLE_MODES[activeCyclePhase].name}</span>
-                      <span className="text-[10px] font-bold text-slate-400">Next Period in {daysUntilNextPeriod} days</span>
+                      <span className="text-[10px] font-bold text-slate-400">Next Period: ~{daysUntilNextPeriod} days</span>
                     </div>
                     <p className="text-xs text-rose-400 font-semibold">{CYCLE_MODES[activeCyclePhase].tag}</p>
                     <p className="text-[11px] text-slate-300 leading-relaxed pt-1 border-t border-slate-900">
@@ -858,28 +922,27 @@
                   </div>
                 </div>
 
-                {/* Readiness & Cortisol Inputs */}
+                {/* Readiness & Recovery Scanner */}
                 <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">Morning Readiness & Recovery Scanner</h3>
-                  
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">Readiness & Cortisol Scanner</h3>
                   <div className="space-y-4">
                     <div>
                       <div className="flex justify-between text-xs font-bold text-slate-300 mb-1">
-                        <span>Sleep Quality & Rest</span>
+                        <span>Sleep Quality</span>
                         <span className="text-sky-400">{dailyLog.sleep} / 10</span>
                       </div>
                       <input type="range" min="1" max="10" value={dailyLog.sleep} onChange={(e) => setDailyLog({...dailyLog, sleep: Number(e.target.value)})} className="w-full h-1.5 bg-slate-950 rounded-lg appearance-none cursor-pointer accent-sky-500" />
                     </div>
                     <div>
                       <div className="flex justify-between text-xs font-bold text-slate-300 mb-1">
-                        <span>Stress & Life Cortisol</span>
+                        <span>Stress / Cortisol</span>
                         <span className="text-amber-400">{dailyLog.stress} / 10</span>
                       </div>
                       <input type="range" min="1" max="10" value={dailyLog.stress} onChange={(e) => setDailyLog({...dailyLog, stress: Number(e.target.value)})} className="w-full h-1.5 bg-slate-950 rounded-lg appearance-none cursor-pointer accent-amber-500" />
                     </div>
                     <div>
                       <div className="flex justify-between text-xs font-bold text-slate-300 mb-1">
-                        <span>Muscle Soreness / Fatigue</span>
+                        <span>Muscle Soreness</span>
                         <span className="text-rose-400">{dailyLog.soreness} / 10</span>
                       </div>
                       <input type="range" min="1" max="10" value={dailyLog.soreness} onChange={(e) => setDailyLog({...dailyLog, soreness: Number(e.target.value)})} className="w-full h-1.5 bg-slate-950 rounded-lg appearance-none cursor-pointer accent-rose-500" />
@@ -894,31 +957,8 @@
                       </p>
                     </div>
                     <div className="text-right">
-                      <span className="text-[9px] font-bold text-slate-400 uppercase">Load Multiplier</span>
+                      <span className="text-[9px] font-bold text-slate-400 uppercase">Load Modifier</span>
                       <p className="text-lg font-black text-white">{Math.round(loadMultiplier * 100)}%</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Body Metrics Logger */}
-                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Body Composition Tracker</h3>
-                  <div className="grid grid-cols-2 gap-2.5">
-                    <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-                      <span className="text-[10px] text-slate-400">Weight (kg)</span>
-                      <input type="number" step="0.1" value={bodyMetrics.weight} onChange={(e) => setBodyMetrics({...bodyMetrics, weight: parseFloat(e.target.value)||0})} className="w-full bg-transparent font-bold text-white text-sm focus:outline-none" />
-                    </div>
-                    <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-                      <span className="text-[10px] text-slate-400">Waist (cm)</span>
-                      <input type="number" value={bodyMetrics.waist} onChange={(e) => setBodyMetrics({...bodyMetrics, waist: parseFloat(e.target.value)||0})} className="w-full bg-transparent font-bold text-white text-sm focus:outline-none" />
-                    </div>
-                    <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-                      <span className="text-[10px] text-slate-400">Hips (cm)</span>
-                      <input type="number" value={bodyMetrics.hips} onChange={(e) => setBodyMetrics({...bodyMetrics, hips: parseFloat(e.target.value)||0})} className="w-full bg-transparent font-bold text-white text-sm focus:outline-none" />
-                    </div>
-                    <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-                      <span className="text-[10px] text-slate-400">Thighs (cm)</span>
-                      <input type="number" value={bodyMetrics.thigh} onChange={(e) => setBodyMetrics({...bodyMetrics, thigh: parseFloat(e.target.value)||0})} className="w-full bg-transparent font-bold text-white text-sm focus:outline-none" />
                     </div>
                   </div>
                 </div>
@@ -926,8 +966,8 @@
                 {/* Data Backup & Restore */}
                 <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex justify-between items-center shadow-lg">
                   <div>
-                    <h4 className="text-xs font-bold text-white">Data Storage</h4>
-                    <p className="text-[10px] text-slate-400">Export or import logged data</p>
+                    <h4 className="text-xs font-bold text-white">Data Storage & Export</h4>
+                    <p className="text-[10px] text-slate-400">Export or import your saved workouts</p>
                   </div>
                   <div className="flex gap-2">
                     <button onClick={exportUserData} className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold px-3 py-1.5 rounded-xl border border-slate-700">Export</button>
@@ -977,10 +1017,30 @@
                   ))}
                 </div>
 
-                {/* Dynamic 3D Dumbbell */}
-                <Dynamic3DDumbbell activeWeight={activeExerciseWeight} exerciseName={activeExerciseObj.name} />
+                {/* Interactive 3D Anatomical Humanoid Heatmap */}
+                <Interactive3DHumanoid activeMuscle={activeExerciseObj.primaryMuscle} exerciseName={activeExerciseObj.name} />
 
-                {/* Guided 3-Min Warmup Trigger Bar */}
+                {/* Finish & Advance to Next Workout Banner */}
+                <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl flex flex-col gap-3">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <span className="text-[10px] font-bold uppercase text-slate-400">Session Progress</span>
+                      <p className="text-sm font-black text-white">{completedSetsCount} of {totalSetsCount} Sets Logged ({totalSessionTonnage.toLocaleString()} kg)</p>
+                    </div>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${isWorkoutFullyCompleted ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-slate-800 text-slate-400'}`}>
+                      {isWorkoutFullyCompleted ? "100% Done" : "In Progress"}
+                    </span>
+                  </div>
+
+                  <button
+                    onClick={advanceToNextWorkout}
+                    className="w-full bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white font-bold py-2.5 rounded-xl text-xs shadow-lg shadow-rose-950 flex items-center justify-center gap-1.5 transition-all"
+                  >
+                    <span>🏆</span> Finish & Advance to Next Workout ({activeDay === 'A' ? 'B' : activeDay === 'B' ? 'C' : 'A'})
+                  </button>
+                </div>
+
+                {/* Guided 3-Min Warmup Trigger */}
                 <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-3 flex justify-between items-center">
                   <div>
                     <span className="text-[10px] font-bold text-rose-400 uppercase tracking-wider">Pre-Workout Protocol</span>
@@ -1157,12 +1217,13 @@
               </div>
             )}
 
-            {/* TAB 4: PROGRESS & 60-DAY HEATMAP */}
-            {activeTab === 'progress' && (
+            {/* TAB 4: HISTORY & 60-DAY PROGRESS */}
+            {activeTab === 'history' && (
               <div className="space-y-4">
+                {/* 60-Day Consistency Streak */}
                 <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-3">
-                  <h3 className="text-sm font-bold text-white">60-Day Consistency Streak</h3>
-                  <p className="text-xs text-slate-400">Completed Sessions: <strong className="text-rose-400">{streakHistory.length} Days</strong></p>
+                  <h3 className="text-sm font-bold text-white">60-Day Consistency Grid</h3>
+                  <p className="text-xs text-slate-400">Completed Days: <strong className="text-rose-400">{streakHistory.length} Days</strong></p>
                   <div className="grid grid-cols-10 gap-1.5 bg-slate-950 p-3 rounded-xl border border-slate-800">
                     {Array.from({ length: 60 }).map((_, i) => {
                       const isDone = i < streakHistory.length;
@@ -1175,27 +1236,25 @@
                   </div>
                 </div>
 
+                {/* Permanent Logged Session Archive */}
                 <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-3">
-                  <h3 className="text-sm font-bold text-white">Target Muscle Set Volume</h3>
-                  <div className="space-y-2">
-                    {[
-                      { name: "Glutes & Posterior", sets: 14, color: "bg-rose-500" },
-                      { name: "Quads & Legs", sets: 12, color: "bg-rose-600" },
-                      { name: "Shoulders & Posture", sets: 9, color: "bg-sky-500" },
-                      { name: "Lats & Waist Taper", sets: 9, color: "bg-emerald-500" },
-                      { name: "Deep Core & Pelvic", sets: 10, color: "bg-amber-500" }
-                    ].map((item, idx) => (
-                      <div key={idx}>
-                        <div className="flex justify-between text-xs font-semibold text-slate-300 mb-1">
-                          <span>{item.name}</span>
-                          <span>{item.sets} Sets / Week</span>
+                  <h3 className="text-sm font-bold text-white">Workout Log History</h3>
+                  {sessionArchive.length === 0 ? (
+                    <p className="text-xs text-slate-500 italic py-2">No finished workouts logged yet. Finish a workout to see history here!</p>
+                  ) : (
+                    <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+                      {sessionArchive.map((session, idx) => (
+                        <div key={idx} className="bg-slate-950 p-3 rounded-xl border border-slate-800 flex justify-between items-center text-xs">
+                          <div>
+                            <span className="font-bold text-rose-400">Workout {session.workoutDay}</span>
+                            <span className="text-slate-500 capitalize ml-2">({session.difficulty})</span>
+                            <p className="text-[10px] text-slate-400">{session.date}</p>
+                          </div>
+                          <span className="font-mono font-bold text-white">{session.tonnage.toLocaleString()} kg lifted</span>
                         </div>
-                        <div className="h-2 w-full bg-slate-950 rounded-full overflow-hidden">
-                          <div className={`h-full ${item.color}`} style={{ width: `${(item.sets / 16) * 100}%` }}></div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -1268,13 +1327,13 @@
               <span>Tempo</span>
             </button>
             <button
-              onClick={() => setActiveTab('progress')}
+              onClick={() => setActiveTab('history')}
               className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all flex flex-col items-center gap-1 ${
-                activeTab === 'progress' ? 'text-rose-500 bg-rose-950/40' : 'text-slate-400 hover:text-slate-200'
+                activeTab === 'history' ? 'text-rose-500 bg-rose-950/40' : 'text-slate-400 hover:text-slate-200'
               }`}
             >
               <span className="text-base">📈</span>
-              <span>Progress</span>
+              <span>History</span>
             </button>
           </nav>
 
@@ -1318,7 +1377,7 @@
             </div>
           )}
 
-          {/* Exercise Form Modal with Anatomical Heatmap */}
+          {/* Exercise Form Modal */}
           {selectedExercise && (
             <div className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 z-50">
               <div className="bg-slate-900 border border-slate-700 rounded-3xl max-w-sm w-full overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
@@ -1334,11 +1393,6 @@
                   <div>
                     <h3 className="text-base font-black text-white leading-tight">{selectedExercise.name}</h3>
                     <p className="text-[11px] text-rose-400 font-bold uppercase tracking-wider mt-0.5">Target: {selectedExercise.target}</p>
-                  </div>
-
-                  <div>
-                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Anatomical Heatmap</p>
-                    <MuscleHeatmap activeMuscles={[selectedExercise.primaryMuscle]} scale={0.8} />
                   </div>
 
                   <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs text-slate-300 leading-relaxed">
