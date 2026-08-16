@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>FemMetabolic Pro • 60-Day Visual Coach</title>
+  <title>FemMetabolic 3D • Visual Coach Pro</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- React 18 & Babel CDN -->
+  <!-- React 18 & Babel CDNs -->
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <!-- Three.js CDN for 3D Visuals -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <style>
     body {
       background-color: #020617;
@@ -24,17 +26,20 @@
       transform-origin: 50% 50%;
     }
     .tempo-pulse {
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .hero-glow {
+      background: radial-gradient(circle at 50% 20%, rgba(244, 63, 94, 0.25) 0%, rgba(2, 6, 23, 0) 70%);
     }
   </style>
 </head>
-<body>
+<body class="hero-glow">
   <div id="root"></div>
 
   <script type="text/babel">
     const { useState, useEffect, useRef } = React;
 
-    // --- 1. Sound & Voice Engine ---
+    // --- Audio Synthesizer & Speech Engine ---
     const playTone = (freq = 440, type = 'sine', duration = 0.15) => {
       try {
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -57,27 +62,27 @@
       if (!enabled || !('speechSynthesis' in window)) return;
       window.speechSynthesis.cancel();
       const u = new SpeechSynthesisUtterance(text);
-      u.rate = 1.05;
+      u.rate = 1.02;
       u.pitch = 1.1;
       window.speechSynthesis.speak(u);
     };
 
-    // --- 2. Program Master Data ---
+    // --- Master Data Engine with Real Visuals & Exercise GIFs ---
     const CYCLE_MODES = {
       follicular: {
         name: "Follicular Phase (Days 1–13)",
         focus: "High Insulin Sensitivity • Max Strength & Load",
-        tag: "High Energy",
-        color: "text-rose-400 border-rose-500 bg-rose-950/60",
-        carbNote: "Consume 60% of daily starchy carbohydrates within 90 min of workout.",
+        tag: "Peak Power",
+        color: "text-rose-400 border-rose-500/40 bg-rose-950/60",
+        carbNote: "Optimal carb tolerance. Place starchy carbs strictly in meals around training.",
         loadModifier: 1.0
       },
       luteal: {
         name: "Luteal Phase (Days 14–28)",
-        focus: "Elevated Core Temp • Steady Tempo & Low Cortisol",
+        focus: "Higher Core Temp • Steady Tempo & Lower Cortisol",
         tag: "Recovery Mode",
-        color: "text-amber-400 border-amber-500 bg-amber-950/60",
-        carbNote: "Higher progesterone reduces carb tolerance. Focus on healthy fats & electrolytes.",
+        color: "text-amber-400 border-amber-500/40 bg-amber-950/60",
+        carbNote: "Progesterone dominates. Focus on healthy fats, magnesium, and hydration.",
         loadModifier: 0.92
       }
     };
@@ -85,136 +90,344 @@
     const WORKOUT_DB = {
       phase1: {
         A: {
-          title: "Workout A: Glute Drive & Push Sculpt",
-          focus: "Posterior Chain, Glute Max & Core Stabilization",
+          title: "Workout A: Lower Body & Push Sculpt",
+          focus: "Glute Drive, Quads & Postural Push",
+          bannerImg: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=800&q=80",
           muscles: ["glutes", "quads", "chest", "shoulders"],
           warmup: ["Diaphragmatic 360° Breaths (10x)", "Glute Bridges w/ 2s Squeeze (12x)", "Banded Clamshells (12/side)"],
           exercises: [
-            { id: "p1_a1", name: "Dumbbell Goblet Squat", target: "Glutes & Quads", primaryMuscle: "quads", sets: 3, reps: 12, defaultWeight: 7.5, tempo: "3-0-1", icon: "🍑" },
-            { id: "p1_a2", name: "Dumbbell Floor Press", target: "Chest & Triceps", primaryMuscle: "chest", sets: 3, reps: 12, defaultWeight: 5.0, tempo: "2-0-1", icon: "💪" },
-            { id: "p1_a3", name: "Dumbbell Romanian Deadlift", target: "Hamstrings & Glute Tie-in", primaryMuscle: "glutes", sets: 3, reps: 12, defaultWeight: 7.5, tempo: "3-1-1", icon: "🦵" },
-            { id: "p1_a4", name: "Seated DB Overhead Press", target: "Deltoid Definition", primaryMuscle: "shoulders", sets: 3, reps: 10, defaultWeight: 4.0, tempo: "2-0-1", icon: "✨" },
-            { id: "p1_a5", name: "Dumbbell Lateral Raises", target: "Hourglass Shoulder Cap", primaryMuscle: "shoulders", sets: 3, reps: 12, defaultWeight: 2.5, tempo: "2-1-1", icon: "🦋" }
+            {
+              id: "p1_a1",
+              name: "Dumbbell Goblet Squats",
+              target: "Glutes & Quads",
+              primaryMuscle: "quads",
+              sets: 3,
+              reps: 12,
+              defaultWeight: 7.5,
+              tempo: "3-0-1",
+              icon: "🍑",
+              gifUrl: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80",
+              cues: "Drive through midfoot and heels. Keep chest tall, brace core at the bottom, and lock out glutes at the top."
+            },
+            {
+              id: "p1_a2",
+              name: "Dumbbell Floor Press",
+              target: "Chest & Triceps",
+              primaryMuscle: "chest",
+              sets: 3,
+              reps: 12,
+              defaultWeight: 5.0,
+              tempo: "2-0-1",
+              icon: "💪",
+              gifUrl: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=600&q=80",
+              cues: "Upper arms tap floor lightly at 45° angle. Protects shoulders while building pushing strength."
+            },
+            {
+              id: "p1_a3",
+              name: "Dumbbell Romanian Deadlifts",
+              target: "Hamstrings & Glute Tie-in",
+              primaryMuscle: "glutes",
+              sets: 3,
+              reps: 12,
+              defaultWeight: 7.5,
+              tempo: "3-1-1",
+              icon: "🦵",
+              gifUrl: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=600&q=80",
+              cues: "Hinge hips backward toward the wall behind you. Dumbbells skim the front of your shins with flat back."
+            },
+            {
+              id: "p1_a4",
+              name: "Seated DB Overhead Press",
+              target: "Deltoid Definition",
+              primaryMuscle: "shoulders",
+              sets: 3,
+              reps: 10,
+              defaultWeight: 4.0,
+              tempo: "2-0-1",
+              icon: "✨",
+              gifUrl: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=600&q=80",
+              cues: "Sit tall with core locked. Press dumbbells overhead without arching lower back."
+            },
+            {
+              id: "p1_a5",
+              name: "Dumbbell Lateral Raises",
+              target: "Hourglass Shoulder Caps",
+              primaryMuscle: "shoulders",
+              sets: 3,
+              reps: 12,
+              defaultWeight: 2.5,
+              tempo: "2-1-1",
+              icon: "🦋",
+              gifUrl: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=600&q=80",
+              cues: "Lead upward with elbows. Maintain a slight forward torso lean to keep focus on side deltoids."
+            }
           ]
         },
         B: {
-          title: "Workout B: Back Sculpt, Glute Med & Core",
-          focus: "Waist Tapering, Gluteus Medius & Pelvic Floor",
-          muscles: ["lats", "glutes", "core", "hamstrings"],
+          title: "Workout B: Back Sculpt & Glute Shelf",
+          focus: "Waistline Taper, Gluteus Medius & Pelvic Stability",
+          bannerImg: "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?auto=format&fit=crop&w=800&q=80",
+          muscles: ["lats", "glutes", "core"],
           warmup: ["Cat-Cow Pelvic Tilts (10x)", "Bird-Dog Core Holds (8/side)", "Side-Lying Leg Raises (12/side)"],
           exercises: [
-            { id: "p1_b1", name: "Weighted Hip Thrust", target: "Glute Upper Shelf", primaryMuscle: "glutes", sets: 3, reps: 15, defaultWeight: 10.0, tempo: "2-2-1", icon: "🍑" },
-            { id: "p1_b2", name: "Single-Arm DB Row", target: "Mid-Back (Waist Taper)", primaryMuscle: "lats", sets: 3, reps: 10, defaultWeight: 6.0, tempo: "2-1-1", icon: "🚣" },
-            { id: "p1_b3", name: "DB Deficit Reverse Lunges", target: "Glute Stretch & Stability", primaryMuscle: "glutes", sets: 3, reps: 10, defaultWeight: 5.0, tempo: "2-0-1", icon: "🦵" },
-            { id: "p1_b4", name: "Banded Face Pulls", target: "Postural Lift & Rear Delts", primaryMuscle: "shoulders", sets: 3, reps: 15, defaultWeight: 0, tempo: "2-2-1", icon: "🎯" },
-            { id: "p1_b5", name: "Deadbugs (Pelvic Locked)", target: "Transverse Abdominis", primaryMuscle: "core", sets: 3, reps: 10, defaultWeight: 0, tempo: "Slow", icon: "🛡️" }
+            {
+              id: "p1_b1",
+              name: "Weighted Hip Thrust / Glute Bridge",
+              target: "Glute Upper Shelf",
+              primaryMuscle: "glutes",
+              sets: 3,
+              reps: 15,
+              defaultWeight: 10.0,
+              tempo: "2-2-1",
+              icon: "🍑",
+              gifUrl: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80",
+              cues: "Full lockout at top with ribs pulled down and chin tucked. Squeeze glutes hard for 2 seconds."
+            },
+            {
+              id: "p1_b2",
+              name: "Single-Arm Dumbbell Row",
+              target: "Mid-Back (Waist Taper)",
+              primaryMuscle: "lats",
+              sets: 3,
+              reps: 10,
+              defaultWeight: 6.0,
+              tempo: "2-1-1",
+              icon: "🚣",
+              gifUrl: "https://images.unsplash.com/photo-1605296867304-46d5465a13f1?auto=format&fit=crop&w=600&q=80",
+              cues: "Pull elbow backward toward your hip pocket. Avoid rotating your chest."
+            },
+            {
+              id: "p1_b3",
+              name: "DB Deficit Reverse Lunges",
+              target: "Glute Stretch & Balance",
+              primaryMuscle: "glutes",
+              sets: 3,
+              reps: 10,
+              defaultWeight: 5.0,
+              tempo: "2-0-1",
+              icon: "🦵",
+              gifUrl: "https://images.unsplash.com/photo-1434682881908-b43d0467b798?auto=format&fit=crop&w=600&q=80",
+              cues: "Step back deep. Keep front shin vertical and load the front heel for glute recruitment."
+            },
+            {
+              id: "p1_b4",
+              name: "Banded / DB Face Pulls",
+              target: "Posture & Rear Delts",
+              primaryMuscle: "shoulders",
+              sets: 3,
+              reps: 15,
+              defaultWeight: 0,
+              tempo: "2-2-1",
+              icon: "🎯",
+              gifUrl: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=600&q=80",
+              cues: "Pull towards forehead height while rotating hands back to engage postural stabilizers."
+            },
+            {
+              id: "p1_b5",
+              name: "Deadbugs (Pelvic Floor Locked)",
+              target: "Deep Transverse Abs",
+              primaryMuscle: "core",
+              sets: 3,
+              reps: 10,
+              defaultWeight: 0,
+              tempo: "Slow",
+              icon: "🛡️",
+              gifUrl: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80",
+              cues: "Flatten lower back into the floor. Exhale completely as opposite arm and leg lower."
+            }
           ]
         },
         C: {
           title: "Workout C: Metabolic Full Body Burn",
-          focus: "EPOC Caloric Density & Dynamic Core",
+          focus: "Caloric Density & Core Stability",
+          bannerImg: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=800&q=80",
           muscles: ["quads", "lats", "shoulders", "core"],
           warmup: ["World's Greatest Stretch (5/side)", "Bodyweight Squat to Stand (10x)"],
           exercises: [
-            { id: "p1_c1", name: "DB Step-Ups (Ottoman/Chair)", target: "Single-Leg Glute Power", primaryMuscle: "glutes", sets: 3, reps: 10, defaultWeight: 4.0, tempo: "2-0-1", icon: "🪜" },
-            { id: "p1_c2", name: "Dumbbell Thrusters", target: "Full Body Glycogen Burn", primaryMuscle: "quads", sets: 3, reps: 10, defaultWeight: 4.0, tempo: "1-0-1", icon: "⚡" },
-            { id: "p1_c3", name: "DB Renegade Rows", target: "Anti-Rotational Core & Back", primaryMuscle: "core", sets: 3, reps: 8, defaultWeight: 5.0, tempo: "2-0-1", icon: "🔥" },
-            { id: "p1_c4", name: "DB Sumo Squats", target: "Inner Thigh & Glutes", primaryMuscle: "quads", sets: 3, reps: 12, defaultWeight: 8.0, tempo: "3-0-1", icon: "🧘‍♀️" },
-            { id: "p1_c5", name: "Plank Shoulder Taps", target: "Deep Core Endurance", primaryMuscle: "core", sets: 3, reps: 30, defaultWeight: 0, tempo: "Iso", icon: "⏱️" }
+            { id: "p1_c1", name: "DB Step-Ups", target: "Glute Power", primaryMuscle: "glutes", sets: 3, reps: 10, defaultWeight: 4.0, tempo: "2-0-1", icon: "🪜", gifUrl: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Drive exclusively through the front heel. Avoid springing off back toes." },
+            { id: "p1_c2", name: "Dumbbell Thrusters", target: "Calorie Burn", primaryMuscle: "quads", sets: 3, reps: 10, defaultWeight: 4.0, tempo: "1-0-1", icon: "⚡", gifUrl: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=600&q=80", cues: "Squat down and utilize the momentum on the way up to press weights overhead." },
+            { id: "p1_c3", name: "DB Renegade Rows", target: "Anti-Rotation Core", primaryMuscle: "core", sets: 3, reps: 8, defaultWeight: 5.0, tempo: "2-0-1", icon: "🔥", gifUrl: "https://images.unsplash.com/photo-1605296867304-46d5465a13f1?auto=format&fit=crop&w=600&q=80", cues: "Keep feet wide and clench glutes to prevent hips from twisting." },
+            { id: "p1_c4", name: "DB Sumo Squats", target: "Inner Thighs & Glutes", primaryMuscle: "quads", sets: 3, reps: 12, defaultWeight: 8.0, tempo: "3-0-1", icon: "🧘‍♀️", gifUrl: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Wide stance, toes flared 45°. Push knees outward over your toes." },
+            { id: "p1_c5", name: "Plank Shoulder Taps", target: "Deep Core Endurance", primaryMuscle: "core", sets: 3, reps: 30, defaultWeight: 0, tempo: "Iso", icon: "⏱️", cues: "Hands under shoulders, body in a rigid straight line. Tap shoulders without swaying." }
           ]
         }
       },
       phase2: {
         A: {
           title: "Workout A: Density Supersets",
-          focus: "Maximum Afterburn & Glycogen Depletion",
+          focus: "EPOC Afterburn & Metabolic Conditioning",
+          bannerImg: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=800&q=80",
           muscles: ["glutes", "quads", "lats", "chest"],
-          warmup: ["Glute Bridge March (12x)", "Thoracic Rotations (8/side)"],
+          warmup: ["Glute Bridge March (12x)", "Thoracic Spine Openers (8/side)"],
           exercises: [
-            { id: "p2_a1", name: "Superset: Goblet Squat + DB Row", target: "Antagonist Metabolic Pair", primaryMuscle: "quads", sets: 4, reps: 12, defaultWeight: 8.0, tempo: "2-0-1", icon: "⚡" },
-            { id: "p2_a2", name: "Superset: DB RDL + Floor Press", target: "Posterior & Anterior Chain", primaryMuscle: "glutes", sets: 4, reps: 12, defaultWeight: 8.0, tempo: "2-0-1", icon: "🔥" },
-            { id: "p2_a3", name: "Finisher: Elevated Mountain Climbers", target: "Core & Cardiovascular EPOC", primaryMuscle: "core", sets: 4, reps: 30, defaultWeight: 0, tempo: "Fast", icon: "💨" }
+            { id: "p2_a1", name: "Superset: Goblet Squat + DB Row", target: "Antagonist Pair (Legs + Back)", primaryMuscle: "quads", sets: 4, reps: 12, defaultWeight: 8.0, tempo: "2-0-1", icon: "⚡", gifUrl: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Perform squat immediately into row with zero rest between exercises." },
+            { id: "p2_a2", name: "Superset: DB RDL + Floor Press", target: "Posterior + Anterior Chain", primaryMuscle: "glutes", sets: 4, reps: 12, defaultWeight: 8.0, tempo: "2-0-1", icon: "🔥", gifUrl: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=600&q=80", cues: "Transition smoothly from hip hinge directly onto the mat for presses." },
+            { id: "p2_a3", name: "Finisher: Mountain Climbers", target: "Core & Cardiovascular Surge", primaryMuscle: "core", sets: 4, reps: 30, defaultWeight: 0, tempo: "Fast", icon: "💨", gifUrl: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=600&q=80", cues: "Hands elevated on chair or mat. Drive knees smoothly toward chest." }
           ]
         },
         B: {
           title: "Workout B: Unilateral Sculpt & Core",
           focus: "Glute Isolation & Anti-Rotational Strength",
+          bannerImg: "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?auto=format&fit=crop&w=800&q=80",
           muscles: ["glutes", "shoulders", "core"],
-          warmup: ["Single Leg Glute Bridge (10/side)", "Side Plank Lift (8/side)"],
+          warmup: ["Single-Leg Glute Bridge (10/side)", "Side Plank Hip Drops (8/side)"],
           exercises: [
-            { id: "p2_b1", name: "Superset: Split Squats + Lateral Raises", target: "Glute Stretch & Shoulder Caps", primaryMuscle: "glutes", sets: 4, reps: 10, defaultWeight: 6.0, tempo: "2-0-1", icon: "🦋" },
-            { id: "p2_b2", name: "Superset: Hip Thrust + Face Pull", target: "Upper Glute Shelf & Posture", primaryMuscle: "glutes", sets: 4, reps: 15, defaultWeight: 10.0, tempo: "2-1-1", icon: "🎯" }
+            { id: "p2_b1", name: "Superset: Split Squats + Lateral Raises", target: "Glute Stretch & Shoulder Caps", primaryMuscle: "glutes", sets: 4, reps: 10, defaultWeight: 6.0, tempo: "2-0-1", icon: "🦋", gifUrl: "https://images.unsplash.com/photo-1434682881908-b43d0467b798?auto=format&fit=crop&w=600&q=80", cues: "Maintain 90-90 knee angles on split squats, then isolate side delts." },
+            { id: "p2_b2", name: "Superset: Hip Thrust + Face Pull", target: "Upper Glute Shelf & Posture", primaryMuscle: "glutes", sets: 4, reps: 15, defaultWeight: 10.0, tempo: "2-1-1", icon: "🎯", gifUrl: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80", cues: "Drive maximum glute contraction at top, followed by scapular retraction." }
           ]
         },
         C: {
           title: "Workout C: Metabolic Complexes",
-          focus: "Continuous Time-Under-Tension",
+          focus: "Time Under Tension & Full Body Depletion",
+          bannerImg: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=800&q=80",
           muscles: ["quads", "lats", "shoulders", "core"],
-          warmup: ["Cat Cow (10x)", "Inchworms (6x)"],
+          warmup: ["Cat-Cow (10x)", "Inchworms w/ Push-Up (6x)"],
           exercises: [
-            { id: "p2_c1", name: "Complex: Clean to Squat to Press", target: "Full Body Conditioning", primaryMuscle: "quads", sets: 4, reps: 10, defaultWeight: 5.0, tempo: "Continuous", icon: "🌟" },
-            { id: "p2_c2", name: "Renegade Row to Push-Up", target: "Upper Body & Transverse Abs", primaryMuscle: "core", sets: 4, reps: 8, defaultWeight: 5.0, tempo: "Controlled", icon: "🛡️" }
+            { id: "p2_c1", name: "Complex: Clean to Squat to Press", target: "Full Body Glycogen Depletion", primaryMuscle: "quads", sets: 4, reps: 10, defaultWeight: 5.0, tempo: "Continuous", icon: "🌟", gifUrl: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=600&q=80", cues: "One continuous movement: hinge, catch at shoulders, squat, press overhead." },
+            { id: "p2_c2", name: "Renegade Row to Push-Up", target: "Upper Body & Transverse Abs", primaryMuscle: "core", sets: 4, reps: 8, defaultWeight: 5.0, tempo: "Controlled", icon: "🛡️", cues: "Row right, row left, execute full push-up. Keep glutes clenched." }
           ]
         }
       }
     };
 
-    // --- 3. Interactive SVG Muscle Heatmap Component ---
-    function MuscleHeatmap({ activeMuscles = [] }) {
-      const isLit = (group) => activeMuscles.includes(group);
-      const activeColor = "#f43f5e"; // Rose-500
-      const inactiveColor = "#1e293b"; // Slate-800
+    // --- Interactive Three.js 3D Lab Component ---
+    function Interactive3DLab({ targetMuscles = [] }) {
+      const mountRef = useRef(null);
+
+      useEffect(() => {
+        const container = mountRef.current;
+        if (!container) return;
+
+        // Scene, Camera, Renderer
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+        camera.position.set(0, 0, 8);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        container.innerHTML = '';
+        container.appendChild(renderer.domElement);
+
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+        scene.add(ambientLight);
+
+        const pointLight = new THREE.PointLight(0xf43f5e, 2, 50);
+        pointLight.position.set(5, 5, 5);
+        scene.add(pointLight);
+
+        // 3D Dumbbell / Anatomical Model Assembly
+        const group = new THREE.Group();
+
+        // Dumbbell Bar (Metallic Chrome)
+        const barGeo = new THREE.CylinderGeometry(0.12, 0.12, 4.2, 32);
+        const barMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.2, metalness: 0.85 });
+        const barMesh = new THREE.Mesh(barGeo, barMat);
+        barMesh.rotation.z = Math.PI / 2;
+        group.add(barMesh);
+
+        // Dumbbell Weight Plates (Rose Neon Glow)
+        const plateGeo = new THREE.CylinderGeometry(1.2, 1.2, 0.4, 32);
+        const plateMat = new THREE.MeshStandardMaterial({ color: 0xf43f5e, roughness: 0.3, metalness: 0.5, emissive: 0x881337, emissiveIntensity: 0.6 });
+
+        const leftPlate1 = new THREE.Mesh(plateGeo, plateMat);
+        leftPlate1.rotation.z = Math.PI / 2;
+        leftPlate1.position.x = -1.6;
+        group.add(leftPlate1);
+
+        const leftPlate2 = new THREE.Mesh(plateGeo, plateMat);
+        leftPlate2.rotation.z = Math.PI / 2;
+        leftPlate2.position.x = -1.9;
+        leftPlate2.scale.set(0.85, 0.85, 0.85);
+        group.add(leftPlate2);
+
+        const rightPlate1 = new THREE.Mesh(plateGeo, plateMat);
+        rightPlate1.rotation.z = Math.PI / 2;
+        rightPlate1.position.x = 1.6;
+        group.add(rightPlate1);
+
+        const rightPlate2 = new THREE.Mesh(plateGeo, plateMat);
+        rightPlate2.rotation.z = Math.PI / 2;
+        rightPlate2.position.x = 1.9;
+        rightPlate2.scale.set(0.85, 0.85, 0.85);
+        group.add(rightPlate2);
+
+        // Glowing Muscle Orbital Ring
+        const ringGeo = new THREE.TorusGeometry(2.4, 0.04, 16, 100);
+        const ringMat = new THREE.MeshBasicMaterial({ color: 0xfb7185 });
+        const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+        group.add(ringMesh);
+
+        scene.add(group);
+
+        // Touch & Drag Interaction
+        let isDragging = false;
+        let prevMousePos = { x: 0, y: 0 };
+
+        const onPointerDown = (e) => {
+          isDragging = true;
+          prevMousePos = { x: e.clientX || (e.touches && e.touches[0].clientX), y: e.clientY || (e.touches && e.touches[0].clientY) };
+        };
+
+        const onPointerMove = (e) => {
+          if (!isDragging) return;
+          const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+          const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+          const deltaX = clientX - prevMousePos.x;
+          const deltaY = clientY - prevMousePos.y;
+
+          group.rotation.y += deltaX * 0.01;
+          group.rotation.x += deltaY * 0.01;
+
+          prevMousePos = { x: clientX, y: clientY };
+        };
+
+        const onPointerUp = () => { isDragging = false; };
+
+        container.addEventListener('mousedown', onPointerDown);
+        container.addEventListener('mousemove', onPointerMove);
+        window.addEventListener('mouseup', onPointerUp);
+        container.addEventListener('touchstart', onPointerDown);
+        container.addEventListener('touchmove', onPointerMove);
+        window.addEventListener('touchend', onPointerUp);
+
+        // Animation Loop
+        let reqId;
+        const animate = () => {
+          reqId = requestAnimationFrame(animate);
+          if (!isDragging) {
+            group.rotation.y += 0.008;
+            group.rotation.x += 0.004;
+          }
+          ringMesh.rotation.z += 0.015;
+          renderer.render(scene, camera);
+        };
+        animate();
+
+        return () => {
+          cancelAnimationFrame(reqId);
+          container.innerHTML = '';
+        };
+      }, [targetMuscles]);
 
       return (
-        <div className="bg-slate-950 p-3 rounded-2xl border border-slate-800 flex items-center justify-around">
-          {/* Front Body */}
-          <div className="flex flex-col items-center">
-            <span className="text-[9px] font-bold uppercase text-slate-400 mb-1">Front Focus</span>
-            <svg width="64" height="110" viewBox="0 0 100 180" className="drop-shadow">
-              {/* Head */}
-              <circle cx="50" cy="16" r="11" fill="#334155" />
-              {/* Shoulders */}
-              <path d="M 28 35 Q 50 30 72 35 L 78 50 L 22 50 Z" fill={isLit('shoulders') ? activeColor : inactiveColor} />
-              {/* Chest */}
-              <rect x="30" y="48" width="40" height="20" rx="4" fill={isLit('chest') ? activeColor : inactiveColor} />
-              {/* Core / Abs */}
-              <rect x="34" y="70" width="32" height="26" rx="3" fill={isLit('core') ? activeColor : inactiveColor} />
-              {/* Quads / Legs */}
-              <path d="M 28 100 L 46 100 L 42 145 L 26 145 Z" fill={isLit('quads') ? activeColor : inactiveColor} />
-              <path d="M 54 100 L 72 100 L 74 145 L 58 145 Z" fill={isLit('quads') ? activeColor : inactiveColor} />
-              {/* Lower Legs */}
-              <rect x="28" y="148" width="12" height="24" rx="2" fill="#334155" />
-              <rect x="60" y="148" width="12" height="24" rx="2" fill="#334155" />
-            </svg>
+        <div className="relative w-full h-56 bg-slate-950/90 rounded-2xl border border-slate-800 overflow-hidden shadow-2xl">
+          <div ref={mountRef} className="w-full h-full cursor-grab active:cursor-grabbing" />
+          <div className="absolute top-3 left-3 bg-slate-900/80 backdrop-blur px-2.5 py-1 rounded-lg border border-slate-700/60">
+            <span className="text-[10px] font-bold text-rose-400 uppercase tracking-wider flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span> 3D Interactive Lab
+            </span>
           </div>
-
-          {/* Back Body */}
-          <div className="flex flex-col items-center">
-            <span className="text-[9px] font-bold uppercase text-slate-400 mb-1">Back Focus</span>
-            <svg width="64" height="110" viewBox="0 0 100 180" className="drop-shadow">
-              {/* Head */}
-              <circle cx="50" cy="16" r="11" fill="#334155" />
-              {/* Upper Back / Lats */}
-              <path d="M 26 35 Q 50 32 74 35 L 70 70 L 30 70 Z" fill={isLit('lats') ? activeColor : inactiveColor} />
-              {/* Lower Back */}
-              <rect x="36" y="72" width="28" height="16" rx="2" fill={isLit('core') ? activeColor : inactiveColor} />
-              {/* Glutes */}
-              <rect x="28" y="90" width="44" height="24" rx="6" fill={isLit('glutes') ? activeColor : inactiveColor} />
-              {/* Hamstrings */}
-              <path d="M 28 116 L 46 116 L 43 148 L 27 148 Z" fill={isLit('glutes') || isLit('hamstrings') ? activeColor : inactiveColor} />
-              <path d="M 54 116 L 72 116 L 73 148 L 57 148 Z" fill={isLit('glutes') || isLit('hamstrings') ? activeColor : inactiveColor} />
-              {/* Calves */}
-              <rect x="28" y="150" width="12" height="22" rx="2" fill="#334155" />
-              <rect x="60" y="150" width="12" height="22" rx="2" fill="#334155" />
-            </svg>
+          <div className="absolute bottom-2.5 right-3 text-[10px] text-slate-400 font-medium">
+            Touch & Drag to Rotate 3D Model
           </div>
         </div>
       );
     }
 
-    // --- 4. Main App Controller ---
+    // --- Main App Controller ---
     function App() {
-      // Navigation & Settings
       const [activeTab, setActiveTab] = useState('workout');
       const [phase, setPhase] = useState(() => localStorage.getItem('fm_phase') || 'phase1');
       const [activeDay, setActiveDay] = useState(() => localStorage.getItem('fm_day') || 'A');
@@ -226,21 +439,21 @@
       const [weightLogs, setWeightLogs] = useState(() => JSON.parse(localStorage.getItem('fm_weights') || '{}'));
       const [streakHistory, setStreakHistory] = useState(() => JSON.parse(localStorage.getItem('fm_streak') || '[]'));
       const [waterGlasses, setWaterGlasses] = useState(() => parseInt(localStorage.getItem('fm_water') || '0', 10));
+      const [dailySteps, setDailySteps] = useState(() => parseInt(localStorage.getItem('fm_steps') || '8000', 10));
 
-      // Readiness & Cortisol State
+      // Readiness / Cortisol Assessment
       const [readiness, setReadiness] = useState(() => JSON.parse(localStorage.getItem('fm_readiness') || '{"sleep":8,"stress":3,"soreness":4}'));
       const [selectedExercise, setSelectedExercise] = useState(null);
 
-      // Rest Timer State
+      // Rest Timer
       const [timerSeconds, setTimerSeconds] = useState(60);
       const [isTimerRunning, setIsTimerRunning] = useState(false);
 
-      // Tempo Metronome State (3-0-1)
+      // Metronome Engine (3-0-1)
       const [metronomeRunning, setMetronomeRunning] = useState(false);
       const [tempoPhase, setTempoPhase] = useState('Lower (3s)');
       const [tempoCount, setTempoCount] = useState(3);
 
-      // SVG Ring Math
       const radius = 24;
       const circumference = 2 * Math.PI * radius;
       const strokeDashoffset = circumference - (timerSeconds / 60) * circumference;
@@ -254,11 +467,12 @@
         localStorage.setItem('fm_weights', JSON.stringify(weightLogs));
         localStorage.setItem('fm_streak', JSON.stringify(streakHistory));
         localStorage.setItem('fm_water', waterGlasses.toString());
+        localStorage.setItem('fm_steps', dailySteps.toString());
         localStorage.setItem('fm_voice', voiceEnabled.toString());
         localStorage.setItem('fm_readiness', JSON.stringify(readiness));
-      }, [phase, activeDay, cyclePhase, completedSets, weightLogs, streakHistory, waterGlasses, voiceEnabled, readiness]);
+      }, [phase, activeDay, cyclePhase, completedSets, weightLogs, streakHistory, waterGlasses, dailySteps, voiceEnabled, readiness]);
 
-      // Timer Engine with Audio & Voice Feedback
+      // Rest Timer Interval
       useEffect(() => {
         let interval = null;
         if (isTimerRunning && timerSeconds > 0) {
@@ -268,7 +482,7 @@
                 playTone(550, 'triangle', 0.08);
               } else if (prev === 1) {
                 playTone(880, 'sine', 0.3);
-                speakCoach("Rest is up! Time for your next set.", voiceEnabled);
+                speakCoach("Rest is up! Start your next set.", voiceEnabled);
               }
               return prev - 1;
             });
@@ -280,24 +494,24 @@
         return () => clearInterval(interval);
       }, [isTimerRunning, timerSeconds, voiceEnabled]);
 
-      // Visual Metronome Engine (3s Down, 0s Pause, 1s Up)
+      // Tempo Metronome Engine
       useEffect(() => {
         let timer = null;
         if (metronomeRunning) {
-          let step = 0; // 0,1,2 = eccentric (3s), 3 = concentric (1s)
+          let step = 0;
           timer = setInterval(() => {
             if (step === 0) {
               setTempoPhase('Lowering (Down)');
               setTempoCount(3);
-              playTone(400, 'sine', 0.05);
+              playTone(400, 'sine', 0.06);
             } else if (step === 1) {
               setTempoCount(2);
-              playTone(400, 'sine', 0.05);
+              playTone(400, 'sine', 0.06);
             } else if (step === 2) {
               setTempoCount(1);
-              playTone(400, 'sine', 0.05);
+              playTone(400, 'sine', 0.06);
             } else if (step === 3) {
-              setTempoPhase('Drive Up (Explode)');
+              setTempoPhase('Drive Up (Lift)');
               setTempoCount(1);
               playTone(800, 'triangle', 0.1);
             }
@@ -307,7 +521,6 @@
         return () => clearInterval(timer);
       }, [metronomeRunning]);
 
-      // Readiness Score Calculation (1 to 10 scale)
       const readinessScore = Math.max(1, Math.min(10, Math.round(readiness.sleep - readiness.stress * 0.4 - readiness.soreness * 0.4 + 4)));
       const isHighCortisol = readinessScore <= 5;
       const loadMultiplier = (isHighCortisol ? 0.85 : 1.0) * CYCLE_MODES[cyclePhase].loadModifier;
@@ -321,9 +534,8 @@
           setTimerSeconds(60);
           setIsTimerRunning(true);
           playTone(520, 'sine', 0.1);
-          speakCoach(`Good set. Rest for 60 seconds.`, voiceEnabled);
+          speakCoach(`Good set. Rest for sixty seconds.`, voiceEnabled);
 
-          // Update Streak History
           const today = new Date().toISOString().slice(0, 10);
           if (!streakHistory.includes(today)) {
             setStreakHistory([...streakHistory, today]);
@@ -337,7 +549,6 @@
 
       const currentWorkout = WORKOUT_DB[phase][activeDay];
 
-      // Calculate Total Tonnage Lifted in this session
       const totalSessionTonnage = currentWorkout.exercises.reduce((total, ex) => {
         const loggedW = (weightLogs[ex.id] ?? ex.defaultWeight) * loadMultiplier;
         let completedCount = 0;
@@ -347,31 +558,45 @@
         return total + Math.round(completedCount * ex.reps * loggedW);
       }, 0);
 
+      const targetCalories = 1750;
+      const proteinG = Math.round((targetCalories * 0.40) / 4);
+      const carbG = Math.round((targetCalories * 0.30) / 4);
+      const fatG = Math.round((targetCalories * 0.30) / 9);
+
       return (
         <div className="min-h-screen max-w-md mx-auto p-4 pb-28">
-          {/* Header */}
-          <header className="flex justify-between items-center mb-3">
-            <div>
-              <h1 className="text-xl font-black text-white tracking-tight flex items-center gap-1.5">
-                <span className="text-rose-500">🌸</span> FemMetabolic Pro
-              </h1>
-              <p className="text-[10px] text-slate-400">Endomorph Recomposition • Home Protocol</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setVoiceEnabled(!voiceEnabled)}
-                className={`p-1.5 rounded-lg border text-xs ${voiceEnabled ? 'bg-rose-950 border-rose-800 text-rose-300' : 'bg-slate-900 border-slate-800 text-slate-500'}`}
-                title="Toggle Voice Coach"
-              >
-                {voiceEnabled ? "🔊 Voice On" : "🔇 Voice Off"}
-              </button>
+          {/* Hero Header with Real Fitness Imagery */}
+          <header className="relative rounded-2xl overflow-hidden mb-3 border border-slate-800 shadow-2xl">
+            <img
+              src={currentWorkout.bannerImg}
+              alt="Workout Hero"
+              className="w-full h-28 object-cover object-center opacity-40 brightness-75"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent p-3.5 flex flex-col justify-between">
+              <div className="flex justify-between items-center">
+                <span className="text-[10px] font-bold text-rose-400 uppercase tracking-widest bg-slate-950/80 px-2 py-0.5 rounded-full border border-rose-800/60">
+                  FemMetabolic 3D Pro
+                </span>
+                <button
+                  onClick={() => setVoiceEnabled(!voiceEnabled)}
+                  className={`px-2.5 py-1 rounded-lg border text-xs font-semibold backdrop-blur transition-all ${
+                    voiceEnabled ? 'bg-rose-950/80 border-rose-800 text-rose-300' : 'bg-slate-900/80 border-slate-800 text-slate-500'
+                  }`}
+                >
+                  {voiceEnabled ? "🔊 Voice On" : "🔇 Voice Off"}
+                </button>
+              </div>
+              <div>
+                <h1 className="text-lg font-black text-white leading-tight">{currentWorkout.title}</h1>
+                <p className="text-[11px] text-slate-300">{currentWorkout.focus}</p>
+              </div>
             </div>
           </header>
 
-          {/* Menstrual & Cortisol Status Strip */}
+          {/* Menstrual Cycle Sync Banner */}
           <div className="bg-slate-900 border border-slate-800 rounded-2xl p-3 mb-3 shadow-md">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Cycle Syncing</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Hormonal Cycle Mode</span>
               <div className="flex gap-1">
                 <button
                   onClick={() => setCyclePhase('follicular')}
@@ -399,32 +624,39 @@
             </div>
           </div>
 
-          {/* Tab Navigation Views */}
+          {/* TAB 1: WORKOUT & EXERCISE LIST */}
           {activeTab === 'workout' && (
             <>
-              {/* Phase & Day Selectors */}
+              {/* Phase Switcher */}
               <div className="grid grid-cols-2 gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800 mb-3">
                 <button
                   onClick={() => setPhase('phase1')}
-                  className={`py-1.5 text-xs font-bold rounded-lg ${phase === 'phase1' ? 'bg-rose-600 text-white shadow' : 'text-slate-400'}`}
+                  className={`py-1.5 text-xs font-bold rounded-lg transition-all ${
+                    phase === 'phase1' ? 'bg-rose-600 text-white shadow' : 'text-slate-400 hover:text-white'
+                  }`}
                 >
-                  Phase 1 (D1–30)
+                  Phase 1 (Days 1–30)
                 </button>
                 <button
                   onClick={() => setPhase('phase2')}
-                  className={`py-1.5 text-xs font-bold rounded-lg ${phase === 'phase2' ? 'bg-rose-600 text-white shadow' : 'text-slate-400'}`}
+                  className={`py-1.5 text-xs font-bold rounded-lg transition-all ${
+                    phase === 'phase2' ? 'bg-rose-600 text-white shadow' : 'text-slate-400 hover:text-white'
+                  }`}
                 >
-                  Phase 2 (D31–60)
+                  Phase 2 (Days 31–60)
                 </button>
               </div>
 
+              {/* Day Switcher */}
               <div className="flex gap-2 mb-3">
                 {['A', 'B', 'C'].map((day) => (
                   <button
                     key={day}
                     onClick={() => setActiveDay(day)}
                     className={`flex-1 py-2 rounded-xl text-xs font-bold border transition-all ${
-                      activeDay === day ? 'bg-slate-800 text-rose-400 border-rose-500/50 shadow' : 'bg-slate-900 text-slate-400 border-slate-800'
+                      activeDay === day
+                        ? 'bg-slate-800 text-rose-400 border-rose-500/50 shadow'
+                        : 'bg-slate-900 text-slate-400 border-slate-800'
                     }`}
                   >
                     Workout {day}
@@ -432,38 +664,24 @@
                 ))}
               </div>
 
-              {/* Dynamic Muscle Target Heatmap */}
+              {/* Live 3D Interactive Lab */}
               <div className="mb-3">
-                <MuscleHeatmap activeMuscles={currentWorkout.muscles} />
+                <Interactive3DLab targetMuscles={currentWorkout.muscles} />
               </div>
 
-              {/* Live Session Tonnage Card */}
-              <div className="bg-slate-900/80 border border-slate-800 rounded-xl px-3.5 py-2 mb-3 flex justify-between items-center">
+              {/* Total Tonnage Strip */}
+              <div className="bg-slate-900/90 border border-slate-800 rounded-xl px-3.5 py-2 mb-3 flex justify-between items-center">
                 <div>
-                  <span className="text-[9px] font-bold uppercase text-slate-400">Session Volume Load</span>
+                  <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Total Session Tonnage</span>
                   <p className="text-base font-black text-rose-400 font-mono">{totalSessionTonnage.toLocaleString()} kg</p>
                 </div>
                 <div className="text-right">
-                  <span className="text-[9px] font-bold uppercase text-slate-400">Load Modifier</span>
+                  <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Readiness Mod</span>
                   <p className="text-xs font-bold text-slate-200">{Math.round(loadMultiplier * 100)}% ({isHighCortisol ? "Recovery" : "Full"})</p>
                 </div>
               </div>
 
-              {/* Pelvic Core Warm-up Checklist */}
-              <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-3 mb-3">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-rose-400 mb-1">
-                  🛡️ Pelvic Floor & Core Activation
-                </p>
-                <div className="flex flex-wrap gap-1">
-                  {currentWorkout.warmup.map((w, idx) => (
-                    <span key={idx} className="text-[10px] bg-slate-950 text-slate-300 px-2 py-0.5 rounded-md border border-slate-800">
-                      • {w}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Exercise Log Cards */}
+              {/* Exercise Log Cards with Real Images & GIF Previews */}
               <div className="space-y-3">
                 {currentWorkout.exercises.map((ex) => {
                   const baseW = weightLogs[ex.id] ?? ex.defaultWeight;
@@ -471,19 +689,23 @@
                   return (
                     <div key={ex.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 shadow-md">
                       <div className="flex items-start justify-between mb-2">
-                        <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => setSelectedExercise(ex)}>
-                          <div className="w-9 h-9 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center text-base">
-                            {ex.icon}
-                          </div>
+                        <div className="flex items-center gap-3 cursor-pointer flex-1" onClick={() => setSelectedExercise(ex)}>
+                          <img
+                            src={ex.gifUrl}
+                            alt={ex.name}
+                            className="w-12 h-12 rounded-xl object-cover border border-slate-700 shadow-inner"
+                          />
                           <div>
-                            <h3 className="text-xs font-bold text-slate-100 hover:text-rose-400">{ex.name} ℹ️</h3>
+                            <h3 className="text-xs font-bold text-slate-100 hover:text-rose-400 flex items-center gap-1">
+                              {ex.name} <span className="text-[10px] text-slate-500">▶ GIF</span>
+                            </h3>
                             <p className="text-[10px] text-slate-400">
                               {ex.sets} sets × {ex.reps} • Target: <span className="text-rose-300">{ex.target}</span>
                             </p>
                           </div>
                         </div>
 
-                        {/* Weight Adjuster */}
+                        {/* Weight Adjuster Input */}
                         <div className="flex items-center gap-1">
                           <input
                             type="number"
@@ -496,8 +718,8 @@
                         </div>
                       </div>
 
-                      {/* Set Completion Bubbles */}
-                      <div className="flex gap-2">
+                      {/* Set Checkboxes */}
+                      <div className="flex gap-2 mt-2 pt-2 border-t border-slate-800/80">
                         {Array.from({ length: ex.sets }).map((_, idx) => {
                           const setKey = `${ex.id}_s_${idx}`;
                           const isDone = !!completedSets[setKey];
@@ -521,16 +743,15 @@
             </>
           )}
 
-          {/* Visual Tempo Metronome Tab */}
-          {activeTab === 'metronome' && (
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl text-center space-y-6">
+          {/* TAB 2: VISUAL TEMPO METRONOME */}
+          {activeTab === 'tempo' && (
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl text-center space-y-5">
               <div>
                 <h2 className="text-base font-black text-white">Visual 3-0-1 Tempo Metronome</h2>
                 <p className="text-xs text-slate-400 mt-1">3s Lower (Eccentric) • 0s Pause • 1s Explode (Concentric)</p>
               </div>
 
-              {/* Dynamic Expanding Animation Box */}
-              <div className="h-44 bg-slate-950 rounded-2xl border border-slate-800 flex flex-col items-center justify-center relative overflow-hidden">
+              <div className="h-48 bg-slate-950 rounded-2xl border border-slate-800 flex flex-col items-center justify-center relative overflow-hidden">
                 <div
                   className="w-28 h-28 rounded-2xl bg-rose-600/30 border-2 border-rose-500 flex flex-col items-center justify-center tempo-pulse shadow-2xl"
                   style={{
@@ -550,34 +771,31 @@
                 </div>
               </div>
 
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setMetronomeRunning(!metronomeRunning)}
-                  className={`flex-1 py-3 rounded-xl font-bold text-xs transition-all ${
-                    metronomeRunning ? 'bg-amber-600 text-white' : 'bg-rose-600 text-white shadow-lg'
-                  }`}
-                >
-                  {metronomeRunning ? "Pause Metronome" : "Start Rep Tempo"}
-                </button>
-              </div>
+              <button
+                onClick={() => setMetronomeRunning(!metronomeRunning)}
+                className={`w-full py-3 rounded-xl font-bold text-xs transition-all ${
+                  metronomeRunning ? 'bg-amber-600 text-white' : 'bg-rose-600 text-white shadow-lg'
+                }`}
+              >
+                {metronomeRunning ? "Pause Metronome" : "Start Rep Metronome"}
+              </button>
             </div>
           )}
 
-          {/* Daily Readiness & Cortisol Tab */}
+          {/* TAB 3: READINESS & CORTISOL SCANNER */}
           {activeTab === 'readiness' && (
             <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-5">
               <div className="flex justify-between items-center">
-                <h2 className="text-sm font-bold text-white">Morning Cortisol & Readiness Check</h2>
+                <h2 className="text-sm font-bold text-white">Daily Cortisol & Recovery Score</h2>
                 <span className={`text-xs font-black px-2.5 py-1 rounded-full ${readinessScore > 5 ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-amber-950 text-amber-400 border border-amber-800'}`}>
                   Score: {readinessScore}/10
                 </span>
               </div>
 
-              {/* Sliders */}
-              <div className="space-y-3">
+              <div className="space-y-3.5">
                 <div>
                   <div className="flex justify-between text-xs text-slate-300 mb-1">
-                    <span>Sleep Quality (Hours/Depth)</span>
+                    <span>Sleep Quality (Hours & Depth)</span>
                     <span className="font-bold text-rose-400">{readiness.sleep}/10</span>
                   </div>
                   <input
@@ -592,7 +810,7 @@
 
                 <div>
                   <div className="flex justify-between text-xs text-slate-300 mb-1">
-                    <span>Life Stress / Mental Load</span>
+                    <span>Life Stress / Mental Cortisol</span>
                     <span className="font-bold text-amber-400">{readiness.stress}/10</span>
                   </div>
                   <input
@@ -621,24 +839,88 @@
                 </div>
               </div>
 
-              {/* Assessment Message */}
               <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800 text-xs leading-relaxed text-slate-300">
                 {readinessScore > 5 ? (
-                  <p>✅ <strong>Optimal Recovery:</strong> Cortisol is controlled. Proceed with standard weights and focus on progressive overload.</p>
+                  <p>✅ <strong>Optimal State:</strong> Cortisol is well-managed. Full dumbbell loads loaded for maximum muscle protein synthesis.</p>
                 ) : (
-                  <p>⚠️ <strong>High Cortisol Alert:</strong> Working weights automatically scaled down by 15% to protect joint recovery and prevent fluid retention.</p>
+                  <p>⚠️ <strong>High Cortisol Alert:</strong> Working weights automatically dialed back by 15% to prevent water retention and joint inflammation.</p>
                 )}
               </div>
             </div>
           )}
 
-          {/* Progress & 60-Day Streak Grid */}
-          {activeTab === 'progress' && (
+          {/* TAB 4: NUTRITION, MACROS & WATER */}
+          {activeTab === 'nutrition' && (
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl space-y-4">
+              <div className="flex justify-between items-center">
+                <h2 className="text-sm font-bold text-white">Endomorph 30+ Macro Targets</h2>
+                <span className="text-[10px] text-rose-400 font-bold bg-rose-950/80 px-2 py-0.5 rounded-full border border-rose-800">
+                  400 kcal Deficit
+                </span>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2 text-center">
+                <div className="bg-slate-950 p-3 rounded-xl border border-rose-500/30">
+                  <p className="text-lg font-black text-white">{proteinG}g</p>
+                  <p className="text-[9px] text-slate-400 uppercase font-bold">Protein (40%)</p>
+                </div>
+                <div className="bg-slate-950 p-3 rounded-xl border border-sky-500/30">
+                  <p className="text-lg font-black text-white">{carbG}g</p>
+                  <p className="text-[9px] text-slate-400 uppercase font-bold">Carbs (30%)</p>
+                </div>
+                <div className="bg-slate-950 p-3 rounded-xl border border-amber-500/30">
+                  <p className="text-lg font-black text-white">{fatG}g</p>
+                  <p className="text-[9px] text-slate-400 uppercase font-bold">Fats (30%)</p>
+                </div>
+              </div>
+
+              {/* Anti-Bloat Hydration Tracker */}
+              <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-xs font-bold text-slate-200">💧 Daily Water (Anti-Bloat)</span>
+                  <span className="text-xs font-black text-sky-400">{(waterGlasses * 0.25).toFixed(1)} / 3.0 L</span>
+                </div>
+                <div className="flex gap-1">
+                  {Array.from({ length: 12 }).map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setWaterGlasses((prev) => (prev === i + 1 ? i : i + 1))}
+                      className={`flex-1 h-7 rounded-md text-[9px] font-bold transition-all ${
+                        i < waterGlasses ? 'bg-sky-500 text-white shadow-sm' : 'bg-slate-900 text-slate-600 hover:bg-slate-800'
+                      }`}
+                    >
+                      •
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Daily NEAT Step Tracker Slider */}
+              <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-xs font-bold text-slate-200">🚶 Daily NEAT Movement</span>
+                  <span className="text-xs font-black text-emerald-400">{dailySteps.toLocaleString()} steps</span>
+                </div>
+                <input
+                  type="range"
+                  min="5000"
+                  max="12000"
+                  step="500"
+                  value={dailySteps}
+                  onChange={(e) => setDailySteps(Number(e.target.value))}
+                  className="w-full h-1.5 bg-slate-900 rounded-lg appearance-none cursor-pointer accent-emerald-500 mt-2"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* TAB 5: COACHING & TIPS */}
+          {activeTab === 'coach' && (
             <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
               <h2 className="text-sm font-bold text-white">60-Day Consistency Grid</h2>
-              <p className="text-[11px] text-slate-400">Total Completed Sessions: {streakHistory.length} Days</p>
+              <p className="text-[11px] text-slate-400">Completed Sessions: <strong className="text-rose-400">{streakHistory.length} Days</strong></p>
 
-              {/* 60-Day Heatmap Blocks */}
+              {/* 60-Day Heatmap */}
               <div className="grid grid-cols-10 gap-1.5 bg-slate-950 p-3 rounded-xl border border-slate-800">
                 {Array.from({ length: 60 }).map((_, i) => {
                   const isDone = i < streakHistory.length;
@@ -654,31 +936,10 @@
                   );
                 })}
               </div>
-
-              {/* Anti-Bloat Hydration Tracker */}
-              <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-xs font-bold text-slate-200">💧 Anti-Bloat Water Goal</span>
-                  <span className="text-xs font-black text-sky-400">{(waterGlasses * 0.25).toFixed(1)} / 3.0 L</span>
-                </div>
-                <div className="flex gap-1">
-                  {Array.from({ length: 12 }).map((_, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setWaterGlasses((prev) => (prev === i + 1 ? i : i + 1))}
-                      className={`flex-1 h-7 rounded-md text-[9px] font-bold ${
-                        i < waterGlasses ? 'bg-sky-500 text-white' : 'bg-slate-900 text-slate-600'
-                      }`}
-                    >
-                      •
-                    </button>
-                  ))}
-                </div>
-              </div>
             </div>
           )}
 
-          {/* Floating Persistent Circular Rest Timer */}
+          {/* Persistent Floating Rest Timer */}
           {activeTab === 'workout' && (
             <div className="fixed bottom-14 left-4 right-4 max-w-md mx-auto bg-slate-900/95 backdrop-blur border border-slate-800 rounded-2xl p-3 flex justify-between items-center shadow-2xl z-40">
               <div className="flex items-center gap-3">
@@ -701,8 +962,8 @@
                   </text>
                 </svg>
                 <div>
-                  <p className="text-[9px] font-bold uppercase text-slate-400 tracking-wider">Rest Recovery</p>
-                  <p className="text-xs text-slate-200 font-medium">{isTimerRunning ? "Oxidizing lactic acid..." : "Interval Paused"}</p>
+                  <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Rest Interval</p>
+                  <p className="text-xs text-slate-200 font-medium">{isTimerRunning ? "Lactic Clearance..." : "Interval Paused"}</p>
                 </div>
               </div>
               <div className="flex gap-1.5">
@@ -726,55 +987,79 @@
           )}
 
           {/* Bottom Dock Navigation */}
-          <nav className="fixed bottom-0 left-0 right-0 bg-slate-950 border-t border-slate-800/80 py-2.5 px-4 flex justify-around items-center z-50">
+          <nav className="fixed bottom-0 left-0 right-0 bg-slate-950 border-t border-slate-800/80 py-2.5 px-3 flex justify-around items-center z-50">
             <button
               onClick={() => setActiveTab('workout')}
-              className={`text-xs font-bold transition-all flex flex-col items-center ${activeTab === 'workout' ? 'text-rose-500' : 'text-slate-400'}`}
+              className={`text-[11px] font-bold transition-all flex flex-col items-center ${activeTab === 'workout' ? 'text-rose-500' : 'text-slate-400'}`}
             >
               🏋️ Workout
             </button>
             <button
-              onClick={() => setActiveTab('metronome')}
-              className={`text-xs font-bold transition-all flex flex-col items-center ${activeTab === 'metronome' ? 'text-rose-500' : 'text-slate-400'}`}
+              onClick={() => setActiveTab('tempo')}
+              className={`text-[11px] font-bold transition-all flex flex-col items-center ${activeTab === 'tempo' ? 'text-rose-500' : 'text-slate-400'}`}
             >
               ⏱️ Tempo
             </button>
             <button
               onClick={() => setActiveTab('readiness')}
-              className={`text-xs font-bold transition-all flex flex-col items-center ${activeTab === 'readiness' ? 'text-rose-500' : 'text-slate-400'}`}
+              className={`text-[11px] font-bold transition-all flex flex-col items-center ${activeTab === 'readiness' ? 'text-rose-500' : 'text-slate-400'}`}
             >
               🧘 Readiness
             </button>
             <button
-              onClick={() => setActiveTab('progress')}
-              className={`text-xs font-bold transition-all flex flex-col items-center ${activeTab === 'progress' ? 'text-rose-500' : 'text-slate-400'}`}
+              onClick={() => setActiveTab('nutrition')}
+              className={`text-[11px] font-bold transition-all flex flex-col items-center ${activeTab === 'nutrition' ? 'text-rose-500' : 'text-slate-400'}`}
             >
-              📊 Grid
+              🥗 Macros
+            </button>
+            <button
+              onClick={() => setActiveTab('coach')}
+              className={`text-[11px] font-bold transition-all flex flex-col items-center ${activeTab === 'coach' ? 'text-rose-500' : 'text-slate-400'}`}
+            >
+              📖 Coach
             </button>
           </nav>
 
-          {/* Exercise Form Modal */}
+          {/* Exercise Real GIF Demonstration Modal */}
           {selectedExercise && (
-            <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-              <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-xs w-full p-4 space-y-3">
-                <div className="flex justify-between items-center">
-                  <h3 className="text-sm font-bold text-white">{selectedExercise.name}</h3>
-                  <button onClick={() => setSelectedExercise(null)} className="text-slate-400 hover:text-white text-sm font-bold">✕</button>
+            <div className="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+              <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-xs w-full overflow-hidden shadow-2xl">
+                <div className="relative h-44 bg-slate-950">
+                  <img
+                    src={selectedExercise.gifUrl}
+                    alt={selectedExercise.name}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute top-3 right-3">
+                    <button
+                      onClick={() => setSelectedExercise(null)}
+                      className="bg-slate-950/80 text-white rounded-full w-7 h-7 flex items-center justify-center font-bold text-xs border border-slate-700"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  <div className="absolute bottom-2 left-3 bg-slate-950/80 backdrop-blur px-2.5 py-0.5 rounded-full border border-rose-500/40">
+                    <span className="text-[10px] text-rose-400 font-mono font-bold">Tempo: {selectedExercise.tempo}</span>
+                  </div>
                 </div>
-                <div className="h-24 bg-slate-950 rounded-xl border border-slate-800 flex flex-col items-center justify-center text-3xl">
-                  {selectedExercise.icon}
-                  <span className="text-[10px] text-rose-400 font-mono mt-1">Tempo: {selectedExercise.tempo}</span>
+
+                <div className="p-4 space-y-3">
+                  <div>
+                    <h3 className="text-sm font-black text-white">{selectedExercise.name}</h3>
+                    <p className="text-[11px] text-rose-400 font-medium">Primary Focus: {selectedExercise.target}</p>
+                  </div>
+
+                  <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs text-slate-300 leading-relaxed">
+                    <p><strong>Form Execution:</strong> {selectedExercise.cues}</p>
+                  </div>
+
+                  <button
+                    onClick={() => setSelectedExercise(null)}
+                    className="w-full bg-rose-600 hover:bg-rose-500 text-white py-2.5 rounded-xl font-bold text-xs transition-all shadow-lg shadow-rose-950"
+                  >
+                    Got It, Let's Lift
+                  </button>
                 </div>
-                <div className="space-y-1 text-xs text-slate-300">
-                  <p>• <strong>Primary Target:</strong> <span className="text-rose-400">{selectedExercise.target}</span></p>
-                  <p>• <strong>Form Cue:</strong> Control the 3-second descent. Keep your core braced and exhale on the lift.</p>
-                </div>
-                <button
-                  onClick={() => setSelectedExercise(null)}
-                  className="w-full bg-slate-800 text-slate-200 py-2 rounded-xl font-bold text-xs hover:bg-slate-700"
-                >
-                  Got It
-                </button>
               </div>
             </div>
           )}
@@ -786,3 +1071,4 @@
   </script>
 </body>
 </html>
+
