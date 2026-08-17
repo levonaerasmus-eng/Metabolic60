@@ -91,11 +91,11 @@
   <script type="text/babel">
     const { useState, useEffect, useRef } = React;
 
-    // --- Storage Helpers ---
+    // --- Safe Storage Helpers ---
     const getStored = (key, fallback) => {
       try {
         const item = localStorage.getItem(key);
-        return item ? JSON.parse(item) : fallback;
+        return (item && item !== "undefined") ? JSON.parse(item) : fallback;
       } catch {
         return fallback;
       }
@@ -105,7 +105,7 @@
       try { localStorage.setItem(key, JSON.stringify(val)); } catch {}
     };
 
-    // --- Local Date Formatter ---
+    // --- Local Date Formatter (YYYY-MM-DD) ---
     const getLocalDateStr = (d = new Date()) => {
       const year = d.getFullYear();
       const month = String(d.getMonth() + 1).padStart(2, '0');
@@ -114,7 +114,7 @@
     };
 
     // --- Audio Feedback ---
-    const playBeep = (freq = 587.33, dur = 0.12) => { // D5 soft tone
+    const playBeep = (freq = 587.33, dur = 0.12) => {
       try {
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
         if (!AudioCtx) return;
@@ -145,7 +145,7 @@
       luteal: { name: "Luteal Phase (Days 17–28)", short: "Luteal", tag: "Steady Burn & Calibrate", color: "text-purple-600 border-purple-200 bg-purple-50", mod: 0.9, tip: "Progesterone dominance elevates core temperature. Hydrate with 3L+ and honor strict rest cadence." }
     };
 
-    // --- Master Exercise Database with Aesthetic Guidance ---
+    // --- Master Exercise Database ---
     const EXERCISE_DATA = {
       beginner: {
         A: [
@@ -158,11 +158,13 @@
         B: [
           { id: "b_b1", name: "Supported Back Rows", target: "Lats & Waist Taper", primary: "lats", sets: 3, reps: 10, rest: 60, tempo: "2-1-1", ecc: 2, pause: 1, conc: 1, defaultKg: 4.0, img: "https://images.unsplash.com/photo-1605296867304-46d5465a13f1?auto=format&fit=crop&w=600&q=80", cues: "Draw elbow softly back toward hip pocket.", execution: ["Support one arm on a bench with a flat back.", "Pull weight smoothly toward the hip, squeezing shoulder blade.", "Pause 1 second at the top before lowering."] },
           { id: "b_b2", name: "Glute Split Squats", target: "Glutes & Thighs", primary: "glutes", sets: 3, reps: 8, rest: 60, tempo: "2-0-1", ecc: 2, pause: 0, conc: 1, defaultKg: 0, img: "https://images.unsplash.com/photo-1434682881908-b43d0467b798?auto=format&fit=crop&w=600&q=80", cues: "Keep front heel grounded and chest lifted.", execution: ["Take a long step back, dropping back knee toward the mat.", "Drive through the front heel to return to top with balance."] },
-          { id: "b_b3", name: "Side Clamshells", target: "Gluteus Medius", primary: "glutes", sets: 3, reps: 12, rest: 45, tempo: "2-1-1", ecc: 2, pause: 1, conc: 1, defaultKg: 0, img: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80", cues: "Rotate top knee upward without letting hips roll backward.", execution: ["Lie on your side with knees bent at 90°.", "Open top knee like a clamshell while keeping feet glued.", "Hold peak contraction for 1 second."] }
+          { id: "b_b3", name: "Side Clamshells", target: "Gluteus Medius", primary: "glutes", sets: 3, reps: 12, rest: 45, tempo: "2-1-1", ecc: 2, pause: 1, conc: 1, defaultKg: 0, img: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80", cues: "Rotate top knee upward without letting hips roll backward.", execution: ["Lie on your side with knees bent at 90°.", "Open top knee like a clamshell while keeping feet glued.", "Hold peak contraction for 1 second."] },
+          { id: "b_b4", name: "Standing DB Curls", target: "Biceps Definition", primary: "lats", sets: 3, reps: 10, rest: 45, tempo: "2-0-1", ecc: 2, pause: 0, conc: 1, defaultKg: 3.0, img: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=600&q=80", cues: "Pin elbows to ribs; lift with pure bicep squeeze.", execution: ["Stand tall with palms facing forward.", "Curl weights up to shoulder level without body swinging.", "Lower with 2-second resistance."] }
         ],
         C: [
           { id: "b_c1", name: "Step-Up Elevation", target: "Glutes & Legs", primary: "glutes", sets: 3, reps: 8, rest: 60, tempo: "2-0-1", ecc: 2, pause: 0, conc: 1, defaultKg: 0, img: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Power through the top heel; step down with light grace.", execution: ["Place full foot on a sturdy platform.", "Drive through heel to step up, standing tall.", "Descend with smooth resistance."] },
-          { id: "b_c2", name: "Romanian Deadlift", target: "Hamstrings & Glutes", primary: "hamstrings", sets: 3, reps: 10, rest: 60, tempo: "3-0-1", ecc: 3, pause: 0, conc: 1, defaultKg: 4.0, img: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=600&q=80", cues: "Hinge hips back like closing a door behind you.", execution: ["Hinge at the hips with soft knees and long spine.", "Lower weights along shins until hamstrings stretch.", "Drive hips forward to stand tall."] }
+          { id: "b_c2", name: "Romanian Deadlift", target: "Hamstrings & Glutes", primary: "hamstrings", sets: 3, reps: 10, rest: 60, tempo: "3-0-1", ecc: 3, pause: 0, conc: 1, defaultKg: 4.0, img: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=600&q=80", cues: "Hinge hips back like closing a door behind you.", execution: ["Hinge at the hips with soft knees and long spine.", "Lower weights along shins until hamstrings stretch.", "Drive hips forward to stand tall."] },
+          { id: "b_c3", name: "Prone Y-Raises", target: "Deltoids & Back Posture", primary: "shoulders", sets: 3, reps: 12, rest: 45, tempo: "2-1-1", ecc: 2, pause: 1, conc: 1, defaultKg: 0, img: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=600&q=80", cues: "Thumbs up toward ceiling; squeeze mid-back with control.", execution: ["Lie flat on stomach with arms in a wide Y shape.", "Raise arms 10cm off the mat using rear shoulders.", "Pause for 1 second before lowering softly."] }
         ]
       },
       intermediate: {
@@ -176,19 +178,23 @@
         B: [
           { id: "i_b1", name: "Weighted Hip Thrust", target: "Gluteus Maximus", primary: "glutes", sets: 3, reps: 15, rest: 60, tempo: "2-2-1", ecc: 2, pause: 2, conc: 1, defaultKg: 10.0, img: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80", cues: "Lock out glutes at top with chin tucked and ribs down.", execution: ["Rest shoulder blades across bench edge.", "Drive through heels to full hip extension.", "Squeeze glutes hard for 2 full seconds at peak."] },
           { id: "i_b2", name: "Single-Arm DB Row", target: "Lats & Waist Taper", primary: "lats", sets: 3, reps: 10, rest: 60, tempo: "2-1-1", ecc: 2, pause: 1, conc: 1, defaultKg: 6.0, img: "https://images.unsplash.com/photo-1605296867304-46d5465a13f1?auto=format&fit=crop&w=600&q=80", cues: "Pull elbow smoothly to hip pocket without torso twist.", execution: ["Support on flat bench with long spine.", "Draw elbow up and back toward hip pocket.", "Squeeze lat for 1 second at top."] },
-          { id: "i_b3", name: "Reverse Lunge Glute Stretch", target: "Glutes & Quads", primary: "glutes", sets: 3, reps: 10, rest: 60, tempo: "2-0-1", ecc: 2, pause: 0, conc: 1, defaultKg: 5.0, img: "https://images.unsplash.com/photo-1434682881908-b43d0467b798?auto=format&fit=crop&w=600&q=80", cues: "Deep step back; maintain vertical front shin for maximum glute load.", execution: ["Take generous step backward.", "Lower knee until hovering above floor.", "Drive through front heel to rise."] }
+          { id: "i_b3", name: "Reverse Lunge Glute Stretch", target: "Glutes & Quads", primary: "glutes", sets: 3, reps: 10, rest: 60, tempo: "2-0-1", ecc: 2, pause: 0, conc: 1, defaultKg: 5.0, img: "https://images.unsplash.com/photo-1434682881908-b43d0467b798?auto=format&fit=crop&w=600&q=80", cues: "Deep step back; maintain vertical front shin for maximum glute load.", execution: ["Take generous step backward.", "Lower knee until hovering above floor.", "Drive through front heel to rise."] },
+          { id: "i_b4", name: "Banded Face Pulls", target: "Rear Delts & Posture", primary: "shoulders", sets: 3, reps: 15, rest: 45, tempo: "2-2-1", ecc: 2, pause: 2, conc: 1, defaultKg: 0, img: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=600&q=80", cues: "Draw band toward eye level; open palms outward at contraction.", execution: ["Pull band toward nose, rotating hands back.", "Hold 2 second peak contraction."] }
         ],
         C: [
           { id: "i_c1", name: "Weighted Step-Ups", target: "Gluteus Maximus", primary: "glutes", sets: 3, reps: 10, rest: 60, tempo: "2-0-1", ecc: 2, pause: 0, conc: 1, defaultKg: 4.0, img: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Drive purely through elevated heel.", execution: ["Place entire foot on elevated box.", "Drive through heel to ascend without hopping off back foot.", "Lower under control."] },
-          { id: "i_c2", name: "Dumbbell Thrusters", target: "Full Body Metabolic", primary: "quads", sets: 3, reps: 10, rest: 60, tempo: "1-0-1", ecc: 1, pause: 0, conc: 1, defaultKg: 4.0, img: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=600&q=80", cues: "Use upward leg momentum to press dumbbells overhead.", execution: ["Squat into deep goblet squat.", "Explode upward and press weights overhead in one fluid arc."] }
+          { id: "i_c2", name: "Dumbbell Thrusters", target: "Full Body Metabolic", primary: "quads", sets: 3, reps: 10, rest: 60, tempo: "1-0-1", ecc: 1, pause: 0, conc: 1, defaultKg: 4.0, img: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=600&q=80", cues: "Use upward leg momentum to press dumbbells overhead.", execution: ["Squat into deep goblet squat.", "Explode upward and press weights overhead in one fluid arc."] },
+          { id: "i_c3", name: "DB Sumo Squats", target: "Adductors & Glutes", primary: "quads", sets: 3, reps: 12, rest: 60, tempo: "3-0-1", ecc: 3, pause: 0, conc: 1, defaultKg: 8.0, img: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Wide stance, knees tracking outward over toes.", execution: ["Stand wide, toes turned 45°.", "Sink deep into hips keeping chest lifted.", "Drive through heels to stand."] }
         ]
       },
       advanced: {
         A: [
-          { id: "a_a1", name: "1.5-Rep DB Goblet Squats", target: "Glutes & Quads", primary: "quads", sets: 4, reps: 12, rest: 45, tempo: "3-1-1", ecc: 3, pause: 1, conc: 1, defaultKg: 10.0, img: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Squat deep, rise halfway, return to bottom, then explode up.", execution: ["Descend for 3 seconds to bottom of squat.", "Rise halfway, pause 1 second, sink back to bottom.", "Drive through heels to stand fully."] }
+          { id: "a_a1", name: "1.5-Rep DB Goblet Squats", target: "Glutes & Quads", primary: "quads", sets: 4, reps: 12, rest: 45, tempo: "3-1-1", ecc: 3, pause: 1, conc: 1, defaultKg: 10.0, img: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Squat deep, rise halfway, return to bottom, then explode up.", execution: ["Descend for 3 seconds to bottom of squat.", "Rise halfway, pause 1 second, sink back to bottom.", "Drive through heels to stand fully."] },
+          { id: "a_a2", name: "Superset: DB RDL + Floor Press", target: "Hamstrings & Chest", primary: "hamstrings", sets: 4, reps: 12, rest: 45, tempo: "2-0-1", ecc: 2, pause: 0, conc: 1, defaultKg: 9.0, img: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=600&q=80", cues: "Hinge through RDLs, then immediately perform floor presses.", execution: ["Perform 12 strict Romanian deadlifts, drop straight into 12 floor chest presses."] }
         ],
         B: [
-          { id: "a_b1", name: "Single-Leg DB Hip Thrust", target: "Gluteus Maximus", primary: "glutes", sets: 4, reps: 12, rest: 45, tempo: "2-2-1", ecc: 2, pause: 2, conc: 1, defaultKg: 6.0, img: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80", cues: "One foot grounded; lock out glute at top with level hips.", execution: ["Upper back on bench, one leg lifted.", "Drive through grounded heel to full extension, hold 2s."] }
+          { id: "a_b1", name: "Single-Leg DB Hip Thrust", target: "Gluteus Maximus", primary: "glutes", sets: 4, reps: 12, rest: 45, tempo: "2-2-1", ecc: 2, pause: 2, conc: 1, defaultKg: 6.0, img: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80", cues: "One foot grounded; lock out glute at top with level hips.", execution: ["Upper back on bench, one leg lifted.", "Drive through grounded heel to full extension, hold 2s."] },
+          { id: "a_b2", name: "DB Renegade Row to Push-Up", target: "Core & Upper Body", primary: "core", sets: 4, reps: 8, rest: 45, tempo: "2-1-1", ecc: 2, pause: 1, conc: 1, defaultKg: 6.0, img: "https://images.unsplash.com/photo-1605296867304-46d5465a13f1?auto=format&fit=crop&w=600&q=80", cues: "Row right, row left, execute full push-up with locked core.", execution: ["Perform row on right dumbbell, row on left, then lower into push-up."] }
         ],
         C: [
           { id: "a_c1", name: "Clean to Squat to Press", target: "Metabolic Complex", primary: "quads", sets: 4, reps: 10, rest: 45, tempo: "1-0-1", ecc: 1, pause: 0, conc: 1, defaultKg: 6.0, img: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=600&q=80", cues: "Hinge, catch at shoulders, deep squat, and press overhead seamlessly.", execution: ["Clean dumbbells to shoulders, sink into deep squat, press overhead."] }
@@ -256,7 +262,7 @@
       );
     }
 
-    // --- Master Meal Plan ---
+    // --- Complete 7-Day Master Meal Plan (No Prices) ---
     const SA_MEALS = [
       {
         day: "Monday",
@@ -275,27 +281,84 @@
         target: "1,640 kcal • 144g Protein",
         meals: [
           { name: "Breakfast", title: "Savory Egg & Spinach Cups w/ Avocado", img: "https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=600&q=80", desc: "2 whole eggs + 2 whites baked with morogo/spinach, ½ avocado.", steps: ["Whisk eggs with chopped spinach and bell peppers.", "Bake in muffin tins at 180°C for 20 mins.", "Serve warm with fresh avocado."] },
-          { name: "Lunch", title: "Lucky Star Pilchard Protein Bowl", img: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80", desc: "½ tin pilchards in tomato sauce, mixed greens, steamed gem squash.", steps: ["Steam gem squash halves for 15 mins.", "Warm pilchards and flake over fresh salad greens and squash."] }
+          { name: "Lunch", title: "Lucky Star Pilchard Protein Bowl", img: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80", desc: "½ tin pilchards in tomato sauce, mixed greens, steamed gem squash.", steps: ["Steam gem squash halves for 15 mins.", "Warm pilchards and flake over fresh salad greens and squash."] },
+          { name: "Snack", title: "Hard-Boiled Egg & Raw Almonds", img: "https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=600&q=80", desc: "1 boiled egg, 15 raw almonds, sliced salted cucumber.", steps: ["Boil egg 8 mins; serve with almonds and sea-salted cucumber."] },
+          { name: "Dinner", title: "Lemon Baked Cape Hake & Cauliflower", img: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=600&q=80", desc: "180g Cape Hake fillet, cauliflower florets, 1 tbsp olive oil, lemon.", steps: ["Roast cauliflower florets in olive oil at 200°C for 20 mins.", "Bake hake fillet alongside for 12 mins with lemon slices."] }
+        ]
+      },
+      {
+        day: "Wednesday",
+        type: "Workout B (Glycogen Glow)",
+        target: "1,730 kcal • 152g Protein",
+        meals: [
+          { name: "Breakfast", title: "Rooibos Vanilla Protein Smoothie", img: "https://images.unsplash.com/photo-1590301157890-4810ed352733?auto=format&fit=crop&w=600&q=80", desc: "1 cup chilled rooibos tea, 1 scoop protein, berries, ½ banana, chia.", steps: ["Brew rooibos tea and chill.", "Blend with protein, frozen berries, banana, and chia seeds until smooth."] },
+          { name: "Lunch", title: "Slow-Cooker Lean Beef over Brown Rice", img: "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=600&q=80", desc: "140g tender lean beef stew, ½ cup brown basmati rice, steamed broccoli.", steps: ["Simmer beef in bone broth with carrots and onions.", "Serve over warm brown basmati rice with steamed broccoli."] },
+          { name: "Snack", title: "Cottage Cheese & Sliced Green Apple", img: "https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=600&q=80", desc: "½ cup low-fat cottage cheese, ½ green apple sliced, cinnamon.", steps: ["Top cottage cheese with crisp green apple slices and cinnamon."] },
+          { name: "Dinner", title: "Pan-Grilled Chicken & Roasted Butternut", img: "https://images.unsplash.com/photo-1532550907401-a500c9a57435?auto=format&fit=crop&w=600&q=80", desc: "160g chicken fillet, 100g butternut cubes, sautéed Swiss chard.", steps: ["Roast butternut cubes at 200°C for 25 mins.", "Pan-sear chicken with herbs; sauté Swiss chard for 3 mins."] }
+        ]
+      },
+      {
+        day: "Thursday",
+        type: "Active Mobility Flow",
+        target: "1,650 kcal • 148g Protein",
+        meals: [
+          { name: "Breakfast", title: "Morogo & Feta Scrambled Eggs", img: "https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=600&q=80", desc: "3 whole eggs, tomatoes, onions, Swiss chard, 30g feta.", steps: ["Sauté onions and chopped morogo in 1 tsp olive oil.", "Scramble eggs gently; crumble feta over top."] },
+          { name: "Lunch", title: "Chicken Caesar Romaine Wraps", img: "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80", desc: "150g grilled chicken, romaine leaves, parmesan, light Caesar.", steps: ["Wrap grilled chicken strips in crisp romaine leaves with light dressing."] },
+          { name: "Snack", title: "Tuna in Spring Water & Cucumber", img: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80", desc: "1 tin tuna, lemon juice, sliced cucumbers.", steps: ["Flake tuna into a bowl with lemon and cracked pepper; serve with cucumber."] },
+          { name: "Dinner", title: "Grilled Ostrich Steak & Mediterranean Veg", img: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80", desc: "160g ostrich steak, baby marrows, bell peppers, red onion.", steps: ["Roast vegetables at 200°C; sear ostrich steak 2.5 mins per side in a smoking hot pan."] }
+        ]
+      },
+      {
+        day: "Friday",
+        type: "Workout C (Metabolic Glow)",
+        target: "1,740 kcal • 154g Protein",
+        meals: [
+          { name: "Breakfast", title: "Spiced Jungle Protein Oats", img: "https://images.unsplash.com/photo-1517673132405-a56a62b18caf?auto=format&fit=crop&w=600&q=80", desc: "⅓ cup oats, 1 scoop vanilla protein, 1 tbsp flaxseed, fresh berries.", steps: ["Simmer oats with nutmeg for 3 mins.", "Stir in protein and flaxseed; top with berries."] },
+          { name: "Lunch", title: "Chicken Breast & Sweet Potato Mash", img: "https://images.unsplash.com/photo-1532550907401-a500c9a57435?auto=format&fit=crop&w=600&q=80", desc: "160g chicken breast, 120g mashed sweet potato, steamed green beans.", steps: ["Boil peeled sweet potatoes and mash with sea salt.", "Sear chicken fillets with garlic herbs; serve with green beans."] },
+          { name: "Snack", title: "Greek Yogurt & Raw Walnuts", img: "https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=600&q=80", desc: "1 cup 0% Greek yogurt, 10 raw walnut halves.", steps: ["Spoon cold yogurt into a bowl and top with crushed walnuts."] },
+          { name: "Dinner", title: "Savory Lean Mince over Cauliflower Mash", img: "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=600&q=80", desc: "150g extra-lean beef mince, cumin, peppers, cauliflower mash.", steps: ["Blend steamed cauliflower into a creamy mash.", "Brown seasoned mince with diced peppers; serve over mash."] }
+        ]
+      },
+      {
+        day: "Saturday",
+        type: "Zone 2 Cardio Radiance",
+        target: "1,670 kcal • 146g Protein",
+        meals: [
+          { name: "Breakfast", title: "Poached Eggs on Seeded Rye Toast", img: "https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=600&q=80", desc: "2 poached eggs, 1 slice toasted seeded rye bread, sliced tomatoes.", steps: ["Poach 2 eggs for 3.5 mins in simmering water.", "Serve over toasted rye bread with sliced fresh tomatoes."] },
+          { name: "Lunch", title: "Mediterranean Chopped Chicken Salad", img: "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80", desc: "150g chicken breast, cucumber, cherry tomatoes, olives, 30g feta.", steps: ["Toss grilled chicken, tomatoes, cucumber, olives, and feta with lemon dressing."] },
+          { name: "Snack", title: "Savory Egg & Spinach Cups", img: "https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=600&q=80", desc: "2 prepped egg cups.", steps: ["Enjoy 2 pre-baked egg muffin cups as a convenient protein snack."] },
+          { name: "Dinner", title: "Baked Cape Hake & Herb Green Beans", img: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=600&q=80", desc: "180g hake fillet, garlic butter, parsley, green beans.", steps: ["Bake hake fillet at 190°C for 14 mins with garlic, butter, and parsley."] }
+        ]
+      },
+      {
+        day: "Sunday",
+        type: "Rest & Nourish Batch Prep",
+        target: "1,660 kcal • 150g Protein",
+        meals: [
+          { name: "Breakfast", title: "Sunday Scramble w/ Mushrooms & Chard", img: "https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=600&q=80", desc: "2 whole eggs + 2 whites, mushrooms, Swiss chard.", steps: ["Sauté sliced mushrooms and Swiss chard; scramble eggs gently until set."] },
+          { name: "Lunch", title: "Lean Beef Potjie Stew w/ Steamed Cabbage", img: "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=600&q=80", desc: "140g slow-cooked beef stew, shredded steamed cabbage ribbons.", steps: ["Reheat slow-cooked beef stew; serve over tender steamed cabbage."] },
+          { name: "Snack", title: "Warm Bone Broth & Boiled Egg", img: "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=600&q=80", desc: "1 cup beef bone broth, 1 boiled egg, black pepper.", steps: ["Warm bone broth in a mug with cracked pepper; enjoy with 1 boiled egg."] },
+          { name: "Dinner", title: "Grilled Lean Beef Patties & Rocket Salad", img: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80", desc: "150g lean beef patties, sautéed button mushrooms, fresh rocket.", steps: ["Pan-sear patties 4 mins each side; serve with mushrooms and rocket with lemon."] }
         ]
       }
     ];
 
-    // --- Grocery Checklist ---
+    // --- Master Grocery Checklist Data ---
     const GROCERY_CATEGORIES = {
-      "Lean Proteins": ["Skinless Chicken Breast", "Extra-Lean Beef Mince", "Cape Hake Fillets", "Free-Range Eggs", "0% Greek Yogurt", "Low-Fat Cottage Cheese", "Vanilla Whey/Plant Protein"],
-      "Glowing Carbs": ["Sweet Potatoes (*Patats*)", "Jungle Rolled Oats", "Brown Basmati Rice", "100% Seeded Rye Bread", "Quinoa"],
-      "Fresh Produce": ["Swiss Chard / Morogo", "Baby Marrows (Zucchini)", "Green Beans", "Gem Squash", "Broccoli", "Baby Spinach", "Fresh Blueberries & Lemons"],
-      "Healthy Fats": ["Ripe Avocados", "Raw Almonds & Walnuts", "Chia Seeds & Flaxseeds", "Extra Virgin Olive Oil", "Sugar-Free Peanut Butter"]
+      "Lean Proteins": ["Skinless Chicken Breast fillets (bulk)", "Extra-Lean Beef Mince (90/10)", "Frozen Cape Hake Fillets", "Free-Range Eggs (Tray of 30)", "Liquid Egg Whites", "0% Greek Yogurt", "Low-Fat Cottage Cheese", "Vanilla Whey/Plant Protein Powder", "Tinned Tuna in Spring Water"],
+      "Glowing Carbs": ["Sweet Potatoes (*Patats*)", "Jungle Rolled Oats", "Brown Basmati Rice", "100% Seeded Rye Bread", "Quinoa", "Butternut Squash"],
+      "Fresh Produce": ["Swiss Chard / Morogo", "Baby Marrows (Zucchini)", "Fresh Green Beans", "Gem Squash", "Broccoli & Cauliflower", "Baby Spinach & Rocket", "Fresh Lemons & Blueberries"],
+      "Healthy Fats": ["Ripe Avocados", "Raw Almonds & Walnuts", "Chia Seeds & Ground Flaxseed", "Cold-Pressed Olive Oil", "Sugar-Free Peanut Butter"]
     };
 
     const SUBSTITUTIONS = {
       "Lean Proteins": ["Chicken breast", "Turkey mince", "Cape Hake / Kingklip", "Extra-lean Beef mince", "Ostrich steaks", "Tinned Tuna", "Free-Range Eggs"],
-      "Glowing Carbs": ["Sweet Potato", "Butternut", "Rolled Oats", "Brown Rice", "100% Seeded Rye Bread"],
+      "Glowing Carbs": ["Sweet Potato (*patats*)", "Butternut", "Rolled Oats", "Brown Rice", "100% Seeded Rye Bread"],
       "Fibrous Greens": ["Swiss Chard / Morogo", "Zucchini", "Green Beans", "Gem Squash", "Broccoli", "Spinach"],
       "Healthy Fats": ["Avocado", "Raw Almonds", "Chia Seeds", "Olive Oil", "Sugar-Free Peanut Butter"]
     };
 
-    // --- Main Application Component ---
+    // --- Main Application Engine ---
     function App() {
       const [tab, setTab] = useState("train"); // train, fuel, progress, profile
       const [difficulty, setDifficulty] = useState(() => getStored("m60_diff", "intermediate"));
@@ -329,7 +392,11 @@
         goal: "Fat Loss & Metabolic Reset"
       };
 
-      const [userProfile, setUserProfile] = useState(() => getStored("m60_user_profile", defaultProfile));
+      const [userProfile, setUserProfile] = useState(() => {
+        const stored = getStored("m60_user_profile", null);
+        return stored ? { ...defaultProfile, ...stored } : defaultProfile;
+      });
+
       const [showWelcomeScreen, setShowWelcomeScreen] = useState(!userProfile.onboardingCompleted);
       const [showOnboardingModal, setShowOnboardingModal] = useState(false);
       const [showResetConfirmModal, setShowResetConfirmModal] = useState(false);
@@ -362,6 +429,28 @@
       // Menstrual Cycle State (Accessible directly in Train & Profile)
       const [periodStart, setPeriodStart] = useState(() => getStored("m60_pstart", "2026-08-01"));
       const [cycleLen, setCycleLen] = useState(() => getStored("m60_clen", 28));
+
+      // Dynamic BMR & Macro Calculation Engine
+      const calcMetabolicTargets = (p) => {
+        const w = Number(p.currentWeight) || 75;
+        const h = Number(p.height) || 165;
+        const a = Number(p.age) || 30;
+        const bmr = Math.round(10 * w + 6.25 * h - 5 * a - 161);
+        const tdee = Math.round(bmr * 1.375);
+        const deficitCals = Math.max(1450, tdee - 350);
+        
+        let pRatio = 0.40, cRatio = 0.30, fRatio = 0.30;
+        if (p.somatotype === "Ectomorph") { pRatio = 0.30; cRatio = 0.50; fRatio = 0.20; }
+        else if (p.somatotype === "Mesomorph") { pRatio = 0.35; cRatio = 0.40; fRatio = 0.25; }
+
+        const pGrams = Math.round((deficitCals * pRatio) / 4);
+        const cGrams = Math.round((deficitCals * cRatio) / 4);
+        const fGrams = Math.round((deficitCals * fRatio) / 9);
+
+        return { calories: deficitCals, pGrams, cGrams, fGrams, pRatio: Math.round(pRatio * 100), cRatio: Math.round(cRatio * 100), fRatio: Math.round(fRatio * 100) };
+      };
+
+      const metabolicTargets = calcMetabolicTargets(userProfile);
 
       // Persistence
       useEffect(() => { setStored("m60_diff", difficulty); }, [difficulty]);
@@ -450,7 +539,7 @@
         return () => clearInterval(timer);
       }, [activeModalExercise, activeModalPacing]);
 
-      // Cycle Math
+      // Cycle Math with Normalized Midnight Timestamps
       const calcCycle = () => {
         const start = new Date(periodStart);
         start.setHours(0, 0, 0, 0);
@@ -562,6 +651,42 @@
         const nextDay = workoutDay === "A" ? "B" : workoutDay === "B" ? "C" : "A";
         setWorkoutDay(nextDay);
         setFocusedId(EXERCISE_DATA[difficulty][nextDay][0].id);
+      };
+
+      // Onboarding Handlers
+      const completeOnboarding = () => {
+        const finalized = { ...tempProfile, onboardingCompleted: true };
+        setUserProfile(finalized);
+        setStored("m60_user_profile", finalized);
+        setShowOnboardingModal(false);
+        setShowWelcomeScreen(false);
+        if (window.confetti) window.confetti({ particleCount: 150, spread: 90 });
+        triggerHaptic([50, 50, 50]);
+      };
+
+      const startOnboardingWizard = () => {
+        setTempProfile({ ...userProfile });
+        setOnboardingStep(1);
+        setShowOnboardingModal(true);
+      };
+
+      // Full App Reset
+      const executeFullReset = () => {
+        try {
+          localStorage.clear();
+        } catch (e) {}
+
+        setUserProfile(defaultProfile);
+        setWeights({});
+        setCompletedSets({});
+        setHistory([]);
+        setCheckedGroceries({});
+        setWaterGlasses(0);
+        setDifficulty("intermediate");
+        setWorkoutDay("A");
+        setShowResetConfirmModal(false);
+        setShowWelcomeScreen(true);
+        triggerHaptic([100, 50, 100]);
       };
 
       // Milestone Badges
@@ -1117,7 +1242,7 @@
                         <span>Workout {selectedCalendarDate.day} Completed</span>
                         <button onClick={() => setSelectedCalendarDate(null)}>✕</button>
                       </div>
-                      <p className="text-mutedMauve">{selectedCalendarDate.date} • {selectedCalendarDate.tonnage.toLocaleString()} kg sculpted volume</p>
+                      <p className="text-mutedMauve">{selectedCalendarDate.date} • {(selectedCalendarDate.tonnage || 0).toLocaleString()} kg sculpted volume</p>
                     </div>
                   )}
                 </div>
@@ -1184,42 +1309,146 @@
             {/* TAB 4: PROFILE */}
             {tab === "profile" && (
               <div className="space-y-4">
+                
+                {/* 1. Identity & Somatotype Header Card */}
                 <div className="card-light p-4 rounded-3xl space-y-4">
-                  <div className="flex items-center justify-between pb-2 border-b border-blush-100">
+                  <div className="flex items-center justify-between pb-3 border-b border-blush-100">
                     <div className="flex items-center gap-3">
-                      <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-blush-300 to-blush-500 text-white flex items-center justify-center font-serif text-lg font-bold shadow-sm">
-                        {userProfile.name[0]}
+                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blush-300 via-blush-400 to-roseGold text-white flex items-center justify-center font-serif text-lg font-bold shadow-sm">
+                        {userProfile?.name ? userProfile.name[0] : 'M'}
                       </div>
                       <div>
-                        <h2 className="text-sm font-serif font-bold text-charcoal">{userProfile.name}, {userProfile.age}y</h2>
+                        <h2 className="text-sm font-serif font-bold text-charcoal">{userProfile.name || 'Goddess'}, {userProfile.age || 29}y</h2>
                         <p className="text-xs text-blush-600 font-medium">{userProfile.somatotype} • {userProfile.experience}</p>
                       </div>
                     </div>
                     <button
                       onClick={() => setShowWelcomeScreen(true)}
-                      className="text-[10px] font-bold text-blush-600 bg-blush-50 px-3 py-1 rounded-xl border border-blush-200"
+                      className="text-[10px] font-bold text-blush-600 bg-blush-50 px-3 py-1 rounded-xl border border-blush-200 hover:bg-blush-100"
                     >
                       ▶ Intro Tour
                     </button>
                   </div>
 
-                  <div className="space-y-2">
+                  {/* Primary Goal Tag */}
+                  <div className="bg-blush-50/70 p-2.5 rounded-2xl flex items-center justify-between text-xs border border-blush-100">
+                    <span className="text-mutedMauve font-medium">Primary Focus:</span>
+                    <span className="font-serif font-bold text-blush-600">{userProfile.goal}</span>
+                  </div>
+
+                  {/* 2. Personalized Fuel Equation & BMR Calculations */}
+                  <div className="bg-blush-50/60 p-3.5 rounded-2xl border border-blush-200 space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-[9px] font-bold text-roseGold uppercase tracking-widest">Calibrated Metabolic Targets</span>
+                      <span className="text-[10px] font-bold text-blush-600 font-mono">{metabolicTargets.pRatio}P / {metabolicTargets.cRatio}C / {metabolicTargets.fRatio}F</span>
+                    </div>
+                    <div className="flex justify-between items-baseline">
+                      <span className="text-lg font-serif font-bold text-charcoal">{metabolicTargets.calories.toLocaleString()} <span className="text-xs font-normal text-mutedMauve">kcal / day</span></span>
+                      <span className="text-[11px] text-mutedMauve">Daily Deficit Target</span>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2 pt-1">
+                      <div className="bg-white p-2 rounded-xl text-center border border-blush-100">
+                        <span className="text-[8px] text-mutedMauve uppercase block font-bold">Protein</span>
+                        <span className="text-xs font-bold text-charcoal">{metabolicTargets.pGrams}g</span>
+                      </div>
+                      <div className="bg-white p-2 rounded-xl text-center border border-blush-100">
+                        <span className="text-[8px] text-mutedMauve uppercase block font-bold">Carbs</span>
+                        <span className="text-xs font-bold text-charcoal">{metabolicTargets.cGrams}g</span>
+                      </div>
+                      <div className="bg-white p-2 rounded-xl text-center border border-blush-100">
+                        <span className="text-[8px] text-mutedMauve uppercase block font-bold">Fats</span>
+                        <span className="text-xs font-bold text-charcoal">{metabolicTargets.fGrams}g</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 3. Interactive Biometrics Edit Grid */}
+                  <div className="space-y-1.5">
+                    <span className="text-[9px] font-bold text-roseGold uppercase tracking-wider">Current Measurements</span>
+                    <div className="grid grid-cols-2 gap-2 bg-blush-50/40 p-3 rounded-2xl border border-blush-100 text-xs">
+                      <div>
+                        <span className="text-[9px] text-mutedMauve uppercase font-semibold">Current Weight</span>
+                        <div className="flex items-baseline gap-1 mt-0.5">
+                          <input
+                            type="number"
+                            step="0.1"
+                            value={userProfile.currentWeight === '' ? '' : userProfile.currentWeight}
+                            onChange={e => {
+                              const v = e.target.value;
+                              setUserProfile({ ...userProfile, currentWeight: v === '' ? '' : parseFloat(v) });
+                            }}
+                            className="w-14 bg-white border border-blush-200 text-center font-bold text-charcoal p-1 rounded-lg focus:outline-none"
+                          />
+                          <span className="text-mutedMauve">kg</span>
+                        </div>
+                      </div>
+                      <div>
+                        <span className="text-[9px] text-mutedMauve uppercase font-semibold">Target Goal</span>
+                        <div className="flex items-baseline gap-1 mt-0.5">
+                          <input
+                            type="number"
+                            step="0.1"
+                            value={userProfile.targetWeight === '' ? '' : userProfile.targetWeight}
+                            onChange={e => {
+                              const v = e.target.value;
+                              setUserProfile({ ...userProfile, targetWeight: v === '' ? '' : parseFloat(v) });
+                            }}
+                            className="w-14 bg-white border border-blush-200 text-center font-bold text-blush-600 p-1 rounded-lg focus:outline-none"
+                          />
+                          <span className="text-mutedMauve">kg</span>
+                        </div>
+                      </div>
+                      <div className="pt-2 border-t border-blush-100">
+                        <span className="text-[9px] text-mutedMauve uppercase font-semibold">Waist</span>
+                        <div className="flex items-baseline gap-1 mt-0.5">
+                          <input
+                            type="number"
+                            value={userProfile.waist === '' ? '' : userProfile.waist}
+                            onChange={e => {
+                              const v = e.target.value;
+                              setUserProfile({ ...userProfile, waist: v === '' ? '' : parseInt(v, 10) });
+                            }}
+                            className="w-14 bg-white border border-blush-200 text-center font-bold text-charcoal p-1 rounded-lg focus:outline-none"
+                          />
+                          <span className="text-mutedMauve">cm</span>
+                        </div>
+                      </div>
+                      <div className="pt-2 border-t border-blush-100">
+                        <span className="text-[9px] text-mutedMauve uppercase font-semibold">Hips</span>
+                        <div className="flex items-baseline gap-1 mt-0.5">
+                          <input
+                            type="number"
+                            value={userProfile.hips === '' ? '' : userProfile.hips}
+                            onChange={e => {
+                              const v = e.target.value;
+                              setUserProfile({ ...userProfile, hips: v === '' ? '' : parseInt(v, 10) });
+                            }}
+                            className="w-14 bg-white border border-blush-200 text-center font-bold text-charcoal p-1 rounded-lg focus:outline-none"
+                          />
+                          <span className="text-mutedMauve">cm</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 4. Action Buttons */}
+                  <div className="space-y-2 pt-1">
                     <button
                       onClick={startOnboardingWizard}
                       className="w-full py-2.5 rounded-xl bg-blush-50 text-xs font-bold text-blush-600 hover:bg-blush-100 transition-all border border-blush-200"
                     >
-                      ✨ Edit Profile & Metabolic Equation
+                      ✨ Edit Profile & Somatotype Questionnaire
                     </button>
                     <button
                       onClick={() => setShowResetConfirmModal(true)}
                       className="w-full py-2.5 rounded-xl bg-rose-50 text-xs font-bold text-rose-600 border border-rose-200 transition-all"
                     >
-                      ⚠️ Reset All Transformation Data
+                      ⚠️ Reset All Lifestyle & Workout Records
                     </button>
                   </div>
                 </div>
 
-                {/* Milestone Badges */}
+                {/* 5. Milestone Badges */}
                 <div className="card-light p-4 rounded-3xl space-y-3">
                   <div className="flex justify-between items-center">
                     <h3 className="text-xs font-serif font-bold text-charcoal uppercase tracking-wider">Milestone Achievements</h3>
@@ -1247,6 +1476,7 @@
                     ))}
                   </div>
                 </div>
+
               </div>
             )}
 
@@ -1365,67 +1595,239 @@
           {showOnboardingModal && (
             <div className="fixed inset-0 bg-charcoal/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
               <div className="card-light rounded-3xl p-5 max-w-sm w-full space-y-4 my-auto border-blush-300 shadow-2xl">
+                
+                {/* Step Header */}
                 <div className="flex justify-between items-center border-b border-blush-100 pb-3">
                   <div>
                     <span className="text-[9px] font-bold text-roseGold uppercase tracking-widest">Personalization</span>
-                    <h3 className="text-sm font-serif font-bold text-charcoal">Step {onboardingStep} of 3</h3>
+                    <h3 className="text-sm font-serif font-bold text-charcoal">Step {onboardingStep} of 5</h3>
                   </div>
+                  <span className="text-xs font-mono font-bold text-mutedMauve">{Math.round((onboardingStep / 5) * 100)}%</span>
                 </div>
 
+                {/* STEP 1: IDENTITY & AGE */}
                 {onboardingStep === 1 && (
-                  <div className="space-y-3">
-                    <label className="block text-[10px] font-bold text-mutedMauve uppercase">Your First Name</label>
-                    <input
-                      type="text"
-                      value={tempProfile.name}
-                      onChange={e => setTempProfile({ ...tempProfile, name: e.target.value })}
-                      placeholder="e.g. Lindiwe"
-                      className="w-full bg-blush-50 border border-blush-200 text-charcoal rounded-xl p-3 text-xs font-bold focus:outline-none"
-                    />
+                  <div className="space-y-3.5">
+                    <div>
+                      <h4 className="text-base font-serif font-bold text-charcoal">Welcome, Beautiful</h4>
+                      <p className="text-xs text-mutedMauve mt-0.5">Let's tailor your metabolic calibration.</p>
+                    </div>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-[10px] font-bold text-mutedMauve uppercase mb-1">Your First Name</label>
+                        <input
+                          type="text"
+                          value={tempProfile.name}
+                          onChange={e => setTempProfile({ ...tempProfile, name: e.target.value })}
+                          placeholder="e.g. Lindiwe"
+                          className="w-full bg-blush-50 border border-blush-200 text-charcoal rounded-xl p-3 text-xs font-bold focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold text-mutedMauve uppercase mb-1">Your Age</label>
+                        <input
+                          type="number"
+                          value={tempProfile.age === '' ? '' : tempProfile.age}
+                          onChange={e => {
+                            const v = e.target.value;
+                            setTempProfile({ ...tempProfile, age: v === '' ? '' : parseInt(v, 10) });
+                          }}
+                          className="w-full bg-blush-50 border border-blush-200 text-charcoal rounded-xl p-3 text-xs font-bold focus:outline-none"
+                        />
+                      </div>
+                    </div>
                   </div>
                 )}
 
+                {/* STEP 2: SOMATOTYPE */}
                 {onboardingStep === 2 && (
                   <div className="space-y-3">
-                    <label className="block text-[10px] font-bold text-mutedMauve uppercase">Primary Focus Goal</label>
-                    {["Fat Loss & Metabolic Reset", "Glute Lift & Waist Taper", "Full Body Recomposition"].map(g => (
-                      <div
-                        key={g}
-                        onClick={() => setTempProfile({ ...tempProfile, goal: g })}
-                        className={`p-3 rounded-2xl border text-xs font-bold cursor-pointer ${
-                          tempProfile.goal === g ? "bg-blush-50 border-blush-500 text-blush-600" : "bg-white border-blush-200 text-charcoal"
-                        }`}
-                      >
-                        {g}
-                      </div>
-                    ))}
+                    <div>
+                      <h4 className="text-sm font-serif font-bold text-charcoal">Select Your Somatotype</h4>
+                      <p className="text-[11px] text-mutedMauve">Customizes your insulin sensitivity & carbohydrate split.</p>
+                    </div>
+                    <div className="space-y-2">
+                      {[
+                        { type: "Endomorph", desc: "Curves easily, higher carb sensitivity. Thrives on 40P/30C/30F.", img: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=400&q=80" },
+                        { type: "Mesomorph", desc: "Athletic structure, sculpts muscle rapidly, handles moderate carbs efficiently.", img: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=400&q=80" },
+                        { type: "Ectomorph", desc: "Naturally lean structure, fast metabolic burn, excels with higher carb allocation.", img: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=400&q=80" }
+                      ].map(s => (
+                        <div
+                          key={s.type}
+                          onClick={() => { setTempProfile({ ...tempProfile, somatotype: s.type }); triggerHaptic(10); }}
+                          className={`p-2.5 rounded-2xl border cursor-pointer flex items-center gap-3 transition-all ${
+                            tempProfile.somatotype === s.type ? "bg-blush-50 border-blush-500 shadow-sm" : "bg-white border-blush-200"
+                          }`}
+                        >
+                          <img src={s.img} alt={s.type} className="w-12 h-12 rounded-xl object-cover shrink-0 border border-blush-200" />
+                          <div className="flex-1">
+                            <span className="text-xs font-serif font-bold text-charcoal">{s.type}</span>
+                            <p className="text-[10px] text-mutedMauve leading-tight mt-0.5">{s.desc}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
 
+                {/* STEP 3: BIOMETRICS */}
                 {onboardingStep === 3 && (
-                  <div className="text-center space-y-2">
-                    <h4 className="text-base font-serif font-bold text-charcoal">All Set for {tempProfile.name}!</h4>
-                    <p className="text-xs text-mutedMauve">Your custom metabolic macros & hormonal strength plan are calibrated.</p>
+                  <div className="space-y-3">
+                    <div>
+                      <h4 className="text-sm font-serif font-bold text-charcoal">Starting Measurements</h4>
+                      <p className="text-[11px] text-mutedMauve">Calibrates your baseline energy output.</p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <div>
+                        <label className="block text-[9px] font-bold text-mutedMauve uppercase mb-1">Height (cm)</label>
+                        <input
+                          type="number"
+                          value={tempProfile.height === '' ? '' : tempProfile.height}
+                          onChange={e => {
+                            const v = e.target.value;
+                            setTempProfile({ ...tempProfile, height: v === '' ? '' : parseInt(v, 10) });
+                          }}
+                          className="w-full bg-blush-50 border border-blush-200 text-charcoal rounded-xl p-2.5 text-xs font-bold"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[9px] font-bold text-mutedMauve uppercase mb-1">Current Weight (kg)</label>
+                        <input
+                          type="number"
+                          step="0.1"
+                          value={tempProfile.currentWeight === '' ? '' : tempProfile.currentWeight}
+                          onChange={e => {
+                            const v = e.target.value;
+                            setTempProfile({ ...tempProfile, currentWeight: v === '' ? '' : parseFloat(v) });
+                          }}
+                          className="w-full bg-blush-50 border border-blush-200 text-charcoal rounded-xl p-2.5 text-xs font-bold"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[9px] font-bold text-mutedMauve uppercase mb-1">Target Weight (kg)</label>
+                        <input
+                          type="number"
+                          step="0.1"
+                          value={tempProfile.targetWeight === '' ? '' : tempProfile.targetWeight}
+                          onChange={e => {
+                            const v = e.target.value;
+                            setTempProfile({ ...tempProfile, targetWeight: v === '' ? '' : parseFloat(v) });
+                          }}
+                          className="w-full bg-blush-50 border border-blush-200 text-charcoal rounded-xl p-2.5 text-xs font-bold"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[9px] font-bold text-mutedMauve uppercase mb-1">Waist (cm)</label>
+                        <input
+                          type="number"
+                          value={tempProfile.waist === '' ? '' : tempProfile.waist}
+                          onChange={e => {
+                            const v = e.target.value;
+                            setTempProfile({ ...tempProfile, waist: v === '' ? '' : parseInt(v, 10) });
+                          }}
+                          className="w-full bg-blush-50 border border-blush-200 text-charcoal rounded-xl p-2.5 text-xs font-bold"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* STEP 4: GOAL */}
+                {onboardingStep === 4 && (
+                  <div className="space-y-3">
+                    <div>
+                      <h4 className="text-sm font-serif font-bold text-charcoal">Your Primary Transformation Goal</h4>
+                      <p className="text-[11px] text-mutedMauve">Customizes training volume and progressive overload.</p>
+                    </div>
+                    <div className="space-y-2">
+                      {["Fat Loss & Metabolic Reset", "Glute Lift & Waist Taper", "Full Body Recomposition & Tone"].map(g => (
+                        <div
+                          key={g}
+                          onClick={() => { setTempProfile({ ...tempProfile, goal: g }); triggerHaptic(8); }}
+                          className={`p-3 rounded-2xl border text-xs font-bold cursor-pointer transition-all ${
+                            tempProfile.goal === g ? "bg-blush-50 border-blush-500 text-blush-600 font-serif" : "bg-white border-blush-200 text-charcoal"
+                          }`}
+                        >
+                          {g}
+                        </div>
+                      ))}
+                    </div>
+                    <div className="pt-2">
+                      <label className="block text-[9px] font-bold text-mutedMauve uppercase mb-1">Experience Level</label>
+                      <div className="flex gap-2">
+                        {["Beginner", "Intermediate", "Advanced"].map(exp => (
+                          <button
+                            key={exp}
+                            onClick={() => {
+                              setTempProfile({ ...tempProfile, experience: exp });
+                              setDifficulty(exp.toLowerCase());
+                              triggerHaptic(8);
+                            }}
+                            className={`flex-1 py-2 rounded-xl text-[11px] font-bold capitalize border transition-all ${
+                              tempProfile.experience.toLowerCase() === exp.toLowerCase() ? "bg-blush-500 text-white border-blush-500 shadow-sm" : "bg-white text-mutedMauve border-blush-200"
+                            }`}
+                          >
+                            {exp}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* STEP 5: CONFIRMATION */}
+                {onboardingStep === 5 && (
+                  <div className="space-y-3.5 text-center">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-blush-300 via-blush-400 to-roseGold text-white flex items-center justify-center mx-auto text-xl font-serif font-bold shadow-sm">
+                      ✨
+                    </div>
+                    <div>
+                      <h4 className="text-base font-serif font-bold text-charcoal">Ready to Bloom, {tempProfile.name}!</h4>
+                      <p className="text-xs text-mutedMauve mt-1">Caloric target calibrated for your {tempProfile.somatotype} structure.</p>
+                    </div>
+                    <div className="bg-blush-50/70 p-3.5 rounded-2xl border border-blush-200 space-y-2 text-xs text-left">
+                      <div className="flex justify-between border-b border-blush-100 pb-1.5">
+                        <span className="text-mutedMauve">Daily Energy Target:</span>
+                        <span className="font-bold text-charcoal">~{calcMetabolicTargets(tempProfile).calories} kcal / day</span>
+                      </div>
+                      <div className="flex justify-between border-b border-blush-100 pb-1.5">
+                        <span className="text-mutedMauve">Macro Split:</span>
+                        <span className="font-bold text-blush-600">{calcMetabolicTargets(tempProfile).pRatio}% P / {calcMetabolicTargets(tempProfile).cRatio}% C / {calcMetabolicTargets(tempProfile).fRatio}% F</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-mutedMauve">Daily Hydration:</span>
+                        <span className="font-bold text-blush-500">3.0 Liters Radiance</span>
+                      </div>
+                    </div>
                   </div>
                 )}
 
                 <div className="flex gap-2 pt-2 border-t border-blush-100">
-                  {onboardingStep < 3 ? (
+                  {onboardingStep > 1 && (
                     <button
-                      onClick={() => setOnboardingStep(prev => prev + 1)}
-                      className="flex-1 py-2.5 rounded-xl bg-blush-500 text-white text-xs font-bold"
+                      onClick={() => { setOnboardingStep(prev => prev - 1); triggerHaptic(8); }}
+                      className="px-4 py-2.5 rounded-xl bg-blush-50 text-xs font-bold text-mutedMauve hover:text-charcoal"
+                    >
+                      Back
+                    </button>
+                  )}
+                  {onboardingStep < 5 ? (
+                    <button
+                      onClick={() => { setOnboardingStep(prev => prev + 1); triggerHaptic(12); }}
+                      className="flex-1 py-2.5 rounded-xl bg-blush-500 text-white text-xs font-bold shadow-sm"
                     >
                       Continue →
                     </button>
                   ) : (
                     <button
                       onClick={completeOnboarding}
-                      className="flex-1 py-3 rounded-xl bg-gradient-to-r from-blush-400 to-blush-500 text-white text-xs font-bold shadow-md"
+                      className="flex-1 py-3 rounded-xl bg-gradient-to-r from-blush-400 via-blush-500 to-roseGold text-white text-xs font-bold shadow-md"
                     >
                       Launch metabolic60 ✨
                     </button>
                   )}
                 </div>
+
               </div>
             </div>
           )}
