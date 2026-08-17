@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>FemMetabolic Pro SA • Elite Biomechanics & Nutrition</title>
+  <title>Metabolic60 • Elite Training & Nutrition</title>
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -179,12 +179,11 @@
       }
     };
 
-    // --- South African Meal Plan ---
+    // --- South African Meal Plan (Checkers & Woolies) ---
     const SA_MEAL_PLAN_DAYS = [
       {
         day: "Monday",
         type: "Workout A (Post-Workout Carb Load)",
-        cost: "ZAR 65",
         target: "1,720 kcal • 150g P • 118g C • 55g F",
         breakfast: "Classic Protein Oats w/ Woolies Berries (1 cup Jungle Oats, 1 scoop protein, fresh blueberries & raspberries)",
         lunch: "Checkers Skinless Chicken Breast (160g) w/ Roasted Patats & Green Beans (120g sweet potatoes, 1 tsp olive oil)",
@@ -194,7 +193,6 @@
       {
         day: "Tuesday",
         type: "Active Recovery (Healthy Fats Focus)",
-        cost: "ZAR 55",
         target: "1,640 kcal • 144g P • 74g C • 62g F",
         breakfast: "2 Savory Egg Muffin Cups with diced peppers & spinach + ½ sliced avocado",
         lunch: "Lucky Star Pilchard Protein Bowl (½ 400g tin in tomato sauce) over shredded lettuce & gem squash",
@@ -204,7 +202,6 @@
       {
         day: "Wednesday",
         type: "Workout B (Targeted Glycogen Load)",
-        cost: "ZAR 68",
         target: "1,730 kcal • 152g P • 120g C • 52g F",
         breakfast: "Rooibos Vanilla Protein Smoothie (Rooibos tea base, 1 scoop protein, frozen berries, ½ banana, chia)",
         lunch: "Shredded Slow-Cooker Lean Beef (140g) over ½ cup brown basmati rice & steamed broccoli",
@@ -214,7 +211,6 @@
       {
         day: "Thursday",
         type: "Active Rest & Mobility",
-        cost: "ZAR 58",
         target: "1,650 kcal • 148g P • 80g C • 60g F",
         breakfast: "3 Scrambled Eggs with tomatoes, onions & fresh spinach + 30g feta",
         lunch: "Chicken Caesar Lettuce Wraps: 150g grilled chicken, romaine leaves, 1 tbsp parmesan, light Caesar",
@@ -224,7 +220,6 @@
       {
         day: "Friday",
         type: "Workout C (Metabolic Depletion)",
-        cost: "ZAR 62",
         target: "1,740 kcal • 154g P • 122g C • 54g F",
         breakfast: "Warm Spiced Jungle Protein Oats (⅓ cup oats, 1 scoop protein, flaxseed, nutmeg) + fresh berries",
         lunch: "Checkers Chicken Breast Strips (160g) + 120g mashed sweet potato + steamed green beans",
@@ -234,7 +229,6 @@
       {
         day: "Saturday",
         type: "Zone 2 Cardio Day",
-        cost: "ZAR 58",
         target: "1,670 kcal • 146g P • 92g C • 58g F",
         breakfast: "2 Poached Eggs on 1 slice toasted 100% rye bread + sliced tomato and cucumber",
         lunch: "Mediterranean Chopped Salad: 150g grilled chicken, cucumber, cherry tomatoes, Kalamata olives, 30g feta",
@@ -244,7 +238,6 @@
       {
         day: "Sunday",
         type: "Rest & Meal Prep Day",
-        cost: "ZAR 52",
         target: "1,660 kcal • 150g P • 86g C • 59g F",
         breakfast: "Sunday Protein Scramble: 2 whole eggs, 2 whites, mushrooms, onions & Swiss chard",
         lunch: "Leftover Lean Beef Potjie with steamed cabbage ribbons",
@@ -444,11 +437,11 @@
     // --- Main Application Engine ---
     function App() {
       const [activeTab, setActiveTab] = useState('workout'); // 'dashboard', 'workout', 'meals', 'tempo', 'history', 'profile'
-      const [difficulty, setDifficulty] = useState(() => safeGetString('fm_difficulty', 'intermediate'));
-      const [activeDay, setActiveDay] = useState(() => safeGetString('fm_day', 'A'));
+      const [difficulty, setDifficulty] = useState(() => safeGetString('m60_difficulty', 'intermediate'));
+      const [activeDay, setActiveDay] = useState(() => safeGetString('m60_day', 'A'));
 
       // Profile State
-      const [userProfile, setUserProfile] = useState(() => safeGetJSON('fm_user_profile', {
+      const [userProfile, setUserProfile] = useState(() => safeGetJSON('m60_user_profile', {
         name: "Lindiwe",
         age: 32,
         somatotype: "Endomorph",
@@ -466,21 +459,21 @@
         d.setDate(d.getDate() - 10);
         return d.toISOString().slice(0, 10);
       };
-      const [periodStartDate, setPeriodStartDate] = useState(() => safeGetString('fm_period_start', defaultStartDate()));
-      const [cycleLengthDays, setCycleLengthDays] = useState(() => parseInt(safeGetString('fm_cycle_len', '28'), 10));
-      const [periodDurationDays, setPeriodDurationDays] = useState(() => parseInt(safeGetString('fm_period_dur', '5'), 10));
+      const [periodStartDate, setPeriodStartDate] = useState(() => safeGetString('m60_period_start', defaultStartDate()));
+      const [cycleLengthDays, setCycleLengthDays] = useState(() => parseInt(safeGetString('m60_cycle_len', '28'), 10));
+      const [periodDurationDays, setPeriodDurationDays] = useState(() => parseInt(safeGetString('m60_period_dur', '5'), 10));
 
       // Voice
-      const [voiceEnabled, setVoiceEnabled] = useState(() => safeGetString('fm_voice', 'true') !== 'false');
+      const [voiceEnabled, setVoiceEnabled] = useState(() => safeGetString('m60_voice', 'true') !== 'false');
 
       // Workout Storage
-      const [customSets, setCustomSets] = useState(() => safeGetJSON('fm_custom_sets', {}));
-      const [customReps, setCustomReps] = useState(() => safeGetJSON('fm_custom_reps', {}));
-      const [customRest, setCustomRest] = useState(() => safeGetJSON('fm_custom_rest', {}));
-      const [weightLogs, setWeightLogs] = useState(() => safeGetJSON('fm_weights', {}));
-      const [completedSets, setCompletedSets] = useState(() => safeGetJSON('fm_sets', {}));
-      const [streakHistory, setStreakHistory] = useState(() => safeGetJSON('fm_streak', []));
-      const [sessionArchive, setSessionArchive] = useState(() => safeGetJSON('fm_session_archive', []));
+      const [customSets, setCustomSets] = useState(() => safeGetJSON('m60_custom_sets', {}));
+      const [customReps, setCustomReps] = useState(() => safeGetJSON('m60_custom_reps', {}));
+      const [customRest, setCustomRest] = useState(() => safeGetJSON('m60_custom_rest', {}));
+      const [weightLogs, setWeightLogs] = useState(() => safeGetJSON('m60_weights', {}));
+      const [completedSets, setCompletedSets] = useState(() => safeGetJSON('m60_sets', {}));
+      const [streakHistory, setStreakHistory] = useState(() => safeGetJSON('m60_streak', []));
+      const [sessionArchive, setSessionArchive] = useState(() => safeGetJSON('m60_session_archive', []));
 
       // Meals Subtab & Food Selection
       const [mealDayIndex, setMealDayIndex] = useState(0);
@@ -533,20 +526,20 @@
 
       // Persistence Sync
       useEffect(() => {
-        localStorage.setItem('fm_difficulty', difficulty);
-        localStorage.setItem('fm_day', activeDay);
-        localStorage.setItem('fm_period_start', periodStartDate);
-        localStorage.setItem('fm_cycle_len', cycleLengthDays.toString());
-        localStorage.setItem('fm_period_dur', periodDurationDays.toString());
-        localStorage.setItem('fm_custom_sets', JSON.stringify(customSets));
-        localStorage.setItem('fm_custom_reps', JSON.stringify(customReps));
-        localStorage.setItem('fm_custom_rest', JSON.stringify(customRest));
-        localStorage.setItem('fm_weights', JSON.stringify(weightLogs));
-        localStorage.setItem('fm_sets', JSON.stringify(completedSets));
-        localStorage.setItem('fm_streak', JSON.stringify(streakHistory));
-        localStorage.setItem('fm_session_archive', JSON.stringify(sessionArchive));
-        localStorage.setItem('fm_user_profile', JSON.stringify(userProfile));
-        localStorage.setItem('fm_voice', voiceEnabled.toString());
+        localStorage.setItem('m60_difficulty', difficulty);
+        localStorage.setItem('m60_day', activeDay);
+        localStorage.setItem('m60_period_start', periodStartDate);
+        localStorage.setItem('m60_cycle_len', cycleLengthDays.toString());
+        localStorage.setItem('m60_period_dur', periodDurationDays.toString());
+        localStorage.setItem('m60_custom_sets', JSON.stringify(customSets));
+        localStorage.setItem('m60_custom_reps', JSON.stringify(customReps));
+        localStorage.setItem('m60_custom_rest', JSON.stringify(customRest));
+        localStorage.setItem('m60_weights', JSON.stringify(weightLogs));
+        localStorage.setItem('m60_sets', JSON.stringify(completedSets));
+        localStorage.setItem('m60_streak', JSON.stringify(streakHistory));
+        localStorage.setItem('m60_session_archive', JSON.stringify(sessionArchive));
+        localStorage.setItem('m60_user_profile', JSON.stringify(userProfile));
+        localStorage.setItem('m60_voice', voiceEnabled.toString());
       }, [difficulty, activeDay, periodStartDate, cycleLengthDays, periodDurationDays, customSets, customReps, customRest, weightLogs, completedSets, streakHistory, sessionArchive, userProfile, voiceEnabled]);
 
       // Rest Timer Interval
@@ -648,7 +641,7 @@
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `fem_metabolic_sa_backup_${new Date().toISOString().slice(0, 10)}.json`;
+        a.download = `metabolic60_backup_${new Date().toISOString().slice(0, 10)}.json`;
         a.click();
         URL.revokeObjectURL(url);
       };
@@ -665,7 +658,7 @@
             if (data.periodStartDate) setPeriodStartDate(data.periodStartDate);
             if (data.weightLogs) setWeightLogs(data.weightLogs);
             if (data.sessionArchive) setSessionArchive(data.sessionArchive);
-            alert("Profile & Workout Backup Restored Successfully!");
+            alert("Metabolic60 Profile & Workout Backup Restored!");
           } catch (err) {
             alert("Invalid backup file.");
           }
@@ -704,14 +697,14 @@
                 </button>
                 <div>
                   <h1 className="text-sm font-black text-white flex items-center gap-1.5 tracking-tight">
-                    FemMetabolic Pro SA <span className="text-xs">🇿🇦</span>
+                    metabolic60 <span className="text-xs">⚡</span>
                   </h1>
                   <p className="text-[9px] text-slate-400">{userProfile.name} • Cycle Day {cycleDay}</p>
                 </div>
               </div>
               <div className="text-right">
-                <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Est. Daily Meals</span>
-                <p className="text-xs font-black text-emerald-400">ZAR 55–68</p>
+                <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Macro Target</span>
+                <p className="text-xs font-black text-rose-400">40P / 30C / 30F</p>
               </div>
             </header>
           </div>
@@ -912,8 +905,8 @@
                     <h3 className="text-sm font-black text-white">{SA_MEAL_PLAN_DAYS[mealDayIndex].day} Plan</h3>
                     <p className="text-[10px] text-rose-400 font-semibold">{SA_MEAL_PLAN_DAYS[mealDayIndex].type}</p>
                   </div>
-                  <span className="text-[10px] font-mono font-bold bg-slate-950 text-emerald-400 px-2 py-1 rounded-lg border border-slate-800">
-                    {SA_MEAL_PLAN_DAYS[mealDayIndex].cost}
+                  <span className="text-[10px] font-mono font-bold bg-slate-950 text-slate-300 px-2 py-1 rounded-lg border border-slate-800">
+                    {SA_MEAL_PLAN_DAYS[mealDayIndex].target}
                   </span>
                 </div>
 
@@ -922,7 +915,6 @@
                   <div className="glass-card rounded-2xl overflow-hidden shadow-md flex flex-col">
                     <div className="relative h-24 bg-slate-950">
                       <img src="https://images.unsplash.com/photo-1517673132405-a56a62b18caf?auto=format&fit=crop&w=400&q=80" alt="Breakfast" className="w-full h-full object-cover" />
-                      <span className="absolute bottom-1 left-1.5 text-[8px] font-mono font-bold bg-black/80 text-slate-200 px-1 rounded">ZAR 20</span>
                     </div>
                     <div className="p-2 flex-1 flex flex-col justify-between">
                       <h4 className="text-[10px] font-bold text-white leading-tight">Protein Oats & Woolies Berries</h4>
@@ -933,7 +925,6 @@
                   <div className="glass-card rounded-2xl overflow-hidden shadow-md flex flex-col">
                     <div className="relative h-24 bg-slate-950">
                       <img src="https://images.unsplash.com/photo-1532550907401-a500c9a57435?auto=format&fit=crop&w=400&q=80" alt="Lunch" className="w-full h-full object-cover" />
-                      <span className="absolute bottom-1 left-1.5 text-[8px] font-mono font-bold bg-black/80 text-slate-200 px-1 rounded">ZAR 24</span>
                     </div>
                     <div className="p-2 flex-1 flex flex-col justify-between">
                       <h4 className="text-[10px] font-bold text-white leading-tight">Checkers Chicken & Patats</h4>
@@ -944,7 +935,6 @@
                   <div className="glass-card rounded-2xl overflow-hidden shadow-md flex flex-col">
                     <div className="relative h-24 bg-slate-950">
                       <img src="https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=400&q=80" alt="Dinner" className="w-full h-full object-cover" />
-                      <span className="absolute bottom-1 left-1.5 text-[8px] font-mono font-bold bg-black/80 text-slate-200 px-1 rounded">ZAR 22</span>
                     </div>
                     <div className="p-2 flex-1 flex flex-col justify-between">
                       <h4 className="text-[10px] font-bold text-white leading-tight">Lean Mince Bolognese Zoodles</h4>
@@ -956,8 +946,8 @@
                 {/* Substitution Table */}
                 <div className="glass-card rounded-3xl p-4 shadow-2xl space-y-3">
                   <div className="text-center pb-1 border-b border-slate-800">
-                    <h3 className="text-xs font-black text-white">FemMetabolic Pro SA Ingredient Substitutions</h3>
-                    <p className="text-[9px] text-slate-400">Available at Checkers, Woolies, Food Lover's</p>
+                    <h3 className="text-xs font-black text-white">metabolic60 Ingredient Substitutions</h3>
+                    <p className="text-[9px] text-slate-400">Standard Grocery Matrix (Checkers, Woolies, Food Lover's)</p>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3 text-xs">
@@ -1086,8 +1076,8 @@
               <div className="space-y-4">
                 <div className="glass-card rounded-3xl p-5 shadow-2xl space-y-4">
                   <div className="flex items-center gap-3 pb-3 border-b border-slate-800/80">
-                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 to-rose-600 flex items-center justify-center text-xl shadow-lg">
-                      🌸
+                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 to-rose-600 flex items-center justify-center text-xl shadow-lg font-black text-white">
+                      M60
                     </div>
                     <div>
                       <h2 className="text-base font-black text-white">{userProfile.name}</h2>
@@ -1171,8 +1161,8 @@
                   {/* Data Backup & Restore */}
                   <div className="bg-slate-950/90 p-3.5 rounded-2xl border border-slate-800 space-y-2.5">
                     <div>
-                      <h4 className="text-xs font-bold text-white">Cloud / Local Backup</h4>
-                      <p className="text-[10px] text-slate-400">Save and sync your completed workouts & weights</p>
+                      <h4 className="text-xs font-bold text-white">Local / Cloud Backup</h4>
+                      <p className="text-[10px] text-slate-400">Export your completed logs, progression weights & profile</p>
                     </div>
                     <div className="flex gap-2">
                       <button onClick={exportBackup} className="flex-1 bg-slate-900 hover:bg-slate-800 text-slate-200 text-xs font-bold py-2 rounded-xl border border-slate-700">
@@ -1227,7 +1217,7 @@
           )}
 
           {/* Bottom Dock Navigation */}
-          <nav className="fixed bottom-0 left-0 right-0 bg-[#05070e]/95 backdrop-blur-xl border-t border-slate-800/80 pb-5 pt-2.5 px-2 flex justify-around items-center z-50 shadow-2xl">
+          <nav className="fixed bottom-0 left-0 right-0 bg-[#05070e]/95 backdrop-blur-xl border-t border-slate-800/80 pb-5 pt-2.5 px-3 flex justify-around items-center z-50 shadow-2xl">
             <button
               onClick={() => setActiveTab('dashboard')}
               className={`flex-1 py-1 rounded-xl text-xs font-bold transition-all flex flex-col items-center gap-0.5 ${
@@ -1292,4 +1282,3 @@
   </script>
 </body>
 </html>
-
