@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>FemMetabolic 3D • Next-Day & Anatomical Suite</title>
+  <title>FemMetabolic Pro • 3D Workouts & Endomorph Meal Suite</title>
   
-  <!-- On-Screen Debugger -->
+  <!-- On-Screen Debugger for Mobile -->
   <script>
     window.onerror = function(msg, url, line) {
       var errDiv = document.getElementById('debug-error');
@@ -57,7 +57,7 @@
   <div id="root">
     <div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#94a3b8;font-family:sans-serif;">
       <div style="width:36px;height:36px;border:3px solid #1e293b;border-top-color:#f43f5e;border-radius:50%;animation:spin 1s linear infinite;margin-bottom:12px;"></div>
-      <p style="font-size:13px;font-weight:600;">Loading 3D Engine & Workouts...</p>
+      <p style="font-size:13px;font-weight:600;">Loading 3D Biomechanics & Nutrition...</p>
       <style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
     </div>
   </div>
@@ -117,6 +117,7 @@
       window.speechSynthesis.speak(u);
     };
 
+    // --- Cycle Phasing Data ---
     const CYCLE_MODES = {
       menstrual: { name: "Menstrual Phase", tag: "Deload & Mobility", color: "text-sky-400 border-sky-500/40 bg-sky-950/60", modifier: 0.8, carbTip: "Focus on warm anti-inflammatory meals, iron-rich greens, and hydration." },
       follicular: { name: "Follicular Phase", tag: "Peak Strength & Power", color: "text-rose-400 border-rose-500/40 bg-rose-950/60", modifier: 1.0, carbTip: "High insulin sensitivity: place complex carbs around your workouts." },
@@ -124,6 +125,7 @@
       luteal: { name: "Luteal Phase", tag: "Recovery & Steady Tempo", color: "text-amber-400 border-amber-500/40 bg-amber-950/60", modifier: 0.9, carbTip: "Elevated core temp: prioritize magnesium, healthy fats, and 3L+ hydration." }
     };
 
+    // --- Master Exercise Database (3 Tiers) ---
     const MASTER_EXERCISE_DATA = {
       beginner: {
         A: [
@@ -203,7 +205,196 @@
       { name: "Banded Clamshells / Squat Hold", dur: 30, cue: "Prime gluteus medius for stability before lifting loads." }
     ];
 
-    // --- Interactive 3D Anatomical Humanoid Mannequin ---
+    // --- Master Meal Plan & Recipe Database ---
+    const MEAL_PLAN_DAYS = [
+      {
+        day: "Monday",
+        type: "Workout A (Post-Workout Carb Load)",
+        target: "1,720 kcal • 150g P • 118g C • 55g F",
+        breakfast: "3-Egg Omelet (2 whole + 2 whites) w/ spinach & ½ cup oats + ½ cup blueberries + 1 scoop protein",
+        lunch: "160g Peri-Peri Grilled Chicken + 120g roasted sweet potatoes + large garden salad (1 tsp olive oil)",
+        snack: "1 cup 0% Greek Yogurt + 1 tbsp chia seeds + cinnamon",
+        dinner: "150g Lean Ground Beef (90/10) with zucchini noodles, tomato basil marinara & ¼ avocado"
+      },
+      {
+        day: "Tuesday",
+        type: "Active Recovery (Low Carb / Healthy Fats)",
+        target: "1,640 kcal • 144g P • 74g C • 62g F",
+        breakfast: "2 Glute-Fuel Egg Muffin Cups + ½ sliced avocado + green tea",
+        lunch: "Tuna Salad Bowl: 1 can tuna in spring water, light mayo, celery over baby greens & steamed green beans",
+        snack: "1 boiled egg + 15 raw almonds + sliced cucumber with sea salt",
+        dinner: "180g Lemon-Herb Baked White Fish (Hake) + roasted cauliflower & asparagus with 1 tbsp olive oil"
+      },
+      {
+        day: "Wednesday",
+        type: "Workout B (Targeted Glycogen Load)",
+        target: "1,730 kcal • 152g P • 120g C • 52g F",
+        breakfast: "Chocolate Berry Post-Workout Smoothie Bowl (Protein, berries, banana, almond milk & chia)",
+        lunch: "140g Shredded Slow-Cooker Beef over ½ cup quinoa & steamed lemon broccoli",
+        snack: "½ cup low-fat cottage cheese + ½ sliced apple with cinnamon",
+        dinner: "160g Pan-Seared Chicken Breast + sautéed spinach in coconut oil + 100g roasted butternut"
+      },
+      {
+        day: "Thursday",
+        type: "Active Rest & Mobility",
+        target: "1,650 kcal • 148g P • 80g C • 60g F",
+        breakfast: "3 Scrambled Eggs with chopped bell peppers, tomatoes & 30g feta",
+        lunch: "Chicken Caesar Lettuce Wraps: 150g grilled chicken, romaine leaves, 1 tbsp parmesan, light Caesar",
+        snack: "1 scoop Whey Protein in water + 1 tbsp peanut butter",
+        dinner: "150g Grilled Salmon or Trout + large tray of roasted Mediterranean vegetables (zucchini, peppers, red onion)"
+      },
+      {
+        day: "Friday",
+        type: "Workout C (Metabolic Depletion)",
+        target: "1,740 kcal • 154g P • 122g C • 54g F",
+        breakfast: "Overnight Protein Oats (⅓ cup rolled oats, 1 scoop protein, 1 tbsp flaxseed) + ¼ cup raspberries",
+        lunch: "160g Peri-Peri Grilled Chicken + ½ cup brown basmati rice + grilled zucchini",
+        snack: "1 cup plain Greek yogurt + 10 raw walnuts",
+        dinner: "Slow-Cooker Lean Beef & Root Veggie Stew (Carrots, onions, baby potatoes & bone broth)"
+      },
+      {
+        day: "Saturday",
+        type: "Zone 2 Cardio / Low Impact",
+        target: "1,670 kcal • 146g P • 92g C • 58g F",
+        breakfast: "2 Poached Eggs on 1 slice toasted 100% wholewheat/rye + 50g smoked salmon or turkey bacon",
+        lunch: "Mediterranean Chopped Salad: 150g chicken breast, cucumbers, cherry tomatoes, 6 olives, 30g feta",
+        snack: "2 Glute-Fuel Egg Muffin Cups (Batch prepped)",
+        dinner: "180g Baked White Fish Fillet with garlic butter + 150g roasted green beans & cherry tomatoes"
+      },
+      {
+        day: "Sunday",
+        type: "Rest & Batch Meal Prep Day",
+        target: "1,660 kcal • 150g P • 86g C • 59g F",
+        breakfast: "Sunday Scramble: 2 whole eggs, 2 whites, 50g diced lean ham/chicken, mushrooms & baby spinach",
+        lunch: "Leftover Slow-Cooker Beef Stew or Grilled Chicken Salad Bowl",
+        snack: "1 cup warm bone broth + 1 boiled egg",
+        dinner: "150g Pan-Grilled Lean Sirloin Steak with garlic butter mushrooms & large rocket salad"
+      }
+    ];
+
+    const MASTER_RECIPES = [
+      {
+        id: "rec_1",
+        title: "Flame-Spiced Peri-Peri Chicken Bowls",
+        servings: "4 Servings",
+        macros: "420 kcal • 44g P • 32g C • 11g F",
+        imgUrl: "https://images.unsplash.com/photo-1532550907401-a500c9a57435?auto=format&fit=crop&w=600&q=80",
+        ingredients: [
+          "700g skinless chicken breasts (cut into cutlets)",
+          "2 tbsp peri-peri marinade (garlic, lemon, chili, oregano, 1 tsp olive oil)",
+          "500g sweet potatoes (cubed into 1cm blocks)",
+          "400g fresh green beans (trimmed)"
+        ],
+        steps: [
+          "Preheat oven to 200°C. Toss sweet potatoes with salt, paprika & 1 tsp olive oil. Roast for 25 mins.",
+          "Coat chicken in peri-peri marinade. Heat skillet on high; sear chicken 4–5 mins per side until charred and cooked.",
+          "Steam green beans for 4 mins until bright green and crisp.",
+          "Portion evenly into 4 meal-prep containers."
+        ]
+      },
+      {
+        id: "rec_2",
+        title: "Glute-Fuel Egg & Turkey Muffin Cups",
+        servings: "6 Cups (3 Servings)",
+        macros: "210 kcal per 2 muffins • 24g P • 4g C • 11g F",
+        imgUrl: "https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=600&q=80",
+        ingredients: [
+          "5 whole free-range eggs + 4 egg whites",
+          "100g cooked lean ground turkey or smoked turkey breast",
+          "1 cup baby spinach (finely chopped)",
+          "½ red bell pepper (diced) + 30g crumbled feta",
+          "Sea salt, black pepper & garlic powder"
+        ],
+        steps: [
+          "Preheat oven to 180°C. Grease a 6-cup muffin tin.",
+          "Whisk eggs, egg whites, garlic powder, salt, and pepper in a mixing bowl.",
+          "Distribute turkey, spinach, and bell pepper into the cups. Pour egg mix over toppings.",
+          "Top with crumbled feta. Bake 20–22 mins until set and golden. Store in fridge for up to 5 days."
+        ]
+      },
+      {
+        id: "rec_3",
+        title: "Slow-Cooker Lean Beef Stew",
+        servings: "4 Servings",
+        macros: "430 kcal • 42g P • 24g C • 15g F",
+        imgUrl: "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=600&q=80",
+        ingredients: [
+          "700g lean stewing beef (trimmed of visible fat, cubed)",
+          "2 medium carrots & 1 onion (chopped)",
+          "200g baby potatoes or butternut squash cubes",
+          "2 cups low-sodium beef bone broth",
+          "2 tbsp tomato paste + 2 cloves minced garlic + fresh rosemary"
+        ],
+        steps: [
+          "Season beef with salt and pepper; sear in a hot skillet for 3 mins to lock in rich flavor.",
+          "Transfer beef, carrots, onions, garlic, and butternut/potatoes into the slow cooker.",
+          "Whisk tomato paste into warm bone broth; pour over the meat and vegetables.",
+          "Cook on LOW for 7–8 hours or HIGH for 4 hours until beef is melt-in-your-mouth tender."
+        ]
+      },
+      {
+        id: "rec_4",
+        title: "Chocolate Berry Post-Workout Smoothie",
+        servings: "1 Serving",
+        macros: "390 kcal • 40g P • 38g C • 7g F",
+        imgUrl: "https://images.unsplash.com/photo-1590301157890-4810ed352733?auto=format&fit=crop&w=600&q=80",
+        ingredients: [
+          "1 scoop (30g) chocolate whey or plant protein powder",
+          "150g frozen mixed berries (blueberries, raspberries, strawberries)",
+          "½ small frozen banana",
+          "½ cup unsweetened almond milk + 1 tbsp chia seeds + 1 tbsp cocoa"
+        ],
+        steps: [
+          "Add almond milk, protein powder, cocoa, frozen berries, and banana to a blender.",
+          "Blend on high for 45–60 seconds until thick and creamy.",
+          "Pour into a chilled bowl and top with chia seeds."
+        ]
+      }
+    ];
+
+    const GROCERY_CATEGORIES = {
+      "Lean Proteins": [
+        "1.2 kg Skinless Chicken Breast",
+        "700g Lean Stewing Beef or Sirloin",
+        "400g White Fish Fillets (Hake / Cod)",
+        "200g Fresh Salmon Fillet or Trout",
+        "2 Dozen Free-Range Eggs",
+        "1 Carton Liquid Egg Whites (500ml)",
+        "2 Tins Chunk Tuna in spring water"
+      ],
+      "Dairy & Alternatives": [
+        "1 kg Tub Plain 0% Greek Yogurt",
+        "250g Low-Fat Cottage Cheese",
+        "100g Feta Cheese",
+        "1 Liter Unsweetened Almond Milk"
+      ],
+      "Complex Carbs & Tubers": [
+        "500g Sweet Potatoes",
+        "500g Rolled Oats",
+        "250g Quinoa or Brown Basmati Rice",
+        "1 Loaf 100% Wholewheat or Seeded Rye Bread"
+      ],
+      "Fresh Produce": [
+        "2 Bags Baby Spinach & Mixed Greens",
+        "1 Head Romaine Lettuce",
+        "500g Fresh Green Beans",
+        "1 Head Broccoli & 1 Head Cauliflower",
+        "1 Small Butternut Squash",
+        "3 Red Bell Peppers, 2 Cucumbers, 250g Cherry Tomatoes",
+        "Carrots, Brown Onions, Garlic & Lemons"
+      ],
+      "Antioxidants & Healthy Fats": [
+        "500g Frozen Mixed Berries",
+        "1 Punnet Fresh Blueberries",
+        "3 Bananas & 2 Green Apples",
+        "2 Ripe Avocados & 100g Raw Almonds",
+        "1 Bag Chia Seeds & Flaxseeds",
+        "Cold-Pressed Extra Virgin Olive Oil",
+        "1 Liter Low-Sodium Beef Bone Broth"
+      ]
+    };
+
+    // --- Interactive 3D Humanoid Body Visualizer ---
     function Interactive3DHumanoid({ activeMuscle, exerciseName }) {
       const mountRef = useRef(null);
       const muscleMeshesRef = useRef({});
@@ -225,15 +416,14 @@
         container.innerHTML = '';
         container.appendChild(renderer.domElement);
 
-        // Lighting
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
         scene.add(ambientLight);
 
-        const frontLight = new THREE.PointLight(0xf43f5e, 2.0, 30);
+        const frontLight = new THREE.PointLight(0xf43f5e, 2.2, 30);
         frontLight.position.set(2, 4, 4);
         scene.add(frontLight);
 
-        const backLight = new THREE.PointLight(0x38bdf8, 1.5, 30);
+        const backLight = new THREE.PointLight(0x38bdf8, 1.8, 30);
         backLight.position.set(-2, -3, -4);
         scene.add(backLight);
 
@@ -241,14 +431,10 @@
         const baseMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.5, metalness: 0.3 });
         const glowMat = new THREE.MeshStandardMaterial({ color: 0xf43f5e, roughness: 0.2, metalness: 0.6, emissive: 0x9f1239, emissiveIntensity: 0.9 });
 
-        // Head & Neck
+        // Head
         const head = new THREE.Mesh(new THREE.SphereGeometry(0.38, 24, 24), baseMat);
         head.position.y = 2.1;
         bodyGroup.add(head);
-
-        const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.16, 0.3, 16), baseMat);
-        neck.position.y = 1.75;
-        bodyGroup.add(neck);
 
         // Chest / Upper Torso
         const chest = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.55, 0.45), baseMat.clone());
@@ -265,7 +451,7 @@
         lats.position.set(0, 1.35, -0.15);
         bodyGroup.add(lats);
 
-        // Shoulders (Left & Right)
+        // Shoulders
         const leftShoulder = new THREE.Mesh(new THREE.SphereGeometry(0.24, 16, 16), baseMat.clone());
         leftShoulder.position.set(-0.62, 1.45, 0);
         bodyGroup.add(leftShoulder);
@@ -274,21 +460,12 @@
         rightShoulder.position.set(0.62, 1.45, 0);
         bodyGroup.add(rightShoulder);
 
-        // Arms
-        const leftArm = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.1, 0.9, 16), baseMat);
-        leftArm.position.set(-0.65, 0.9, 0);
-        bodyGroup.add(leftArm);
-
-        const rightArm = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.1, 0.9, 16), baseMat);
-        rightArm.position.set(0.65, 0.9, 0);
-        bodyGroup.add(rightArm);
-
-        // Glutes / Pelvis
+        // Glutes
         const glutes = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.45, 0.48), baseMat.clone());
         glutes.position.set(0, 0.4, -0.05);
         bodyGroup.add(glutes);
 
-        // Quads (Front Thighs)
+        // Quads
         const leftQuad = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.16, 1.1, 16), baseMat.clone());
         leftQuad.position.set(-0.25, -0.35, 0.05);
         bodyGroup.add(leftQuad);
@@ -297,7 +474,7 @@
         rightQuad.position.set(0.25, -0.35, 0.05);
         bodyGroup.add(rightQuad);
 
-        // Hamstrings (Back Thighs)
+        // Hamstrings
         const leftHam = new THREE.Mesh(new THREE.CylinderGeometry(0.19, 0.15, 1.1, 16), baseMat.clone());
         leftHam.position.set(-0.25, -0.35, -0.06);
         bodyGroup.add(leftHam);
@@ -306,7 +483,7 @@
         rightHam.position.set(0.25, -0.35, -0.06);
         bodyGroup.add(rightHam);
 
-        // Calves & Lower Legs
+        // Calves
         const leftCalf = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.11, 1.0, 16), baseMat);
         leftCalf.position.set(-0.25, -1.35, 0);
         bodyGroup.add(leftCalf);
@@ -315,7 +492,7 @@
         rightCalf.position.set(0.25, -1.35, 0);
         bodyGroup.add(rightCalf);
 
-        // Orbital Neon Energy Ring
+        // Orbital Ring
         const ringGeo = new THREE.TorusGeometry(2.3, 0.03, 16, 80);
         const ringMat = new THREE.MeshBasicMaterial({ color: 0xf43f5e, transparent: true, opacity: 0.65 });
         const ringMesh = new THREE.Mesh(ringGeo, ringMat);
@@ -334,7 +511,7 @@
           hamstrings: [leftHam, rightHam]
         };
 
-        // Touch & Drag Handling
+        // Drag Handler
         let isDragging = false;
         let prevPos = { x: 0, y: 0 };
         const onStart = (e) => { isDragging = true; prevPos = { x: e.clientX || (e.touches && e.touches[0].clientX), y: e.clientY || (e.touches && e.touches[0].clientY) }; };
@@ -357,9 +534,7 @@
         let reqId;
         const animate = () => {
           reqId = requestAnimationFrame(animate);
-          if (!isDragging) {
-            bodyGroup.rotation.y += 0.008;
-          }
+          if (!isDragging) bodyGroup.rotation.y += 0.008;
           ringMesh.rotation.z += 0.015;
           renderer.render(scene, camera);
         };
@@ -371,7 +546,6 @@
         };
       }, []);
 
-      // Dynamic Shading: Highlight active muscle
       useEffect(() => {
         const groups = muscleMeshesRef.current;
         if (!groups) return;
@@ -382,9 +556,7 @@
           const meshes = groups[key];
           if (meshes) {
             const isTarget = key === activeMuscle;
-            meshes.forEach(m => {
-              m.material = isTarget ? glowMat : baseMat;
-            });
+            meshes.forEach(m => { m.material = isTarget ? glowMat : baseMat; });
           }
         });
       }, [activeMuscle]);
@@ -411,7 +583,7 @@
 
     // --- Main Application Engine ---
     function App() {
-      const [activeTab, setActiveTab] = useState('workout'); // 'dashboard', 'workout', 'tempo', 'history'
+      const [activeTab, setActiveTab] = useState('workout'); // 'dashboard', 'workout', 'nutrition', 'tempo', 'history'
       const [difficulty, setDifficulty] = useState(() => safeGetString('fm_difficulty', 'intermediate'));
       const [activeDay, setActiveDay] = useState(() => safeGetString('fm_day', 'A'));
 
@@ -439,6 +611,10 @@
       const [streakHistory, setStreakHistory] = useState(() => safeGetJSON('fm_streak', []));
       const [sessionArchive, setSessionArchive] = useState(() => safeGetJSON('fm_session_archive', []));
 
+      // Meal Plan Subtab & Checked Groceries State
+      const [mealSubTab, setMealSubTab] = useState('plan'); // 'plan', 'recipes', 'grocery', 'prep'
+      const [checkedGroceries, setCheckedGroceries] = useState(() => safeGetJSON('fm_checked_groceries', {}));
+
       // Daily Dashboard & Body Measurements
       const [dailyLog, setDailyLog] = useState(() => safeGetJSON('fm_daily_log', { sleep: 8, stress: 4, soreness: 3 }));
       const [bodyMetrics, setBodyMetrics] = useState(() => safeGetJSON('fm_body_metrics', { weight: 75.0, waist: 78, hips: 102, thigh: 58 }));
@@ -446,7 +622,7 @@
       const [focusedExerciseId, setFocusedExerciseId] = useState('i_a1');
       const [selectedExercise, setSelectedExercise] = useState(null);
 
-      // Warmup & Timers
+      // Timers & Warmup
       const [showWarmupPlayer, setShowWarmupPlayer] = useState(false);
       const [warmupIndex, setWarmupIndex] = useState(0);
       const [warmupTimer, setWarmupTimer] = useState(45);
@@ -462,7 +638,7 @@
 
       const fileInputRef = useRef(null);
 
-      // Dynamic Cycle Phasing Math
+      // Cycle Math
       const computeCycleData = () => {
         try {
           const today = new Date();
@@ -489,7 +665,7 @@
 
       const { cycleDay, phaseKey: activeCyclePhase, ovulationDay, daysUntilNextPeriod } = computeCycleData();
 
-      // LocalStorage Persistence Sync
+      // LocalStorage Sync
       useEffect(() => {
         localStorage.setItem('fm_difficulty', difficulty);
         localStorage.setItem('fm_day', activeDay);
@@ -503,10 +679,11 @@
         localStorage.setItem('fm_sets', JSON.stringify(completedSets));
         localStorage.setItem('fm_streak', JSON.stringify(streakHistory));
         localStorage.setItem('fm_session_archive', JSON.stringify(sessionArchive));
+        localStorage.setItem('fm_checked_groceries', JSON.stringify(checkedGroceries));
         localStorage.setItem('fm_daily_log', JSON.stringify(dailyLog));
         localStorage.setItem('fm_body_metrics', JSON.stringify(bodyMetrics));
         localStorage.setItem('fm_voice', voiceEnabled.toString());
-      }, [difficulty, activeDay, periodStartDate, cycleLengthDays, periodDurationDays, customSets, customReps, customRest, weightLogs, completedSets, streakHistory, sessionArchive, dailyLog, bodyMetrics, voiceEnabled]);
+      }, [difficulty, activeDay, periodStartDate, cycleLengthDays, periodDurationDays, customSets, customReps, customRest, weightLogs, completedSets, streakHistory, sessionArchive, checkedGroceries, dailyLog, bodyMetrics, voiceEnabled]);
 
       // Speech Recognition
       useEffect(() => {
@@ -582,7 +759,7 @@
         return () => clearInterval(interval);
       }, [isTimerRunning, timerSeconds, voiceEnabled, targetTimerSec]);
 
-      // Warmup Player Interval
+      // Warmup Interval
       useEffect(() => {
         let timer = null;
         if (warmupRunning && warmupTimer > 0) {
@@ -677,12 +854,10 @@
         }
       };
 
-      // --- NEXT DAY WORKOUT & ARCHIVE ENGINE ---
       const advanceToNextWorkout = () => {
         const nextDayMap = { 'A': 'B', 'B': 'C', 'C': 'A' };
         const nextDay = nextDayMap[activeDay] || 'A';
 
-        // Archive completed workout
         const newRecord = {
           date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
           workoutDay: activeDay,
@@ -692,7 +867,6 @@
         };
         setSessionArchive([newRecord, ...sessionArchive]);
 
-        // Clear checkmarks for this current workout so it's fresh when repeated
         const cleanSets = { ...completedSets };
         currentExercises.forEach(ex => {
           const sCount = customSets[ex.id] ?? ex.defaultSets;
@@ -702,7 +876,6 @@
         });
         setCompletedSets(cleanSets);
 
-        // Switch to Next Day Workout
         setActiveDay(nextDay);
         const nextExercises = MASTER_EXERCISE_DATA[difficulty][nextDay] || [];
         if (nextExercises.length > 0) setFocusedExerciseId(nextExercises[0].id);
@@ -731,9 +904,13 @@
         speakCoach(`Load increased to ${newW.toFixed(1)} kilograms.`, voiceEnabled);
       };
 
+      const toggleGrocery = (item) => {
+        setCheckedGroceries(prev => ({ ...prev, [item]: !prev[item] }));
+      };
+
       const exportUserData = () => {
         const backupObj = {
-          difficulty, activeDay, periodStartDate, cycleLengthDays, periodDurationDays, customSets, customReps, customRest, weightLogs, completedSets, streakHistory, sessionArchive, dailyLog, bodyMetrics, date: new Date().toISOString()
+          difficulty, activeDay, periodStartDate, cycleLengthDays, periodDurationDays, customSets, customReps, customRest, weightLogs, completedSets, streakHistory, sessionArchive, checkedGroceries, dailyLog, bodyMetrics, date: new Date().toISOString()
         };
         const blob = new Blob([JSON.stringify(backupObj, null, 2)], { type: "application/json" });
         const url = URL.createObjectURL(blob);
@@ -762,6 +939,7 @@
             if (data.completedSets) setCompletedSets(data.completedSets);
             if (data.streakHistory) setStreakHistory(data.streakHistory);
             if (data.sessionArchive) setSessionArchive(data.sessionArchive);
+            if (data.checkedGroceries) setCheckedGroceries(data.checkedGroceries);
             if (data.bodyMetrics) setBodyMetrics(data.bodyMetrics);
             alert("Backup restored successfully!");
           } catch (err) {
@@ -771,7 +949,7 @@
         reader.readAsText(file);
       };
 
-      // Tonnage & Volume Math
+      // Tonnage Math
       const totalSessionTonnage = currentExercises.reduce((total, ex) => {
         const loggedW = (weightLogs[ex.id] ?? ex.defaultWeight) * loadMultiplier;
         const sCount = customSets[ex.id] ?? ex.defaultSets;
@@ -781,7 +959,6 @@
         return total + Math.round(completedCount * reps * loggedW);
       }, 0);
 
-      // Check if current workout is 100% complete
       let totalSetsCount = 0;
       let completedSetsCount = 0;
       currentExercises.forEach(ex => {
@@ -805,9 +982,9 @@
             <header className="flex justify-between items-center">
               <div>
                 <h1 className="text-lg font-black text-white tracking-tight flex items-center gap-1.5">
-                  <span className="text-rose-500">🌸</span> FemMetabolic 3D
+                  <span className="text-rose-500">🌸</span> FemMetabolic Pro
                 </h1>
-                <p className="text-[10px] text-slate-400">3D Biomechanics & Next-Day Flow</p>
+                <p className="text-[10px] text-slate-400">3D Biomechanics & Nutrition Suite</p>
               </div>
               <div className="flex items-center gap-2">
                 <button
@@ -843,12 +1020,9 @@
                     </span>
                   </div>
 
-                  {/* Calendar Inputs Grid */}
                   <div className="grid grid-cols-1 gap-3 bg-slate-950 p-3.5 rounded-xl border border-slate-800/80">
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-300 mb-1">
-                        Last Period Start Date
-                      </label>
+                      <label className="block text-[11px] font-bold text-slate-300 mb-1">Last Period Start Date</label>
                       <input
                         type="date"
                         value={periodStartDate}
@@ -890,7 +1064,7 @@
                     </div>
                   </div>
 
-                  {/* Visual Segmented Progress Bar */}
+                  {/* Horizontal Cycle Bar */}
                   <div>
                     <div className="flex justify-between text-[10px] text-slate-400 font-bold uppercase mb-1.5">
                       <span>Day 1</span>
@@ -909,7 +1083,6 @@
                     </div>
                   </div>
 
-                  {/* Phase Status Card */}
                   <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-1.5">
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-black text-white">{CYCLE_MODES[activeCyclePhase].name}</span>
@@ -922,7 +1095,7 @@
                   </div>
                 </div>
 
-                {/* Readiness & Recovery Scanner */}
+                {/* Readiness Scanner */}
                 <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
                   <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">Readiness & Cortisol Scanner</h3>
                   <div className="space-y-4">
@@ -963,11 +1136,11 @@
                   </div>
                 </div>
 
-                {/* Data Backup & Restore */}
+                {/* Data Backup */}
                 <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex justify-between items-center shadow-lg">
                   <div>
                     <h4 className="text-xs font-bold text-white">Data Storage & Export</h4>
-                    <p className="text-[10px] text-slate-400">Export or import your saved workouts</p>
+                    <p className="text-[10px] text-slate-400">Backup your workouts and meal plans</p>
                   </div>
                   <div className="flex gap-2">
                     <button onClick={exportUserData} className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold px-3 py-1.5 rounded-xl border border-slate-700">Export</button>
@@ -981,7 +1154,6 @@
             {/* TAB 2: WORKOUT */}
             {activeTab === 'workout' && (
               <>
-                {/* 3-Tier Difficulty Selector */}
                 <div className="bg-slate-900 p-1 rounded-2xl border border-slate-800 flex gap-1">
                   {['beginner', 'intermediate', 'advanced'].map((tier) => (
                     <button
@@ -998,7 +1170,6 @@
                   ))}
                 </div>
 
-                {/* Day Switcher */}
                 <div className="flex gap-2 items-center">
                   {['A', 'B', 'C'].map((day) => (
                     <button
@@ -1017,10 +1188,9 @@
                   ))}
                 </div>
 
-                {/* Interactive 3D Anatomical Humanoid Heatmap */}
                 <Interactive3DHumanoid activeMuscle={activeExerciseObj.primaryMuscle} exerciseName={activeExerciseObj.name} />
 
-                {/* Finish & Advance to Next Workout Banner */}
+                {/* Finish & Next Day Banner */}
                 <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl flex flex-col gap-3">
                   <div className="flex justify-between items-center">
                     <div>
@@ -1040,7 +1210,7 @@
                   </button>
                 </div>
 
-                {/* Guided 3-Min Warmup Trigger */}
+                {/* Guided Warmup */}
                 <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-3 flex justify-between items-center">
                   <div>
                     <span className="text-[10px] font-bold text-rose-400 uppercase tracking-wider">Pre-Workout Protocol</span>
@@ -1060,7 +1230,7 @@
                   </button>
                 </div>
 
-                {/* Exercise Cards */}
+                {/* Exercise List */}
                 <div className="space-y-3.5">
                   {currentExercises.map((ex) => {
                     const setCount = customSets[ex.id] ?? ex.defaultSets;
@@ -1117,7 +1287,6 @@
                           </div>
                         </div>
 
-                        {/* Customization Bar */}
                         <div className="bg-slate-950/80 p-2 rounded-xl border border-slate-800/80 flex flex-wrap items-center justify-between gap-2 text-xs mt-2.5">
                           <div className="flex items-center gap-1">
                             <span className="text-[10px] text-slate-400 uppercase font-bold">Sets:</span>
@@ -1152,7 +1321,6 @@
                           </div>
                         </div>
 
-                        {/* Set Checkboxes */}
                         <div className="flex gap-2 pt-2">
                           {Array.from({ length: setCount }).map((_, idx) => {
                             const setKey = `${ex.id}_set_${idx}`;
@@ -1180,7 +1348,182 @@
               </>
             )}
 
-            {/* TAB 3: VISUAL TEMPO METRONOME */}
+            {/* TAB 3: MEAL PLAN & RECIPES */}
+            {activeTab === 'nutrition' && (
+              <div className="space-y-4">
+                
+                {/* Hero Header with Meal Prep Photo */}
+                <div className="relative rounded-2xl overflow-hidden border border-slate-800 shadow-xl">
+                  <img
+                    src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80"
+                    alt="Endomorph Meal Prep"
+                    className="w-full h-28 object-cover opacity-50 brightness-75"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent p-3.5 flex flex-col justify-between">
+                    <span className="text-[10px] font-bold text-rose-400 uppercase tracking-widest bg-slate-950/80 px-2 py-0.5 rounded-full border border-rose-800/60 self-start">
+                      Endomorph 40P / 30C / 30F Blueprint
+                    </span>
+                    <div>
+                      <h2 className="text-base font-black text-white">Target: ~1,700 kcal Daily</h2>
+                      <p className="text-[11px] text-slate-300">High-Protein • Anti-Bloat • Targeted Carbs</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Subtab Switcher */}
+                <div className="grid grid-cols-4 gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800 text-[11px] font-bold">
+                  <button onClick={() => setMealSubTab('plan')} className={`py-1.5 rounded-lg transition-all ${mealSubTab === 'plan' ? 'bg-rose-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}>7-Day</button>
+                  <button onClick={() => setMealSubTab('recipes')} className={`py-1.5 rounded-lg transition-all ${mealSubTab === 'recipes' ? 'bg-rose-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}>Recipes</button>
+                  <button onClick={() => setMealSubTab('grocery')} className={`py-1.5 rounded-lg transition-all ${mealSubTab === 'grocery' ? 'bg-rose-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}>Grocery</button>
+                  <button onClick={() => setMealSubTab('prep')} className={`py-1.5 rounded-lg transition-all ${mealSubTab === 'prep' ? 'bg-rose-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}>90m Prep</button>
+                </div>
+
+                {/* SUBTAB: 7-DAY MEAL PLAN */}
+                {mealSubTab === 'plan' && (
+                  <div className="space-y-3">
+                    {MEAL_PLAN_DAYS.map((item, idx) => (
+                      <div key={idx} className="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-md space-y-2.5">
+                        <div className="flex justify-between items-center border-b border-slate-800/80 pb-2">
+                          <div>
+                            <span className="text-sm font-black text-white">{item.day}</span>
+                            <p className="text-[10px] text-rose-400 font-semibold">{item.type}</p>
+                          </div>
+                          <span className="text-[9px] font-mono font-bold bg-slate-950 text-slate-300 px-2 py-1 rounded-lg border border-slate-800">
+                            {item.target}
+                          </span>
+                        </div>
+
+                        <div className="space-y-1.5 text-xs text-slate-300 leading-relaxed">
+                          <p><strong className="text-rose-400">🍳 Breakfast:</strong> {item.breakfast}</p>
+                          <p><strong className="text-sky-400">🥗 Lunch:</strong> {item.lunch}</p>
+                          <p><strong className="text-amber-400">🍎 Snack:</strong> {item.snack}</p>
+                          <p><strong className="text-emerald-400">🥩 Dinner:</strong> {item.dinner}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* SUBTAB: 4 MASTER RECIPES WITH PHOTOS */}
+                {mealSubTab === 'recipes' && (
+                  <div className="space-y-4">
+                    {MASTER_RECIPES.map((rec) => (
+                      <div key={rec.id} className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-lg space-y-3">
+                        <div className="relative h-36 bg-slate-950">
+                          <img src={rec.imgUrl} alt={rec.title} className="w-full h-full object-cover" />
+                          <div className="absolute bottom-2 left-3 bg-slate-950/80 backdrop-blur px-2.5 py-0.5 rounded-full border border-slate-700">
+                            <span className="text-[10px] font-bold text-rose-400">{rec.macros}</span>
+                          </div>
+                        </div>
+
+                        <div className="p-4 pt-1 space-y-3">
+                          <div className="flex justify-between items-center">
+                            <h3 className="text-sm font-black text-white leading-tight">{rec.title}</h3>
+                            <span className="text-[10px] font-bold text-slate-400">{rec.servings}</span>
+                          </div>
+
+                          <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1.5">
+                            <p className="text-[10px] font-bold uppercase tracking-wider text-rose-400">Ingredients:</p>
+                            <ul className="text-xs text-slate-300 space-y-1">
+                              {rec.ingredients.map((ing, i) => (
+                                <li key={i} className="flex items-start gap-1.5">
+                                  <span className="text-rose-500">•</span> <span>{ing}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+
+                          <div className="space-y-1.5">
+                            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Preparation Steps:</p>
+                            <ol className="text-xs text-slate-300 space-y-1.5 list-decimal list-inside leading-relaxed">
+                              {rec.steps.map((st, i) => (
+                                <li key={i} className="pl-1">{st}</li>
+                              ))}
+                            </ol>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* SUBTAB: INTERACTIVE GROCERY CHECKLIST */}
+                {mealSubTab === 'grocery' && (
+                  <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl space-y-4">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <h3 className="text-sm font-bold text-white">Weekly Grocery Checklist</h3>
+                        <p className="text-[10px] text-slate-400">Tap items to mark as purchased</p>
+                      </div>
+                      <button
+                        onClick={() => setCheckedGroceries({})}
+                        className="text-[10px] font-bold text-rose-400 bg-slate-950 px-2 py-1 rounded-lg border border-slate-800"
+                      >
+                        Clear All
+                      </button>
+                    </div>
+
+                    {Object.keys(GROCERY_CATEGORIES).map((catKey) => (
+                      <div key={catKey} className="space-y-1.5">
+                        <span className="text-xs font-bold text-rose-400 uppercase tracking-wider">{catKey}</span>
+                        <div className="space-y-1">
+                          {GROCERY_CATEGORIES[catKey].map((item, i) => {
+                            const isChecked = !!checkedGroceries[item];
+                            return (
+                              <div
+                                key={i}
+                                onClick={() => toggleGrocery(item)}
+                                className={`p-2 rounded-xl text-xs flex items-center justify-between cursor-pointer border transition-all ${
+                                  isChecked ? 'bg-slate-950/40 text-slate-600 border-slate-900 line-through' : 'bg-slate-950 text-slate-200 border-slate-800 hover:border-slate-700'
+                                }`}
+                              >
+                                <span>{item}</span>
+                                <span className={`w-4 h-4 rounded flex items-center justify-center text-[10px] font-bold ${isChecked ? 'bg-emerald-600 text-white' : 'border border-slate-700'}`}>
+                                  {isChecked ? "✓" : ""}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* SUBTAB: 90-MINUTE SUNDAY PREP WORKFLOW */}
+                {mealSubTab === 'prep' && (
+                  <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl space-y-3.5">
+                    <div>
+                      <h3 className="text-sm font-bold text-white">90-Minute Batch Prep Timeline</h3>
+                      <p className="text-[10px] text-slate-400">Concurrent kitchen tasks for maximum efficiency</p>
+                    </div>
+
+                    <div className="space-y-2.5">
+                      {[
+                        { time: "00 – 10 min", title: "Preheat & Roast", desc: "Preheat oven to 200°C. Cube sweet potatoes, toss with 1 tsp olive oil + paprika, spread on baking sheet & roast for 25 mins." },
+                        { time: "10 – 25 min", title: "Slow Cooker & Grains", desc: "Place cubed beef, carrots, onions, bone broth & tomato paste in slow cooker on LOW (7 hrs). Cook quinoa/brown rice on stove." },
+                        { time: "25 – 45 min", title: "Bake Egg Muffins & Steam", desc: "Remove sweet potatoes. Lower oven to 180°C. Whisk eggs, fill muffin tin with turkey/spinach and bake 20 mins. Steam green beans for 4 mins." },
+                        { time: "45 – 70 min", title: "Grill Peri-Peri Chicken", desc: "Heat skillet on high. Sear chicken breasts 4–5 mins per side. Let rest on cutting board before slicing." },
+                        { time: "70 – 90 min", title: "Portion into Containers", desc: "Assemble 4 lunch boxes (chicken + sweet potato + green beans), 4 dinner containers, and breakfast egg cups. Seal and refrigerate." }
+                      ].map((step, idx) => (
+                        <div key={idx} className="bg-slate-950 p-3 rounded-xl border border-slate-800 flex gap-3">
+                          <span className="text-[10px] font-mono font-black text-rose-400 shrink-0 mt-0.5 bg-rose-950/60 px-1.5 py-0.5 rounded border border-rose-900/60 self-start">
+                            {step.time}
+                          </span>
+                          <div>
+                            <h4 className="text-xs font-bold text-white leading-tight">{step.title}</h4>
+                            <p className="text-[11px] text-slate-300 mt-1 leading-relaxed">{step.desc}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+              </div>
+            )}
+
+            {/* TAB 4: VISUAL TEMPO METRONOME */}
             {activeTab === 'tempo' && (
               <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl text-center space-y-6">
                 <div>
@@ -1217,10 +1560,9 @@
               </div>
             )}
 
-            {/* TAB 4: HISTORY & 60-DAY PROGRESS */}
+            {/* TAB 5: HISTORY & 60-DAY PROGRESS */}
             {activeTab === 'history' && (
               <div className="space-y-4">
-                {/* 60-Day Consistency Streak */}
                 <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-3">
                   <h3 className="text-sm font-bold text-white">60-Day Consistency Grid</h3>
                   <p className="text-xs text-slate-400">Completed Days: <strong className="text-rose-400">{streakHistory.length} Days</strong></p>
@@ -1236,11 +1578,10 @@
                   </div>
                 </div>
 
-                {/* Permanent Logged Session Archive */}
                 <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-3">
                   <h3 className="text-sm font-bold text-white">Workout Log History</h3>
                   {sessionArchive.length === 0 ? (
-                    <p className="text-xs text-slate-500 italic py-2">No finished workouts logged yet. Finish a workout to see history here!</p>
+                    <p className="text-xs text-slate-500 italic py-2">No finished workouts logged yet. Finish a session to see history!</p>
                   ) : (
                     <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
                       {sessionArchive.map((session, idx) => (
@@ -1298,10 +1639,10 @@
           )}
 
           {/* Thumb-Ergonomic Bottom Navigation */}
-          <nav className="fixed bottom-0 left-0 right-0 bg-slate-950 border-t border-slate-800/90 pb-6 pt-3 px-3 flex justify-around items-center z-50 shadow-2xl">
+          <nav className="fixed bottom-0 left-0 right-0 bg-slate-950 border-t border-slate-800/90 pb-6 pt-3 px-2 flex justify-around items-center z-50 shadow-2xl">
             <button
               onClick={() => setActiveTab('dashboard')}
-              className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all flex flex-col items-center gap-1 ${
+              className={`flex-1 py-1.5 rounded-xl text-xs font-bold transition-all flex flex-col items-center gap-0.5 ${
                 activeTab === 'dashboard' ? 'text-rose-500 bg-rose-950/40' : 'text-slate-400 hover:text-slate-200'
               }`}
             >
@@ -1310,7 +1651,7 @@
             </button>
             <button
               onClick={() => setActiveTab('workout')}
-              className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all flex flex-col items-center gap-1 ${
+              className={`flex-1 py-1.5 rounded-xl text-xs font-bold transition-all flex flex-col items-center gap-0.5 ${
                 activeTab === 'workout' ? 'text-rose-500 bg-rose-950/40' : 'text-slate-400 hover:text-slate-200'
               }`}
             >
@@ -1318,8 +1659,17 @@
               <span>Workout</span>
             </button>
             <button
+              onClick={() => setActiveTab('nutrition')}
+              className={`flex-1 py-1.5 rounded-xl text-xs font-bold transition-all flex flex-col items-center gap-0.5 ${
+                activeTab === 'nutrition' ? 'text-rose-500 bg-rose-950/40' : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <span className="text-base">🥗</span>
+              <span>Meals</span>
+            </button>
+            <button
               onClick={() => setActiveTab('tempo')}
-              className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all flex flex-col items-center gap-1 ${
+              className={`flex-1 py-1.5 rounded-xl text-xs font-bold transition-all flex flex-col items-center gap-0.5 ${
                 activeTab === 'tempo' ? 'text-rose-500 bg-rose-950/40' : 'text-slate-400 hover:text-slate-200'
               }`}
             >
@@ -1328,7 +1678,7 @@
             </button>
             <button
               onClick={() => setActiveTab('history')}
-              className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all flex flex-col items-center gap-1 ${
+              className={`flex-1 py-1.5 rounded-xl text-xs font-bold transition-all flex flex-col items-center gap-0.5 ${
                 activeTab === 'history' ? 'text-rose-500 bg-rose-950/40' : 'text-slate-400 hover:text-slate-200'
               }`}
             >
@@ -1337,7 +1687,7 @@
             </button>
           </nav>
 
-          {/* Guided 3-Minute Warmup Modal Player */}
+          {/* Guided 3-Minute Warmup Modal */}
           {showWarmupPlayer && (
             <div className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 z-50">
               <div className="bg-slate-900 border border-slate-700 rounded-3xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl">
@@ -1415,4 +1765,3 @@
   </script>
 </body>
 </html>
-
