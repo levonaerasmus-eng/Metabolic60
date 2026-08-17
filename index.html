@@ -59,7 +59,7 @@
   <script type="text/babel">
     const { useState, useEffect, useRef } = React;
 
-    // --- Storage Helpers ---
+    // --- Safe Storage Helpers ---
     const getStored = (key, fallback) => {
       try {
         const item = localStorage.getItem(key);
@@ -97,82 +97,72 @@
       }
     };
 
-    // --- Cycle Phasing Data ---
+    // --- Cycle Phasing Configuration ---
     const CYCLE_MODES = {
-      menstrual: { name: "Menstrual Phase", tag: "Deload & Restorative", color: "text-sky-400 border-sky-500/40 bg-sky-950/60", mod: 0.85, tip: "Focus on warm rooibos tea, iron-rich greens, and light restorative walks." },
-      follicular: { name: "Follicular Phase", tag: "Peak Strength & Power", color: "text-rose-400 border-rose-500/40 bg-rose-950/60", mod: 1.0, tip: "High insulin sensitivity: place sweet potatoes (*patats*) & oats around training." },
-      ovulatory: { name: "Ovulatory Phase", tag: "Max Energy & PRs", color: "text-fuchsia-400 border-fuchsia-500/40 bg-fuchsia-950/60", mod: 1.05, tip: "Estrogen peak provides maximum energy. Try progressive weight jumps." },
-      luteal: { name: "Luteal Phase", tag: "Steady Tempo", color: "text-amber-400 border-amber-500/40 bg-amber-950/60", mod: 0.9, tip: "Higher core body temp: prioritize magnesium, pumpkin seeds, and 3L+ hydration." }
+      menstrual: { name: "Menstrual Phase (Days 1–5)", short: "Menstrual", tag: "Deload & Restorative", color: "text-sky-400 border-sky-500/40 bg-sky-950/60", mod: 0.85, tip: "Higher baseline fatigue. Focus on form, gentle tempo, and warm hydration." },
+      follicular: { name: "Follicular Phase (Days 6–13)", short: "Follicular", tag: "Peak Strength & Power", color: "text-rose-400 border-rose-500/40 bg-rose-950/60", mod: 1.0, tip: "High insulin sensitivity & estrogen surge. Prime window for progressive weight jumps." },
+      ovulatory: { name: "Ovulatory Phase (Days 14–16)", short: "Ovulatory", tag: "Max Energy & PR Window", color: "text-fuchsia-400 border-fuchsia-500/40 bg-fuchsia-950/60", mod: 1.05, tip: "Peak testosterone & estrogen. Push for personal bests and maximum repetitions." },
+      luteal: { name: "Luteal Phase (Days 17–28)", short: "Luteal", tag: "Steady Tempo & Recovery", color: "text-amber-400 border-amber-500/40 bg-amber-950/60", mod: 0.9, tip: "Elevated core body temperature & cortisol sensitivity. Keep rests strict and hydrate with 3L+." }
     };
 
-    // --- Master Exercise Database with Visual Media ---
+    // --- Master Exercise Database with Full Form Instructions ---
     const EXERCISE_DATA = {
       beginner: {
         A: [
-          { id: "b_a1", name: "Chair / Box Squats", target: "Glutes & Quads", primary: "quads", sets: 3, reps: 10, rest: 60, tempo: "3-0-1", defaultKg: 0, img: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Sit back onto chair, tap lightly, drive through heels to stand." },
-          { id: "b_a2", name: "Incline Push-Ups", target: "Chest & Shoulders", primary: "chest", sets: 3, reps: 8, rest: 60, tempo: "2-0-1", defaultKg: 0, img: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=600&q=80", cues: "Hands on counter. Keep core locked without hip sag." },
-          { id: "b_a3", name: "Bodyweight Glute Bridges", target: "Gluteus Maximus", primary: "glutes", sets: 3, reps: 12, rest: 45, tempo: "2-2-1", defaultKg: 0, img: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80", cues: "Squeeze glutes hard at the top. Keep ribs drawn downward." },
-          { id: "b_a4", name: "Seated DB Overhead Press", target: "Deltoids", primary: "shoulders", sets: 3, reps: 10, rest: 60, tempo: "2-0-1", defaultKg: 3.0, img: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=600&q=80", cues: "Press overhead smoothly without arching lower back." },
-          { id: "b_a5", name: "Deadbugs", target: "Core & Abdominals", primary: "core", sets: 3, reps: 8, rest: 45, tempo: "Slow", defaultKg: 0, img: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=600&q=80", cues: "Press lower back firmly into the floor as limbs extend." }
+          { id: "b_a1", name: "Chair / Box Squats", target: "Glutes & Quads", primary: "quads", sets: 3, reps: 10, rest: 60, tempo: "3-0-1", defaultKg: 0, img: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Sit back onto chair, tap lightly, drive through heels to stand.", execution: ["Stand 10cm in front of a sturdy chair with feet shoulder-width apart.", "Hinge hips backward and descend under control for 3 seconds.", "Lightly brush the chair seat without relaxing your core tension.", "Drive aggressively through your heels to stand tall, locking glutes at the top."] },
+          { id: "b_a2", name: "Incline Push-Ups", target: "Chest & Shoulders", primary: "chest", sets: 3, reps: 8, rest: 60, tempo: "2-0-1", defaultKg: 0, img: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=600&q=80", cues: "Hands on counter. Keep core locked without hip sag.", execution: ["Place hands slightly wider than shoulder-width on an elevated sturdy counter.", "Create a rigid straight line from your ears to your ankles.", "Lower your chest toward the edge for 2 seconds with elbows at 45°.", "Press the counter away powerfully while bracing your abdominals."] },
+          { id: "b_a3", name: "Bodyweight Glute Bridges", target: "Gluteus Maximus", primary: "glutes", sets: 3, reps: 12, rest: 45, tempo: "2-2-1", defaultKg: 0, img: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80", cues: "Squeeze glutes hard at the top. Keep ribs drawn downward.", execution: ["Lie flat on your back with knees bent and feet flat on floor hip-width apart.", "Flatten your lower spine against the mat by engaging your deep core.", "Drive through heels to lift hips until thighs and torso align.", "Squeeze glutes hard for 2 full seconds at the peak before lowering."] },
+          { id: "b_a4", name: "Seated DB Overhead Press", target: "Deltoids", primary: "shoulders", sets: 3, reps: 10, rest: 60, tempo: "2-0-1", defaultKg: 3.0, img: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=600&q=80", cues: "Press overhead smoothly without arching lower back.", execution: ["Sit upright with core braced and feet grounded.", "Hold dumbbells at shoulder height with palms facing forward.", "Press weights straight up overhead until arms are extended without clinking weights.", "Lower slowly back to ear level over 2 seconds."] },
+          { id: "b_a5", name: "Deadbugs", target: "Core & Abdominals", primary: "core", sets: 3, reps: 8, rest: 45, tempo: "Slow", defaultKg: 0, img: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=600&q=80", cues: "Press lower back firmly into the floor as limbs extend.", execution: ["Lie on back with arms pointed to ceiling and knees at 90° table-top.", "Clamp lower back firmly into floor—zero arching permitted.", "Slowly extend right arm overhead and left leg straight out toward floor.", "Return to start and repeat with opposite limbs under strict control."] }
         ],
         B: [
-          { id: "b_b1", name: "Supported DB Rows", target: "Lats & Mid-Back", primary: "lats", sets: 3, reps: 10, rest: 60, tempo: "2-1-1", defaultKg: 4.0, img: "https://images.unsplash.com/photo-1605296867304-46d5465a13f1?auto=format&fit=crop&w=600&q=80", cues: "Support with hand on bench. Pull elbow to hip pocket." },
-          { id: "b_b2", name: "Supported Split Squats", target: "Glutes & Quads", primary: "glutes", sets: 3, reps: 8, rest: 60, tempo: "2-0-1", defaultKg: 0, img: "https://images.unsplash.com/photo-1434682881908-b43d0467b798?auto=format&fit=crop&w=600&q=80", cues: "Hold chair for balance. Drop back knee straight down." },
-          { id: "b_b3", name: "Side Clamshells", target: "Gluteus Medius", primary: "glutes", sets: 3, reps: 12, rest: 45, tempo: "2-1-1", defaultKg: 0, img: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80", cues: "Keep hips stacked. Open top knee with control." },
-          { id: "b_b4", name: "Standing DB Curls", target: "Biceps", primary: "lats", sets: 3, reps: 10, rest: 45, tempo: "2-0-1", defaultKg: 3.0, img: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=600&q=80", cues: "Pin elbows to sides. Squeeze biceps at the top." },
-          { id: "b_b5", name: "Bird-Dogs", target: "Erector Spinae", primary: "back", sets: 3, reps: 8, rest: 45, tempo: "Slow", defaultKg: 0, img: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=600&q=80", cues: "Reach arm and opposite leg out without back twisting." }
+          { id: "b_b1", name: "Supported DB Rows", target: "Lats & Mid-Back", primary: "lats", sets: 3, reps: 10, rest: 60, tempo: "2-1-1", defaultKg: 4.0, img: "https://images.unsplash.com/photo-1605296867304-46d5465a13f1?auto=format&fit=crop&w=600&q=80", cues: "Support with hand on bench. Pull elbow to hip pocket.", execution: ["Place left knee and hand on bench; keep spine flat.", "Hold dumbbell in right hand hanging straight down.", "Pull elbow toward your back hip pocket, retracting shoulder blade.", "Pause for 1 second at top squeeze; lower slowly."] },
+          { id: "b_b2", name: "Supported Split Squats", target: "Glutes & Quads", primary: "glutes", sets: 3, reps: 8, rest: 60, tempo: "2-0-1", defaultKg: 0, img: "https://images.unsplash.com/photo-1434682881908-b43d0467b798?auto=format&fit=crop&w=600&q=80", cues: "Hold chair for balance. Drop back knee straight down.", execution: ["Take a long staggered stride with front foot flat.", "Hold a wall or chair for light balance support.", "Lower back knee straight toward the floor until front thigh is parallel.", "Drive through front heel to return to top."] },
+          { id: "b_b3", name: "Side Clamshells", target: "Gluteus Medius", primary: "glutes", sets: 3, reps: 12, rest: 45, tempo: "2-1-1", defaultKg: 0, img: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80", cues: "Keep hips stacked. Open top knee with control.", execution: ["Lie on side with knees bent at 90° and feet glued together.", "Keep pelvis tilted slightly forward to avoid rolling backward.", "Rotate top knee upward as high as possible while keeping feet joined.", "Hold top contraction for 1 second before closing."] },
+          { id: "b_b4", name: "Standing DB Curls", target: "Biceps", primary: "lats", sets: 3, reps: 10, rest: 45, tempo: "2-0-1", defaultKg: 3.0, img: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=600&q=80", cues: "Pin elbows to sides. Squeeze biceps at the top.", execution: ["Stand tall with dumbbells at sides and palms forward.", "Lock elbows against your ribs; curl weights upward.", "Squeeze biceps hard at shoulder level.", "Lower under control for 2 seconds without body swinging."] }
         ],
         C: [
-          { id: "b_c1", name: "Low Step-Ups", target: "Glutes & Quads", primary: "glutes", sets: 3, reps: 8, rest: 60, tempo: "2-0-1", defaultKg: 0, img: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Drive purely through the elevated heel." },
-          { id: "b_c2", name: "Light DB Romanian Deadlift", target: "Hamstrings", primary: "hamstrings", sets: 3, reps: 10, rest: 60, tempo: "3-0-1", defaultKg: 4.0, img: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=600&q=80", cues: "Hinge at the hips with flat back and soft knees." },
-          { id: "b_c3", name: "DB Floor Chest Press", target: "Chest", primary: "chest", sets: 3, reps: 10, rest: 60, tempo: "2-0-1", defaultKg: 3.0, img: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=600&q=80", cues: "Lie flat on floor. Press dumbbells up in smooth arc." },
-          { id: "b_c4", name: "Prone Y-Raises", target: "Deltoids & Back", primary: "shoulders", sets: 3, reps: 12, rest: 45, tempo: "2-1-1", defaultKg: 0, img: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=600&q=80", cues: "Lie face down, thumbs up, raise arms into Y shape." }
+          { id: "b_c1", name: "Low Step-Ups", target: "Glutes & Quads", primary: "glutes", sets: 3, reps: 8, rest: 60, tempo: "2-0-1", defaultKg: 0, img: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Drive purely through the elevated heel.", execution: ["Place entire right foot on a low sturdy step.", "Drive through the right heel to lift your body without pushing off rear toes.", "Stand tall at the top; step down softly under control."] },
+          { id: "b_c2", name: "Light DB Romanian Deadlift", target: "Hamstrings", primary: "hamstrings", sets: 3, reps: 10, rest: 60, tempo: "3-0-1", defaultKg: 4.0, img: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=600&q=80", cues: "Hinge at the hips with flat back and soft knees.", execution: ["Stand with feet hip-width apart holding dumbbells against thighs.", "Maintain a soft knee bend; push hips straight backward.", "Slide weights down your shins until you feel a deep hamstring stretch.", "Drive hips forward to stand, squeezing glutes."] }
         ]
       },
       intermediate: {
         A: [
-          { id: "i_a1", name: "Dumbbell Goblet Squats", target: "Quadriceps & Glutes", primary: "quads", sets: 3, reps: 12, rest: 60, tempo: "3-0-1", defaultKg: 7.5, img: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Drive through midfoot and heels. Keep chest tall, brace core at bottom." },
-          { id: "i_a2", name: "Dumbbell Floor Press", target: "Chest & Triceps", primary: "chest", sets: 3, reps: 12, rest: 60, tempo: "2-0-1", defaultKg: 5.0, img: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=600&q=80", cues: "Upper arms tap floor lightly at 45° angle to protect shoulders." },
-          { id: "i_a3", name: "Dumbbell Romanian Deadlifts", target: "Hamstrings & Glutes", primary: "hamstrings", sets: 3, reps: 12, rest: 60, tempo: "3-1-1", defaultKg: 7.5, img: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=600&q=80", cues: "Hinge hips back. Keep dumbbells skimming shins with flat spine." },
-          { id: "i_a4", name: "Seated DB Overhead Press", target: "Deltoids", primary: "shoulders", sets: 3, reps: 10, rest: 60, tempo: "2-0-1", defaultKg: 4.0, img: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=600&q=80", cues: "Maintain vertical spine. Avoid lower back arching." },
-          { id: "i_a5", name: "DB Lateral Raises", target: "Lateral Deltoids", primary: "shoulders", sets: 3, reps: 12, rest: 45, tempo: "2-1-1", defaultKg: 2.5, img: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=600&q=80", cues: "Lead with elbows with slight forward torso lean." }
+          { id: "i_a1", name: "Dumbbell Goblet Squats", target: "Quadriceps & Glutes", primary: "quads", sets: 3, reps: 12, rest: 60, tempo: "3-0-1", defaultKg: 7.5, img: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Drive through midfoot and heels. Keep chest tall, brace core at bottom.", execution: ["Hold a dumbbell vertically against your sternum with both hands cupping the top head.", "Set feet shoulder-width apart with toes turned out 15–20°.", "Inhale deep into your belly; descend for 3 full seconds until hips break parallel.", "Drive feet through floor to explode up, exhaling at lockout."] },
+          { id: "i_a2", name: "Dumbbell Floor Press", target: "Chest & Triceps", primary: "chest", sets: 3, reps: 12, rest: 60, tempo: "2-0-1", defaultKg: 5.0, img: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=600&q=80", cues: "Upper arms tap floor lightly at 45° angle to protect shoulders.", execution: ["Lie on floor with knees bent and feet planted.", "Hold dumbbells with elbows flared at a 45° arrow angle from torso.", "Lower weights until triceps lightly brush the floor.", "Press weights straight up in an arc over your chest."] },
+          { id: "i_a3", name: "Dumbbell Romanian Deadlifts", target: "Hamstrings & Glutes", primary: "hamstrings", sets: 3, reps: 12, rest: 60, tempo: "3-1-1", defaultKg: 7.5, img: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=600&q=80", cues: "Hinge hips back. Keep dumbbells skimming shins with flat spine.", execution: ["Hold dumbbells against thighs with lats locked down like holding oranges in armpits.", "Hinge hips backward toward the wall behind you with minimal knee bend.", "Lower weights to mid-shin level until hamstrings are fully loaded.", "Drive hips forward powerfully to return to start."] },
+          { id: "i_a4", name: "Seated DB Overhead Press", target: "Deltoids", primary: "shoulders", sets: 3, reps: 10, rest: 60, tempo: "2-0-1", defaultKg: 4.0, img: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=600&q=80", cues: "Maintain vertical spine. Avoid lower back arching.", execution: ["Sit on bench with core braced tightly.", "Hold dumbbells at collarbone level with elbows under wrists.", "Press straight overhead to full elbow extension without overarching spine.", "Lower weights back down to chin height over 2 seconds."] },
+          { id: "i_a5", name: "DB Lateral Raises", target: "Lateral Deltoids", primary: "shoulders", sets: 3, reps: 12, rest: 45, tempo: "2-1-1", defaultKg: 2.5, img: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=600&q=80", cues: "Lead with elbows with slight forward torso lean.", execution: ["Stand with slight forward hip hinge holding light dumbbells at sides.", "Lead with your elbows, raising arms out to sides in scapular plane (30° forward).", "Pause at parallel for 1 second feeling lateral shoulder burn.", "Lower under control for 2 seconds."] }
         ],
         B: [
-          { id: "i_b1", name: "Weighted Hip Thrust", target: "Gluteus Maximus", primary: "glutes", sets: 3, reps: 15, rest: 60, tempo: "2-2-1", defaultKg: 10.0, img: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80", cues: "Lock out glutes at top with ribs down and chin tucked." },
-          { id: "i_b2", name: "Single-Arm DB Row", target: "Lats & Waist Taper", primary: "lats", sets: 3, reps: 10, rest: 60, tempo: "2-1-1", defaultKg: 6.0, img: "https://images.unsplash.com/photo-1605296867304-46d5465a13f1?auto=format&fit=crop&w=600&q=80", cues: "Pull elbow to hip pocket without rotating torso." },
-          { id: "i_b3", name: "DB Deficit Reverse Lunges", target: "Glutes & Quads", primary: "glutes", sets: 3, reps: 10, rest: 60, tempo: "2-0-1", defaultKg: 5.0, img: "https://images.unsplash.com/photo-1434682881908-b43d0467b798?auto=format&fit=crop&w=600&q=80", cues: "Deep step back with vertical front shin for glute stretch." },
-          { id: "i_b4", name: "Banded Face Pulls", target: "Deltoids & Posture", primary: "shoulders", sets: 3, reps: 15, rest: 45, tempo: "2-2-1", defaultKg: 0, img: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=600&q=80", cues: "Pull to eye level, rotating hands outward at contraction." },
-          { id: "i_b5", name: "Deadbugs (Pelvic Locked)", target: "Core & Abdominals", primary: "core", sets: 3, reps: 10, rest: 45, tempo: "Slow", defaultKg: 0, img: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=600&q=80", cues: "Flatten lower back into the mat as opposite limbs extend." }
+          { id: "i_b1", name: "Weighted Hip Thrust", target: "Gluteus Maximus", primary: "glutes", sets: 3, reps: 15, rest: 60, tempo: "2-2-1", defaultKg: 10.0, img: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80", cues: "Lock out glutes at top with ribs down and chin tucked.", execution: ["Rest upper back against bench edge just below shoulder blades.", "Place dumbbell across hip crease with hands holding it steady.", "Feet flat, shins vertical at top; drive through heels to full hip extension.", "Hold top squeeze for 2 full seconds with chin tucked looking forward."] },
+          { id: "i_b2", name: "Single-Arm DB Row", target: "Lats & Waist Taper", primary: "lats", sets: 3, reps: 10, rest: 60, tempo: "2-1-1", defaultKg: 6.0, img: "https://images.unsplash.com/photo-1605296867304-46d5465a13f1?auto=format&fit=crop&w=600&q=80", cues: "Pull elbow to hip pocket without rotating torso.", execution: ["Brace one arm on a sturdy surface with flat, parallel spine.", "Let weight hang straight down, opening mid-back.", "Drive elbow upward and backward toward your back hip pocket.", "Squeeze lat at peak for 1 second before lowering slowly."] },
+          { id: "i_b3", name: "DB Deficit Reverse Lunges", target: "Glutes & Quads", primary: "glutes", sets: 3, reps: 10, rest: 60, tempo: "2-0-1", defaultKg: 5.0, img: "https://images.unsplash.com/photo-1434682881908-b43d0467b798?auto=format&fit=crop&w=600&q=80", cues: "Deep step back with vertical front shin for glute stretch.", execution: ["Stand tall holding dumbbells at sides.", "Take a large step backward, keeping front shin vertical and torso leaning forward 15°.", "Lower back knee until it hovers 2cm off the mat.", "Drive through front heel to return to standing."] },
+          { id: "i_b4", name: "Banded Face Pulls", target: "Deltoids & Posture", primary: "shoulders", sets: 3, reps: 15, rest: 45, tempo: "2-2-1", defaultKg: 0, img: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=600&q=80", cues: "Pull to eye level, rotating hands outward at contraction.", execution: ["Anchor resistance band at eye height.", "Grasp band with knuckles facing you; pull toward your nose/eyes.", "Rotate hands outward at the end range so forearms make a double bicep pose.", "Hold rear delt squeeze for 2 seconds before returning."] },
+          { id: "i_b5", name: "Deadbugs (Pelvic Locked)", target: "Core & Abdominals", primary: "core", sets: 3, reps: 10, rest: 45, tempo: "Slow", defaultKg: 0, img: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=600&q=80", cues: "Flatten lower back into the mat as opposite limbs extend.", execution: ["Lie on mat with knees bent at 90° and arms pointing to ceiling.", "Exhale all air and press lower back into the floor.", "Slowly reach right arm back and left leg forward simultaneously.", "Return to start and repeat opposite side with zero pelvic rocking."] }
         ],
         C: [
-          { id: "i_c1", name: "DB Step-Ups", target: "Gluteus Maximus", primary: "glutes", sets: 3, reps: 10, rest: 60, tempo: "2-0-1", defaultKg: 4.0, img: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Drive exclusively through the elevated heel." },
-          { id: "i_c2", name: "Dumbbell Thrusters", target: "Quadriceps & Deltoids", primary: "quads", sets: 3, reps: 10, rest: 60, tempo: "1-0-1", defaultKg: 4.0, img: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=600&q=80", cues: "Use upward leg momentum to press dumbbells overhead." },
-          { id: "i_c3", name: "DB Renegade Rows", target: "Core & Lats", primary: "core", sets: 3, reps: 8, rest: 60, tempo: "2-0-1", defaultKg: 5.0, img: "https://images.unsplash.com/photo-1605296867304-46d5465a13f1?auto=format&fit=crop&w=600&q=80", cues: "Widen feet to keep hips motionless without twisting." },
-          { id: "i_c4", name: "DB Sumo Squats", target: "Inner Thigh & Glutes", primary: "quads", sets: 3, reps: 12, rest: 60, tempo: "3-0-1", defaultKg: 8.0, img: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Wide stance, push knees out over toes." }
+          { id: "i_c1", name: "DB Step-Ups", target: "Gluteus Maximus", primary: "glutes", sets: 3, reps: 10, rest: 60, tempo: "2-0-1", defaultKg: 4.0, img: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Drive exclusively through the elevated heel.", execution: ["Place one foot entirely on an elevated bench or box holding dumbbells.", "Lean forward slightly from hip to direct load to the glute.", "Drive heel through box to rise without jumping off trailing foot.", "Step down slowly over 2 seconds."] },
+          { id: "i_c2", name: "Dumbbell Thrusters", target: "Quadriceps & Deltoids", primary: "quads", sets: 3, reps: 10, rest: 60, tempo: "1-0-1", defaultKg: 4.0, img: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=600&q=80", cues: "Use upward leg momentum to press dumbbells overhead.", execution: ["Hold dumbbells at shoulders in a front-rack position.", "Squat deep into a full goblet squat.", "Explode upward through legs, using momentum to launch dumbbells overhead.", "Catch weights at shoulders as you transition directly into the next squat."] },
+          { id: "i_c3", name: "DB Renegade Rows", target: "Core & Lats", primary: "core", sets: 3, reps: 8, rest: 60, tempo: "2-0-1", defaultKg: 5.0, img: "https://images.unsplash.com/photo-1605296867304-46d5465a13f1?auto=format&fit=crop&w=600&q=80", cues: "Widen feet to keep hips motionless without twisting.", execution: ["Set up in a push-up plank holding dumbbell handles; feet wide for base.", "Lock hips completely square to the floor.", "Row right dumbbell to ribs without rotating pelvis.", "Place down and repeat on left side with rigid core."] },
+          { id: "i_c4", name: "DB Sumo Squats", target: "Inner Thigh & Glutes", primary: "quads", sets: 3, reps: 12, rest: 60, tempo: "3-0-1", defaultKg: 8.0, img: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Wide stance, push knees out over toes.", execution: ["Take a wide stance (1.5x shoulder width) with toes turned out 45°.", "Hold heavy dumbbell hanging between legs.", "Squat straight down pushing knees wide over toes.", "Drive through heels to stand, squeezing adductors and glutes."] }
         ]
       },
       advanced: {
         A: [
-          { id: "a_a1", name: "1.5-Rep DB Goblet Squats", target: "Quadriceps & Glutes", primary: "quads", sets: 4, reps: 12, rest: 45, tempo: "3-1-1", defaultKg: 10.0, img: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Squat deep, come halfway up, return to bottom, then stand." },
-          { id: "a_a2", name: "Superset: DB RDL + Floor Press", target: "Hamstrings & Chest", primary: "hamstrings", sets: 4, reps: 12, rest: 45, tempo: "2-0-1", defaultKg: 9.0, img: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=600&q=80", cues: "Hinge through RDLs, then immediately perform floor presses." },
-          { id: "a_a3", name: "Bulgarian Split Squats", target: "Gluteus Maximus", primary: "glutes", sets: 4, reps: 10, rest: 45, tempo: "3-0-1", defaultKg: 7.5, img: "https://images.unsplash.com/photo-1434682881908-b43d0467b798?auto=format&fit=crop&w=600&q=80", cues: "Rear foot elevated on bench. Lean torso forward for glute load." },
-          { id: "a_a4", name: "Strict Seated Lateral Raises", target: "Deltoids", primary: "shoulders", sets: 4, reps: 15, rest: 30, tempo: "2-1-2", defaultKg: 3.5, img: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=600&q=80", cues: "Pause 1 second at parallel without body swing." }
+          { id: "a_a1", name: "1.5-Rep DB Goblet Squats", target: "Quadriceps & Glutes", primary: "quads", sets: 4, reps: 12, rest: 45, tempo: "3-1-1", defaultKg: 10.0, img: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Squat deep, come halfway up, return to bottom, then stand.", execution: ["Hold heavy dumbbell at chest in goblet position.", "Descend deep for 3 seconds into bottom of squat.", "Rise halfway up, pause for 1 second, descend back to deep bottom.", "Drive through heels to stand fully. That is 1 repetition."] },
+          { id: "a_a2", name: "Superset: DB RDL + Floor Press", target: "Hamstrings & Chest", primary: "hamstrings", sets: 4, reps: 12, rest: 45, tempo: "2-0-1", defaultKg: 9.0, img: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=600&q=80", cues: "Hinge through RDLs, then immediately perform floor presses.", execution: ["Perform 12 strict DB Romanian deadlifts with hip hinge.", "Immediately drop to mat and perform 12 DB floor chest presses.", "Rest only after completing both movements back-to-back."] }
         ],
         B: [
-          { id: "a_b1", name: "Single-Leg DB Hip Thrust", target: "Gluteus Maximus", primary: "glutes", sets: 4, reps: 12, rest: 45, tempo: "2-2-1", defaultKg: 6.0, img: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80", cues: "One foot grounded, lock out glute at top with level hips." },
-          { id: "a_b2", name: "DB Renegade Row to Push-Up", target: "Core & Chest", primary: "core", sets: 4, reps: 8, rest: 45, tempo: "Controlled", defaultKg: 6.0, img: "https://images.unsplash.com/photo-1605296867304-46d5465a13f1?auto=format&fit=crop&w=600&q=80", cues: "Row right, row left, then execute full push-up." },
-          { id: "a_b3", name: "DB Curtsy Lunges", target: "Gluteus Medius", primary: "glutes", sets: 4, reps: 12, rest: 45, tempo: "2-0-1", defaultKg: 6.0, img: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Step diagonally behind front leg to isolate upper glute." },
-          { id: "a_b4", name: "Weighted Deadbugs", target: "Core & Abdominals", primary: "core", sets: 4, reps: 15, rest: 30, tempo: "Slow", defaultKg: 2.5, img: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=600&q=80", cues: "Hold dumbbells over chest. Move limbs with precision." }
+          { id: "a_b1", name: "Single-Leg DB Hip Thrust", target: "Gluteus Maximus", primary: "glutes", sets: 4, reps: 12, rest: 45, tempo: "2-2-1", defaultKg: 6.0, img: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80", cues: "One foot grounded, lock out glute at top with level hips.", execution: ["Upper back on bench; lift one leg off floor bent at 90°.", "Drive grounded heel through floor to full hip extension.", "Hold 2 second peak contraction with pelvis perfectly level.", "Lower under control and repeat."] }
         ],
         C: [
-          { id: "a_c1", name: "Clean to Squat to Press", target: "Quadriceps & Deltoids", primary: "quads", sets: 4, reps: 10, rest: 45, tempo: "Continuous", defaultKg: 6.0, img: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=600&q=80", cues: "Hinge, catch at shoulders, squat deep, press overhead." },
-          { id: "a_c2", name: "DB Sumo Squat Pulses", target: "Quadriceps & Glutes", primary: "quads", sets: 4, reps: 15, rest: 30, tempo: "Pulse", defaultKg: 10.0, img: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Stay in bottom half of squat for constant tension." },
-          { id: "a_c3", name: "DB RDL to Bent Row", target: "Hamstrings & Lats", primary: "hamstrings", sets: 4, reps: 10, rest: 45, tempo: "Controlled", defaultKg: 8.0, img: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=600&q=80", cues: "Hinge to bottom of deadlift, perform strict row, stand." }
+          { id: "a_c1", name: "Clean to Squat to Press", target: "Quadriceps & Deltoids", primary: "quads", sets: 4, reps: 10, rest: 45, tempo: "Continuous", defaultKg: 6.0, img: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=600&q=80", cues: "Hinge, catch at shoulders, squat deep, press overhead.", execution: ["Hinge and pull dumbbells from shins to shoulders in a clean.", "Immediately descend into deep front squat.", "Explode upward and press dumbbells overhead in one fluid complex."] }
         ]
       }
     };
 
-    // --- 7-Day Meal Plan with Real Food Media ---
+    // --- 7-Day Meal Plan with Step-by-Step Cooking (No Prices) ---
     const SA_MEALS = [
       {
         day: "Monday",
@@ -376,6 +366,7 @@
       const [difficulty, setDifficulty] = useState(() => getStored("m60_diff", "intermediate"));
       const [workoutDay, setWorkoutDay] = useState(() => getStored("m60_day", "A"));
       const [focusedId, setFocusedId] = useState("i_a1");
+      const [expandedExerciseId, setExpandedExerciseId] = useState(null);
       
       const [weights, setWeights] = useState(() => getStored("m60_weights", {}));
       const [completedSets, setCompletedSets] = useState(() => getStored("m60_sets", {}));
@@ -574,6 +565,14 @@
         }
       };
 
+      const startManualTimer = (seconds) => {
+        setTargetRestSec(seconds);
+        setRestSec(seconds);
+        setIsResting(true);
+        triggerHaptic(15);
+        playBeep(580, 0.08);
+      };
+
       const toggleGroceryItem = (item) => {
         setCheckedGroceries(prev => ({ ...prev, [item]: !prev[item] }));
         triggerHaptic(12);
@@ -588,7 +587,7 @@
       };
 
       const shareWorkoutSummary = () => {
-        const summaryText = `⚡ metabolic60 Workout Complete!\n🏋️ Workout ${workoutDay} (${difficulty.toUpperCase()})\n💪 ${completedSetsCount}/${totalSetsCount} Sets Completed\n🔥 ${liveSessionVolume.toLocaleString()} kg Volume Moved\n🗓️ Cycle Day ${cycle.day} (${cycle.info.name.split(' ')[0]})\n#metabolic60 #${userProfile.somatotype}Protocol`;
+        const summaryText = `⚡ metabolic60 Workout Complete!\n🏋️ Workout ${workoutDay} (${difficulty.toUpperCase()})\n💪 ${completedSetsCount}/${totalSetsCount} Sets Completed\n🔥 ${liveSessionVolume.toLocaleString()} kg Volume Moved\n🗓️ Cycle Day ${cycle.day} (${cycle.info.short})\n#metabolic60 #${userProfile.somatotype}Protocol`;
         
         if (navigator.clipboard) {
           navigator.clipboard.writeText(summaryText).then(() => {
@@ -707,31 +706,59 @@
             {tab === "train" && (
               <div className="space-y-3.5">
                 
-                {/* Personalized Greeting Card */}
-                <div className="card-dark p-4 rounded-3xl space-y-2 border-amber-500/30">
+                {/* 1. DIRECT MENSTRUAL CYCLE & TRAINING MODIFIER INPUT (IN TRAIN TAB) */}
+                <div className="card-dark p-3.5 rounded-3xl space-y-2.5 border-rose-500/30">
                   <div className="flex justify-between items-center">
-                    <span className="text-[10px] font-bold text-amber-400 uppercase tracking-widest">Personalized Coach</span>
-                    <span className="text-[10px] font-bold text-slate-400">{userProfile.somatotype} Protocol</span>
+                    <span className="text-[9px] font-bold text-rose-400 uppercase tracking-widest">Menstrual Phase & Load Sync</span>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${cycle.info.color}`}>
+                      Day {cycle.day} • {cycle.info.short} ({Math.round(cycle.info.mod * 100)}% Load)
+                    </span>
                   </div>
-                  <h2 className="text-sm font-black text-white">Ready for Workout {workoutDay}, {userProfile.name}?</h2>
-                  <p className="text-xs text-slate-300 leading-relaxed">
-                    Target: <strong className="text-rose-400">{userProfile.goal}</strong>. You are in your <strong>{cycle.info.name}</strong>. {cycle.info.tip}
+
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                      <label className="block text-[8px] font-bold text-slate-400 uppercase mb-1">Period Start Date</label>
+                      <input
+                        type="date"
+                        value={periodStart}
+                        onChange={e => setPeriodStart(e.target.value)}
+                        className="w-full bg-transparent text-[11px] font-bold text-white focus:outline-none"
+                      />
+                    </div>
+                    <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                      <div className="flex justify-between text-[8px] font-bold text-slate-400 uppercase mb-1">
+                        <span>Cycle Length</span>
+                        <span className="text-rose-400">{cycleLen}d</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="21"
+                        max="35"
+                        value={cycleLen}
+                        onChange={e => setCycleLen(Number(e.target.value))}
+                        className="w-full h-1 bg-slate-900 rounded accent-rose-500 mt-1.5"
+                      />
+                    </div>
+                  </div>
+
+                  <p className="text-[10px] text-slate-300 bg-slate-950/60 p-2 rounded-xl leading-relaxed">
+                    💡 <strong>{cycle.info.tag}:</strong> {cycle.info.tip}
                   </p>
                 </div>
 
-                {/* Real-time Session Volume & Sets Live HUD */}
+                {/* 2. REAL-TIME SESSION VOLUME & STATS */}
                 <div className="card-dark p-3 rounded-2xl flex items-center justify-between shadow-sm">
                   <div>
                     <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Live Session Load</span>
                     <p className="text-xs font-black text-amber-400 font-mono">{liveSessionVolume.toLocaleString()} kg Moved</p>
                   </div>
                   <div className="text-right">
-                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Progress</span>
-                    <p className="text-xs font-black text-white font-mono">{completedSetsCount} / {totalSetsCount} Sets</p>
+                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Workout Progress</span>
+                    <p className="text-xs font-black text-white font-mono">{completedSetsCount} / {totalSetsCount} Sets Done</p>
                   </div>
                 </div>
 
-                {/* 3-Tier Difficulty Selector (Synced with Profile) */}
+                {/* 3. 3-TIER DIFFICULTY SELECTOR */}
                 <div className="card-dark p-1 rounded-2xl flex gap-1 shadow-sm">
                   {["beginner", "intermediate", "advanced"].map(tier => (
                     <button
@@ -751,36 +778,54 @@
                   ))}
                 </div>
 
-                {/* Day Selector & Tempo */}
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex gap-1.5 flex-1">
-                    {["A", "B", "C"].map(d => (
-                      <button
-                        key={d}
-                        onClick={() => { 
-                          setWorkoutDay(d); 
-                          setFocusedId(EXERCISE_DATA[difficulty][d][0].id);
-                          triggerHaptic(10);
-                        }}
-                        className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all border ${
-                          workoutDay === d ? "bg-slate-800 text-rose-400 border-rose-500/50 shadow" : "card-dark text-slate-400"
-                        }`}
-                      >
-                        Workout {d}
-                      </button>
-                    ))}
+                {/* 4. DAY SELECTOR & QUICK REST TIMER PRESETS */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex gap-1.5 flex-1">
+                      {["A", "B", "C"].map(d => (
+                        <button
+                          key={d}
+                          onClick={() => { 
+                            setWorkoutDay(d); 
+                            setFocusedId(EXERCISE_DATA[difficulty][d][0].id);
+                            triggerHaptic(10);
+                          }}
+                          className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all border ${
+                            workoutDay === d ? "bg-slate-800 text-rose-400 border-rose-500/50 shadow" : "card-dark text-slate-400"
+                          }`}
+                        >
+                          Workout {d}
+                        </button>
+                      ))}
+                    </div>
+                    <button
+                      onClick={() => { setShowTempo(!showTempo); triggerHaptic(12); }}
+                      className="card-dark px-3 py-2 rounded-xl text-xs font-bold text-slate-300 hover:text-white"
+                    >
+                      ⏱️ 3-0-1 Tempo
+                    </button>
                   </div>
-                  <button
-                    onClick={() => { setShowTempo(!showTempo); triggerHaptic(12); }}
-                    className="card-dark px-3 py-2 rounded-xl text-xs font-bold text-slate-300 hover:text-white"
-                  >
-                    ⏱️ Tempo
-                  </button>
+
+                  {/* Manual Quick-Timer Presets */}
+                  <div className="card-dark p-2.5 rounded-2xl flex items-center justify-between gap-2">
+                    <span className="text-[9px] font-bold uppercase text-slate-400">Quick Rest:</span>
+                    <div className="flex gap-1.5">
+                      {[30, 45, 60, 90].map(s => (
+                        <button
+                          key={s}
+                          onClick={() => startManualTimer(s)}
+                          className="bg-slate-950 hover:bg-slate-800 text-slate-300 px-2.5 py-1 rounded-lg text-[10px] font-bold border border-slate-800"
+                        >
+                          {s}s
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
 
-                {/* Integrated Rest Timer Banner with Circular Arc HUD */}
+                {/* 5. ACTIVE REST TIMER BANNER (WITH CIRCULAR ARC) */}
                 {isResting && (
-                  <div className="card-dark border-amber-500/50 p-3 rounded-2xl flex items-center justify-between">
+                  <div className="card-dark border-amber-500/50 p-3 rounded-2xl flex items-center justify-between animate-pulse">
                     <div className="flex items-center gap-3">
                       <svg width="40" height="40" className="w-10 h-10 shrink-0">
                         <circle cx="20" cy="20" r={arcRadius} stroke="#1e293b" strokeWidth="3.5" fill="transparent" />
@@ -799,8 +844,8 @@
                         <text x="20" y="24" textAnchor="middle" fill="#ffffff" fontSize="10" fontWeight="bold">{restSec}s</text>
                       </svg>
                       <div>
-                        <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Resting Phase</span>
-                        <p className="text-xs font-bold text-amber-400">Next set ready soon</p>
+                        <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Rest Countdown</span>
+                        <p className="text-xs font-bold text-amber-400">Catch your breath for next set</p>
                       </div>
                     </div>
                     <button onClick={() => { setIsResting(false); triggerHaptic(10); }} className="text-[10px] text-slate-400 underline">
@@ -809,11 +854,11 @@
                   </div>
                 )}
 
-                {/* Metronome Modal Drawer */}
+                {/* 6. METRONOME DRAWER */}
                 {showTempo && (
                   <div className="card-dark p-4 rounded-2xl text-center space-y-3 border-amber-500/40">
                     <div className="flex justify-between items-center">
-                      <span className="text-xs font-bold text-amber-400">3-0-1 Rep Pacer</span>
+                      <span className="text-xs font-bold text-amber-400">3-0-1 Rep Metronome</span>
                       <button onClick={() => setShowTempo(false)} className="text-xs text-slate-400">✕</button>
                     </div>
                     <div className="py-3 bg-slate-950 rounded-xl">
@@ -826,18 +871,19 @@
                         tempoRunning ? "bg-amber-600 text-white" : "bg-slate-800 text-slate-200"
                       }`}
                     >
-                      {tempoRunning ? "Pause Pacer" : "Start 3-0-1 Pacer"}
+                      {tempoRunning ? "Pause Metronome" : "Start 3-0-1 Metronome"}
                     </button>
                   </div>
                 )}
 
-                {/* Dual-Silhouette Body Map */}
+                {/* 7. DUAL SILHOUETTE BODY HEATMAP */}
                 <ProBodyMap activeMuscle={activeEx.primary} exerciseName={activeEx.name} />
 
-                {/* Exercise List with Demonstration Visuals */}
-                <div className="space-y-2.5">
+                {/* 8. EXERCISE LIST WITH EXPANDABLE FORM & EXECUTION INSTRUCTIONS */}
+                <div className="space-y-3">
                   {currentList.map(ex => {
                     const isCurrent = focusedId === ex.id;
+                    const isExpanded = expandedExerciseId === ex.id;
                     const loggedKg = weights[ex.id] !== undefined ? weights[ex.id] : ex.defaultKg;
                     
                     let exDone = true;
@@ -853,6 +899,7 @@
                           isCurrent ? "card-active" : "card-dark"
                         }`}
                       >
+                        {/* Exercise Header */}
                         <div className="flex items-center justify-between mb-2.5">
                           <div className="flex items-center gap-3">
                             <img src={ex.img} alt={ex.name} className="w-12 h-12 rounded-xl object-cover border border-slate-700 shadow-inner shrink-0" />
@@ -880,7 +927,7 @@
                         </div>
 
                         {/* Set Checkboxes */}
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 mb-2.5">
                           {Array.from({ length: ex.sets }).map((_, sIdx) => {
                             const setKey = `${ex.id}_s_${sIdx}`;
                             const isDone = !!completedSets[setKey];
@@ -899,6 +946,35 @@
                               </button>
                             );
                           })}
+                        </div>
+
+                        {/* Expandable Form & Execution Instructions */}
+                        <div className="pt-2 border-t border-slate-800/80">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setExpandedExerciseId(isExpanded ? null : ex.id);
+                              triggerHaptic(8);
+                            }}
+                            className="w-full text-left flex justify-between items-center text-[10px] font-bold text-amber-400 hover:text-amber-300"
+                          >
+                            <span>📖 Form Cues & Execution Guide</span>
+                            <span>{isExpanded ? "▲ Hide" : "▼ Show"}</span>
+                          </button>
+
+                          {isExpanded && (
+                            <div className="mt-2 p-2.5 bg-slate-950 rounded-xl space-y-2 text-[11px] text-slate-300 border border-slate-800">
+                              <p><strong className="text-amber-400">Key Cue:</strong> {ex.cues}</p>
+                              <div className="space-y-1">
+                                <span className="text-[9px] font-bold uppercase text-slate-400">Step-by-Step Execution:</span>
+                                <ol className="list-decimal list-inside space-y-0.5 text-slate-300">
+                                  {ex.execution ? ex.execution.map((st, sIdx) => (
+                                    <li key={sIdx}>{st}</li>
+                                  )) : <li>Maintain full core tension and controlled tempo throughout.</li>}
+                                </ol>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
                     );
