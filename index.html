@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>metabolic60 • Elite Training & Nutrition</title>
+  <title>metabolic60 • Feminine Metabolic Transformation</title>
 
-  <!-- Google Fonts: Inter -->
+  <!-- Google Fonts: Inter & Playfair Display -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -19,47 +19,79 @@
   <!-- Canvas Confetti -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            serif: ['"Playfair Display"', 'serif'],
+          },
+          colors: {
+            blush: {
+              50: '#FDF8F7',
+              100: '#FBF0EE',
+              200: '#F6DDD9',
+              300: '#EEBFB7',
+              400: '#E49B90',
+              500: '#D97365',
+              600: '#C55446',
+            },
+            roseGold: '#D48D7F',
+            champagne: '#F8F4EE',
+            pearl: '#FFFFFF',
+            charcoal: '#2D2726',
+            mutedMauve: '#8A7D7B'
+          }
+        }
+      }
+    }
+  </script>
+
   <style>
     body {
-      background-color: #070a12;
-      color: #f8fafc;
+      background-color: #FAF6F4;
+      color: #2D2726;
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       -webkit-tap-highlight-color: transparent;
       user-select: none;
     }
-    .card-dark {
-      background: #0f172a;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5);
+    .card-light {
+      background: #FFFFFF;
+      border: 1px solid rgba(228, 155, 144, 0.22);
+      box-shadow: 0 8px 24px -4px rgba(217, 115, 101, 0.08);
     }
     .card-active {
-      background: #131d35;
-      border-color: #f59e0b;
-      box-shadow: 0 0 16px -2px rgba(245, 158, 11, 0.25);
+      background: #FFFDFC;
+      border-color: #D97365;
+      box-shadow: 0 10px 28px -4px rgba(217, 115, 101, 0.2);
     }
     .muscle-glow {
-      filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.9));
+      filter: drop-shadow(0 0 6px rgba(217, 115, 101, 0.8));
     }
     .timer-arc {
       transition: stroke-dashoffset 1s linear;
       transform: rotate(-90deg);
       transform-origin: 50% 50%;
     }
+    .tempo-pulse {
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
     input[type="date"]::-webkit-calendar-picker-indicator {
-      filter: invert(1);
+      filter: opacity(0.6);
       cursor: pointer;
     }
-    ::-webkit-scrollbar { width: 3px; }
-    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-thumb { background: #E49B90; border-radius: 4px; }
   </style>
 </head>
-<body class="bg-[#070a12]">
+<body class="bg-[#FAF6F4] text-charcoal antialiased">
   <div id="root"></div>
 
   <script type="text/babel">
     const { useState, useEffect, useRef } = React;
 
-    // --- Safe Storage Helpers ---
+    // --- Storage Helpers ---
     const getStored = (key, fallback) => {
       try {
         const item = localStorage.getItem(key);
@@ -73,7 +105,7 @@
       try { localStorage.setItem(key, JSON.stringify(val)); } catch {}
     };
 
-    // --- Local Date Formatter (YYYY-MM-DD) ---
+    // --- Local Date Formatter ---
     const getLocalDateStr = (d = new Date()) => {
       const year = d.getFullYear();
       const month = String(d.getMonth() + 1).padStart(2, '0');
@@ -82,7 +114,7 @@
     };
 
     // --- Audio Feedback ---
-    const playBeep = (freq = 520, dur = 0.12) => {
+    const playBeep = (freq = 587.33, dur = 0.12) => { // D5 soft tone
       try {
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
         if (!AudioCtx) return;
@@ -90,7 +122,7 @@
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
         osc.frequency.value = freq;
-        gain.gain.setValueAtTime(0.05, ctx.currentTime);
+        gain.gain.setValueAtTime(0.04, ctx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
         osc.connect(gain);
         gain.connect(ctx.destination);
@@ -107,267 +139,116 @@
 
     // --- Cycle Phasing Configuration ---
     const CYCLE_MODES = {
-      menstrual: { name: "Menstrual Phase (Days 1–5)", short: "Menstrual", tag: "Deload & Restorative", color: "text-sky-400 border-sky-500/40 bg-sky-950/60", mod: 0.85, tip: "Higher baseline fatigue. Focus on form, steady tempo, and warm hydration." },
-      follicular: { name: "Follicular Phase (Days 6–13)", short: "Follicular", tag: "Peak Strength & Power", color: "text-rose-400 border-rose-500/40 bg-rose-950/60", mod: 1.0, tip: "High insulin sensitivity & estrogen surge. Prime window for progressive weight jumps." },
-      ovulatory: { name: "Ovulatory Phase (Days 14–16)", short: "Ovulatory", tag: "Max Energy & PR Window", color: "text-fuchsia-400 border-fuchsia-500/40 bg-fuchsia-950/60", mod: 1.05, tip: "Peak testosterone & estrogen. Push for personal bests and maximum repetitions." },
-      luteal: { name: "Luteal Phase (Days 17–28)", short: "Luteal", tag: "Steady Tempo & Recovery", color: "text-amber-400 border-amber-500/40 bg-amber-950/60", mod: 0.9, tip: "Elevated core body temperature. Keep rests strict and hydrate with 3L+." }
+      menstrual: { name: "Menstrual Phase (Days 1–5)", short: "Menstrual", tag: "Gentle Flow & Restore", color: "text-rose-600 border-rose-200 bg-rose-50", mod: 0.85, tip: "Hormones at baseline. Prioritize graceful movement, deep belly breaths, and warm herbal infusions." },
+      follicular: { name: "Follicular Phase (Days 6–13)", short: "Follicular", tag: "Glow & Sculpt Power", color: "text-pink-600 border-pink-200 bg-pink-50", mod: 1.0, tip: "Estrogen rising! Peak insulin sensitivity and radiant vitality. Perfect time to sculpt and increase weights." },
+      ovulatory: { name: "Ovulatory Phase (Days 14–16)", short: "Ovulatory", tag: "Radiant Strength & PRs", color: "text-amber-600 border-amber-200 bg-amber-50", mod: 1.05, tip: "Peak confidence & energy output. Push your physical personal bests with exquisite form." },
+      luteal: { name: "Luteal Phase (Days 17–28)", short: "Luteal", tag: "Steady Burn & Calibrate", color: "text-purple-600 border-purple-200 bg-purple-50", mod: 0.9, tip: "Progesterone dominance elevates core temperature. Hydrate with 3L+ and honor strict rest cadence." }
     };
 
-    // --- Complete Master Exercise Database ---
+    // --- Master Exercise Database with Aesthetic Guidance ---
     const EXERCISE_DATA = {
       beginner: {
         A: [
-          { id: "b_a1", name: "Chair / Box Squats", target: "Glutes & Quads", primary: "quads", sets: 3, reps: 10, rest: 60, tempo: "3-0-1", defaultKg: 0, img: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Sit back onto chair, tap lightly, drive through heels to stand.", execution: ["Stand 10cm in front of a sturdy chair with feet shoulder-width apart.", "Hinge hips backward and descend under control for 3 seconds.", "Lightly brush the chair seat without relaxing core tension.", "Drive aggressively through your heels to stand tall, locking glutes at the top."] },
-          { id: "b_a2", name: "Incline Push-Ups", target: "Chest & Shoulders", primary: "chest", sets: 3, reps: 8, rest: 60, tempo: "2-0-1", defaultKg: 0, img: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=600&q=80", cues: "Hands on counter. Keep core locked without hip sag.", execution: ["Place hands slightly wider than shoulder-width on an elevated counter.", "Create a rigid straight line from your ears to your ankles.", "Lower your chest toward the edge for 2 seconds with elbows at 45°.", "Press the counter away powerfully while bracing your abdominals."] },
-          { id: "b_a3", name: "Bodyweight Glute Bridges", target: "Gluteus Maximus", primary: "glutes", sets: 3, reps: 12, rest: 45, tempo: "2-2-1", defaultKg: 0, img: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80", cues: "Squeeze glutes hard at the top. Keep ribs drawn downward.", execution: ["Lie on back with knees bent and feet flat on floor hip-width apart.", "Flatten lower spine against mat by engaging deep core.", "Drive through heels to lift hips until thighs and torso align.", "Squeeze glutes hard for 2 full seconds at peak before lowering."] },
-          { id: "b_a4", name: "Seated DB Overhead Press", target: "Deltoids", primary: "shoulders", sets: 3, reps: 10, rest: 60, tempo: "2-0-1", defaultKg: 3.0, img: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=600&q=80", cues: "Press overhead smoothly without arching lower back.", execution: ["Sit upright with core braced and feet grounded.", "Hold dumbbells at shoulder height with palms facing forward.", "Press weights straight up overhead until arms are extended.", "Lower slowly back to ear level over 2 seconds."] },
-          { id: "b_a5", name: "Deadbugs", target: "Core & Abdominals", primary: "core", sets: 3, reps: 8, rest: 45, tempo: "Slow", defaultKg: 0, img: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=600&q=80", cues: "Press lower back firmly into the floor as limbs extend.", execution: ["Lie on back with arms pointed to ceiling and knees at 90° table-top.", "Clamp lower back firmly into floor—zero arching permitted.", "Slowly extend right arm overhead and left leg straight out toward floor.", "Return to start and repeat with opposite limbs under strict control."] }
+          { id: "b_a1", name: "Elegance Box Squats", target: "Glutes & Quads", primary: "quads", sets: 3, reps: 10, rest: 60, tempo: "3-0-1", ecc: 3, pause: 0, conc: 1, defaultKg: 0, img: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Sit softly onto the bench, lightly tap, drive through heels with tall posture.", execution: ["Stand with feet shoulder-width apart, spine long and shoulders relaxed.", "Hinge hips backward with graceful control for 3 seconds.", "Lightly brush the bench surface without relaxing abdominal support.", "Drive through the heels to stand tall, gently locking glutes at the top."] },
+          { id: "b_a2", name: "Incline Push-Ups", target: "Chest & Sculpted Arms", primary: "chest", sets: 3, reps: 8, rest: 60, tempo: "2-0-1", ecc: 2, pause: 0, conc: 1, defaultKg: 0, img: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=600&q=80", cues: "Hands shoulder-width. Keep long neckline and braced core.", execution: ["Place hands on an elevated surface in a pristine plank line.", "Lower chest toward the ledge for 2 seconds with elbows softly angled at 45°.", "Press away smoothly while keeping the crown of your head reaching forward."] },
+          { id: "b_a3", name: "Glute Sculpt Bridge", target: "Gluteus Maximus", primary: "glutes", sets: 3, reps: 12, rest: 45, tempo: "2-2-1", ecc: 2, pause: 2, conc: 1, defaultKg: 0, img: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80", cues: "Squeeze glutes at peak height; draw ribs gently downward.", execution: ["Lie on your back, knees bent, feet flat on the floor hip-width.", "Press through heels to lift hips in line with knees and shoulders.", "Squeeze the glutes intensely for 2 seconds at the peak.", "Lower with control without arching the lower back."] },
+          { id: "b_a4", name: "Seated Shoulder Sculpt", target: "Deltoids & Posture", primary: "shoulders", sets: 3, reps: 10, rest: 60, tempo: "2-0-1", ecc: 2, pause: 0, conc: 1, defaultKg: 3.0, img: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=600&q=80", cues: "Extend overhead smoothly; preserve an elegant, tall spine.", execution: ["Sit tall with core engaged and feet grounded.", "Press dumbbells overhead smoothly without shrugging shoulders up.", "Lower back to chin height with a 2-second count."] },
+          { id: "b_a5", name: "Core Deadbugs", target: "Deep Transverse Core", primary: "core", sets: 3, reps: 8, rest: 45, tempo: "2-1-2", ecc: 2, pause: 1, conc: 2, defaultKg: 0, img: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=600&q=80", cues: "Anchor lower back into the mat as opposite limbs glide away.", execution: ["Lie flat with arms extended upward and knees at 90°.", "Press lower back firmly into the mat.", "Slowly extend opposite arm and leg out hover-height.", "Return to center with deep abdominal control."] }
         ],
         B: [
-          { id: "b_b1", name: "Supported DB Rows", target: "Lats & Mid-Back", primary: "lats", sets: 3, reps: 10, rest: 60, tempo: "2-1-1", defaultKg: 4.0, img: "https://images.unsplash.com/photo-1605296867304-46d5465a13f1?auto=format&fit=crop&w=600&q=80", cues: "Support with hand on bench. Pull elbow to hip pocket.", execution: ["Place left knee and hand on bench; keep spine flat.", "Hold dumbbell in right hand hanging straight down.", "Pull elbow toward back hip pocket, retracting shoulder blade.", "Pause for 1 second at top squeeze; lower slowly."] },
-          { id: "b_b2", name: "Supported Split Squats", target: "Glutes & Quads", primary: "glutes", sets: 3, reps: 8, rest: 60, tempo: "2-0-1", defaultKg: 0, img: "https://images.unsplash.com/photo-1434682881908-b43d0467b798?auto=format&fit=crop&w=600&q=80", cues: "Hold chair for balance. Drop back knee straight down.", execution: ["Take a long staggered stride with front foot flat.", "Hold a wall or chair for light balance support.", "Lower back knee straight toward floor until front thigh is parallel.", "Drive through front heel to return to top."] },
-          { id: "b_b3", name: "Side Clamshells", target: "Gluteus Medius", primary: "glutes", sets: 3, reps: 12, rest: 45, tempo: "2-1-1", defaultKg: 0, img: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80", cues: "Keep hips stacked. Open top knee with control.", execution: ["Lie on side with knees bent at 90° and feet glued together.", "Rotate top knee upward as high as possible while keeping feet joined.", "Hold top contraction for 1 second before closing."] },
-          { id: "b_b4", name: "Standing DB Curls", target: "Biceps", primary: "lats", sets: 3, reps: 10, rest: 45, tempo: "2-0-1", defaultKg: 3.0, img: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=600&q=80", cues: "Pin elbows to sides. Squeeze biceps at the top.", execution: ["Stand tall with dumbbells at sides and palms forward.", "Lock elbows against ribs; curl weights upward.", "Squeeze biceps hard at shoulder level.", "Lower under control for 2 seconds without swinging."] },
-          { id: "b_b5", name: "Bird-Dogs", target: "Erector Spinae", primary: "back", sets: 3, reps: 8, rest: 45, tempo: "Slow", defaultKg: 0, img: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=600&q=80", cues: "Reach arm and opposite leg out without back twisting.", execution: ["Set up on hands and knees with wrists under shoulders.", "Reach right arm forward and left leg backward simultaneously.", "Hold for 1 second in a straight line; return to center."] }
+          { id: "b_b1", name: "Supported Back Rows", target: "Lats & Waist Taper", primary: "lats", sets: 3, reps: 10, rest: 60, tempo: "2-1-1", ecc: 2, pause: 1, conc: 1, defaultKg: 4.0, img: "https://images.unsplash.com/photo-1605296867304-46d5465a13f1?auto=format&fit=crop&w=600&q=80", cues: "Draw elbow softly back toward hip pocket.", execution: ["Support one arm on a bench with a flat back.", "Pull weight smoothly toward the hip, squeezing shoulder blade.", "Pause 1 second at the top before lowering."] },
+          { id: "b_b2", name: "Glute Split Squats", target: "Glutes & Thighs", primary: "glutes", sets: 3, reps: 8, rest: 60, tempo: "2-0-1", ecc: 2, pause: 0, conc: 1, defaultKg: 0, img: "https://images.unsplash.com/photo-1434682881908-b43d0467b798?auto=format&fit=crop&w=600&q=80", cues: "Keep front heel grounded and chest lifted.", execution: ["Take a long step back, dropping back knee toward the mat.", "Drive through the front heel to return to top with balance."] },
+          { id: "b_b3", name: "Side Clamshells", target: "Gluteus Medius", primary: "glutes", sets: 3, reps: 12, rest: 45, tempo: "2-1-1", ecc: 2, pause: 1, conc: 1, defaultKg: 0, img: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80", cues: "Rotate top knee upward without letting hips roll backward.", execution: ["Lie on your side with knees bent at 90°.", "Open top knee like a clamshell while keeping feet glued.", "Hold peak contraction for 1 second."] }
         ],
         C: [
-          { id: "b_c1", name: "Low Step-Ups", target: "Glutes & Quads", primary: "glutes", sets: 3, reps: 8, rest: 60, tempo: "2-0-1", defaultKg: 0, img: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Drive purely through the elevated heel.", execution: ["Place entire right foot on a low sturdy step.", "Drive through right heel to lift body without pushing off rear toes.", "Stand tall at top; step down softly under control."] },
-          { id: "b_c2", name: "Light DB Romanian Deadlift", target: "Hamstrings", primary: "hamstrings", sets: 3, reps: 10, rest: 60, tempo: "3-0-1", defaultKg: 4.0, img: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=600&q=80", cues: "Hinge at the hips with flat back and soft knees.", execution: ["Stand with feet hip-width apart holding dumbbells against thighs.", "Maintain a soft knee bend; push hips straight backward.", "Slide weights down shins until hamstrings are fully loaded.", "Drive hips forward to stand, squeezing glutes."] },
-          { id: "b_c3", name: "DB Floor Chest Press", target: "Chest", primary: "chest", sets: 3, reps: 10, rest: 60, tempo: "2-0-1", defaultKg: 3.0, img: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=600&q=80", cues: "Lie flat on floor. Press dumbbells up in smooth arc.", execution: ["Lie flat on back with knees bent.", "Hold dumbbells at chest with elbows at 45°.", "Press dumbbells up until arms extend over chest.", "Lower under control until upper arms touch floor."] },
-          { id: "b_c4", name: "Prone Y-Raises", target: "Deltoids & Back", primary: "shoulders", sets: 3, reps: 12, rest: 45, tempo: "2-1-1", defaultKg: 0, img: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=600&q=80", cues: "Lie face down, thumbs up, raise arms into Y shape.", execution: ["Lie on stomach with arms extended at 45° in a Y.", "Point thumbs to ceiling; squeeze shoulder blades to lift arms.", "Hold 1 second at top before lowering."] }
+          { id: "b_c1", name: "Step-Up Elevation", target: "Glutes & Legs", primary: "glutes", sets: 3, reps: 8, rest: 60, tempo: "2-0-1", ecc: 2, pause: 0, conc: 1, defaultKg: 0, img: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Power through the top heel; step down with light grace.", execution: ["Place full foot on a sturdy platform.", "Drive through heel to step up, standing tall.", "Descend with smooth resistance."] },
+          { id: "b_c2", name: "Romanian Deadlift", target: "Hamstrings & Glutes", primary: "hamstrings", sets: 3, reps: 10, rest: 60, tempo: "3-0-1", ecc: 3, pause: 0, conc: 1, defaultKg: 4.0, img: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=600&q=80", cues: "Hinge hips back like closing a door behind you.", execution: ["Hinge at the hips with soft knees and long spine.", "Lower weights along shins until hamstrings stretch.", "Drive hips forward to stand tall."] }
         ]
       },
       intermediate: {
         A: [
-          { id: "i_a1", name: "Dumbbell Goblet Squats", target: "Quadriceps & Glutes", primary: "quads", sets: 3, reps: 12, rest: 60, tempo: "3-0-1", defaultKg: 7.5, img: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Drive through midfoot and heels. Keep chest tall, brace core at bottom.", execution: ["Hold dumbbell vertically against your sternum with both hands cupping top head.", "Set feet shoulder-width apart with toes turned out 15–20°.", "Inhale deep into belly; descend for 3 full seconds until hips break parallel.", "Drive feet through floor to explode up, exhaling at lockout."] },
-          { id: "i_a2", name: "Dumbbell Floor Press", target: "Chest & Triceps", primary: "chest", sets: 3, reps: 12, rest: 60, tempo: "2-0-1", defaultKg: 5.0, img: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=600&q=80", cues: "Upper arms tap floor lightly at 45° angle to protect shoulders.", execution: ["Lie on floor with knees bent and feet planted.", "Hold dumbbells with elbows flared at a 45° arrow angle from torso.", "Lower weights until triceps lightly brush the floor.", "Press weights straight up in an arc over your chest."] },
-          { id: "i_a3", name: "Dumbbell Romanian Deadlifts", target: "Hamstrings & Glutes", primary: "hamstrings", sets: 3, reps: 12, rest: 60, tempo: "3-1-1", defaultKg: 7.5, img: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=600&q=80", cues: "Hinge hips back. Keep dumbbells skimming shins with flat spine.", execution: ["Hold dumbbells against thighs with lats locked down tightly.", "Hinge hips backward toward wall behind you with minimal knee bend.", "Lower weights to mid-shin level until hamstrings are loaded.", "Drive hips forward powerfully to return to start."] },
-          { id: "i_a4", name: "Seated DB Overhead Press", target: "Deltoids", primary: "shoulders", sets: 3, reps: 10, rest: 60, tempo: "2-0-1", defaultKg: 4.0, img: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=600&q=80", cues: "Maintain vertical spine. Avoid lower back arching.", execution: ["Sit on bench with core braced tightly.", "Hold dumbbells at collarbone level with elbows under wrists.", "Press straight overhead to full elbow extension without overarching spine.", "Lower weights back down to chin height over 2 seconds."] },
-          { id: "i_a5", name: "DB Lateral Raises", target: "Lateral Deltoids", primary: "shoulders", sets: 3, reps: 12, rest: 45, tempo: "2-1-1", defaultKg: 2.5, img: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=600&q=80", cues: "Lead with elbows with slight forward torso lean.", execution: ["Stand with slight forward hip hinge holding light dumbbells at sides.", "Lead with elbows, raising arms out to sides in scapular plane (30° forward).", "Pause at parallel for 1 second feeling lateral shoulder burn.", "Lower under control for 2 seconds."] }
+          { id: "i_a1", name: "Dumbbell Goblet Squats", target: "Glutes & Quads", primary: "quads", sets: 3, reps: 12, rest: 60, tempo: "3-0-1", ecc: 3, pause: 0, conc: 1, defaultKg: 7.5, img: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Hold weight close to chest; descend with deep control and proud posture.", execution: ["Hold dumbbell vertically at chest center.", "Descend 3 seconds until hips break parallel.", "Drive through heels to stand, exhaling softly."] },
+          { id: "i_a2", name: "Dumbbell Floor Press", target: "Chest & Triceps", primary: "chest", sets: 3, reps: 12, rest: 60, tempo: "2-0-1", ecc: 2, pause: 0, conc: 1, defaultKg: 5.0, img: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=600&q=80", cues: "Upper arms tap floor lightly at 45° angle to protect shoulders.", execution: ["Lie on mat with knees bent.", "Lower weights until triceps gently kiss the floor.", "Press back up in an arc over chest."] },
+          { id: "i_a3", name: "DB Romanian Deadlift", target: "Hamstrings & Glute Lift", primary: "hamstrings", sets: 3, reps: 12, rest: 60, tempo: "3-1-1", ecc: 3, pause: 1, conc: 1, defaultKg: 7.5, img: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=600&q=80", cues: "Hinge hips straight back; skim dumbbells along shins.", execution: ["Keep spine long and lats locked in place.", "Push hips back for 3 seconds into a deep hamstring stretch.", "Drive hips forward into glute contraction."] },
+          { id: "i_a4", name: "Seated DB Shoulder Press", target: "Deltoid Cap", primary: "shoulders", sets: 3, reps: 10, rest: 60, tempo: "2-0-1", ecc: 2, pause: 0, conc: 1, defaultKg: 4.0, img: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=600&q=80", cues: "Drive overhead with control; avoid arching lower spine.", execution: ["Hold dumbbells at shoulder level.", "Press overhead to full extension.", "Lower over 2 seconds."] },
+          { id: "i_a5", name: "Lateral Deltoid Raises", target: "Shoulder Definition", primary: "shoulders", sets: 3, reps: 12, rest: 45, tempo: "2-1-1", ecc: 2, pause: 1, conc: 1, defaultKg: 2.5, img: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=600&q=80", cues: "Lead with elbows; pause at shoulder height for 1 second.", execution: ["Raise dumbbells out to sides in slight forward angle.", "Pause at top, then lower smoothly."] }
         ],
         B: [
-          { id: "i_b1", name: "Weighted Hip Thrust", target: "Gluteus Maximus", primary: "glutes", sets: 3, reps: 15, rest: 60, tempo: "2-2-1", defaultKg: 10.0, img: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80", cues: "Lock out glutes at top with ribs down and chin tucked.", execution: ["Rest upper back against bench edge just below shoulder blades.", "Place dumbbell across hip crease with hands holding it steady.", "Feet flat, shins vertical at top; drive through heels to full hip extension.", "Hold top squeeze for 2 full seconds with chin tucked looking forward."] },
-          { id: "i_b2", name: "Single-Arm DB Row", target: "Lats & Waist Taper", primary: "lats", sets: 3, reps: 10, rest: 60, tempo: "2-1-1", defaultKg: 6.0, img: "https://images.unsplash.com/photo-1605296867304-46d5465a13f1?auto=format&fit=crop&w=600&q=80", cues: "Pull elbow to hip pocket without rotating torso.", execution: ["Brace one arm on a sturdy surface with flat, parallel spine.", "Drive elbow upward and backward toward your back hip pocket.", "Squeeze lat at peak for 1 second before lowering slowly."] },
-          { id: "i_b3", name: "DB Deficit Reverse Lunges", target: "Glutes & Quads", primary: "glutes", sets: 3, reps: 10, rest: 60, tempo: "2-0-1", defaultKg: 5.0, img: "https://images.unsplash.com/photo-1434682881908-b43d0467b798?auto=format&fit=crop&w=600&q=80", cues: "Deep step back with vertical front shin for glute stretch.", execution: ["Stand tall holding dumbbells at sides.", "Take a large step backward, keeping front shin vertical and torso leaning forward 15°.", "Lower back knee until it hovers 2cm off mat.", "Drive through front heel to return to standing."] },
-          { id: "i_b4", name: "Banded Face Pulls", target: "Deltoids & Posture", primary: "shoulders", sets: 3, reps: 15, rest: 45, tempo: "2-2-1", defaultKg: 0, img: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=600&q=80", cues: "Pull to eye level, rotating hands outward at contraction.", execution: ["Anchor band at eye height.", "Grasp band with knuckles facing you; pull toward nose/eyes.", "Rotate hands outward at end range.", "Hold rear delt squeeze for 2 seconds before returning."] },
-          { id: "i_b5", name: "Deadbugs (Pelvic Locked)", target: "Core & Abdominals", primary: "core", sets: 3, reps: 10, rest: 45, tempo: "Slow", defaultKg: 0, img: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=600&q=80", cues: "Flatten lower back into the mat as opposite limbs extend.", execution: ["Lie on mat with knees bent at 90° and arms pointing to ceiling.", "Exhale and press lower back into floor.", "Slowly reach right arm back and left leg forward simultaneously.", "Return to start and repeat opposite side."] }
+          { id: "i_b1", name: "Weighted Hip Thrust", target: "Gluteus Maximus", primary: "glutes", sets: 3, reps: 15, rest: 60, tempo: "2-2-1", ecc: 2, pause: 2, conc: 1, defaultKg: 10.0, img: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80", cues: "Lock out glutes at top with chin tucked and ribs down.", execution: ["Rest shoulder blades across bench edge.", "Drive through heels to full hip extension.", "Squeeze glutes hard for 2 full seconds at peak."] },
+          { id: "i_b2", name: "Single-Arm DB Row", target: "Lats & Waist Taper", primary: "lats", sets: 3, reps: 10, rest: 60, tempo: "2-1-1", ecc: 2, pause: 1, conc: 1, defaultKg: 6.0, img: "https://images.unsplash.com/photo-1605296867304-46d5465a13f1?auto=format&fit=crop&w=600&q=80", cues: "Pull elbow smoothly to hip pocket without torso twist.", execution: ["Support on flat bench with long spine.", "Draw elbow up and back toward hip pocket.", "Squeeze lat for 1 second at top."] },
+          { id: "i_b3", name: "Reverse Lunge Glute Stretch", target: "Glutes & Quads", primary: "glutes", sets: 3, reps: 10, rest: 60, tempo: "2-0-1", ecc: 2, pause: 0, conc: 1, defaultKg: 5.0, img: "https://images.unsplash.com/photo-1434682881908-b43d0467b798?auto=format&fit=crop&w=600&q=80", cues: "Deep step back; maintain vertical front shin for maximum glute load.", execution: ["Take generous step backward.", "Lower knee until hovering above floor.", "Drive through front heel to rise."] }
         ],
         C: [
-          { id: "i_c1", name: "DB Step-Ups", target: "Gluteus Maximus", primary: "glutes", sets: 3, reps: 10, rest: 60, tempo: "2-0-1", defaultKg: 4.0, img: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Drive exclusively through the elevated heel.", execution: ["Place one foot entirely on an elevated bench or box holding dumbbells.", "Lean forward slightly from hip to direct load to glute.", "Drive heel through box to rise without jumping off trailing foot.", "Step down slowly over 2 seconds."] },
-          { id: "i_c2", name: "Dumbbell Thrusters", target: "Quadriceps & Deltoids", primary: "quads", sets: 3, reps: 10, rest: 60, tempo: "1-0-1", defaultKg: 4.0, img: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=600&q=80", cues: "Use upward leg momentum to press dumbbells overhead.", execution: ["Hold dumbbells at shoulders in a front-rack position.", "Squat deep into a full goblet squat.", "Explode upward through legs, using momentum to launch dumbbells overhead.", "Catch weights at shoulders as you transition directly into the next squat."] },
-          { id: "i_c3", name: "DB Renegade Rows", target: "Core & Lats", primary: "core", sets: 3, reps: 8, rest: 60, tempo: "2-0-1", defaultKg: 5.0, img: "https://images.unsplash.com/photo-1605296867304-46d5465a13f1?auto=format&fit=crop&w=600&q=80", cues: "Widen feet to keep hips motionless without twisting.", execution: ["Set up in push-up plank holding dumbbell handles; feet wide.", "Lock hips square to floor.", "Row right dumbbell to ribs without rotating pelvis.", "Place down and repeat on left side."] },
-          { id: "i_c4", name: "DB Sumo Squats", target: "Inner Thigh & Glutes", primary: "quads", sets: 3, reps: 12, rest: 60, tempo: "3-0-1", defaultKg: 8.0, img: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Wide stance, push knees out over toes.", execution: ["Take wide stance with toes turned out 45°.", "Hold heavy dumbbell hanging between legs.", "Squat straight down pushing knees wide over toes.", "Drive through heels to stand, squeezing glutes."] }
+          { id: "i_c1", name: "Weighted Step-Ups", target: "Gluteus Maximus", primary: "glutes", sets: 3, reps: 10, rest: 60, tempo: "2-0-1", ecc: 2, pause: 0, conc: 1, defaultKg: 4.0, img: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Drive purely through elevated heel.", execution: ["Place entire foot on elevated box.", "Drive through heel to ascend without hopping off back foot.", "Lower under control."] },
+          { id: "i_c2", name: "Dumbbell Thrusters", target: "Full Body Metabolic", primary: "quads", sets: 3, reps: 10, rest: 60, tempo: "1-0-1", ecc: 1, pause: 0, conc: 1, defaultKg: 4.0, img: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=600&q=80", cues: "Use upward leg momentum to press dumbbells overhead.", execution: ["Squat into deep goblet squat.", "Explode upward and press weights overhead in one fluid arc."] }
         ]
       },
       advanced: {
         A: [
-          { id: "a_a1", name: "1.5-Rep DB Goblet Squats", target: "Quadriceps & Glutes", primary: "quads", sets: 4, reps: 12, rest: 45, tempo: "3-1-1", defaultKg: 10.0, img: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Squat deep, come halfway up, return to bottom, then stand.", execution: ["Hold heavy dumbbell at chest in goblet position.", "Descend deep for 3 seconds into bottom of squat.", "Rise halfway up, pause for 1 second, descend back to deep bottom.", "Drive through heels to stand fully."] },
-          { id: "a_a2", name: "Superset: DB RDL + Floor Press", target: "Hamstrings & Chest", primary: "hamstrings", sets: 4, reps: 12, rest: 45, tempo: "2-0-1", defaultKg: 9.0, img: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=600&q=80", cues: "Hinge through RDLs, then immediately perform floor presses.", execution: ["Perform 12 strict DB Romanian deadlifts.", "Immediately drop to mat and perform 12 DB floor chest presses.", "Rest only after completing both movements back-to-back."] },
-          { id: "a_a3", name: "Bulgarian Split Squats", target: "Gluteus Maximus", primary: "glutes", sets: 4, reps: 10, rest: 45, tempo: "3-0-1", defaultKg: 7.5, img: "https://images.unsplash.com/photo-1434682881908-b43d0467b798?auto=format&fit=crop&w=600&q=80", cues: "Rear foot elevated on bench. Lean torso forward for glute load.", execution: ["Place rear foot on bench; front foot flat.", "Descend under control until rear knee hovers above floor.", "Drive through front heel to stand."] },
-          { id: "a_a4", name: "Strict Seated Lateral Raises", target: "Deltoids", primary: "shoulders", sets: 4, reps: 15, rest: 30, tempo: "2-1-2", defaultKg: 3.5, img: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=600&q=80", cues: "Pause 1 second at parallel without body swing.", execution: ["Sit on bench with dumbbells at sides.", "Raise arms out to sides until parallel with floor.", "Hold 1 second at peak before lowering."] }
+          { id: "a_a1", name: "1.5-Rep DB Goblet Squats", target: "Glutes & Quads", primary: "quads", sets: 4, reps: 12, rest: 45, tempo: "3-1-1", ecc: 3, pause: 1, conc: 1, defaultKg: 10.0, img: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Squat deep, rise halfway, return to bottom, then explode up.", execution: ["Descend for 3 seconds to bottom of squat.", "Rise halfway, pause 1 second, sink back to bottom.", "Drive through heels to stand fully."] }
         ],
         B: [
-          { id: "a_b1", name: "Single-Leg DB Hip Thrust", target: "Gluteus Maximus", primary: "glutes", sets: 4, reps: 12, rest: 45, tempo: "2-2-1", defaultKg: 6.0, img: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80", cues: "One foot grounded, lock out glute at top with level hips.", execution: ["Upper back on bench; lift one leg off floor bent at 90°.", "Drive grounded heel through floor to full hip extension.", "Hold 2 second peak contraction with pelvis level."] },
-          { id: "a_b2", name: "DB Renegade Row to Push-Up", target: "Core & Chest", primary: "core", sets: 4, reps: 8, rest: 45, tempo: "Controlled", defaultKg: 6.0, img: "https://images.unsplash.com/photo-1605296867304-46d5465a13f1?auto=format&fit=crop&w=600&q=80", cues: "Row right, row left, then execute full push-up.", execution: ["In plank on dumbbells: row right arm, row left arm.", "Execute full chest push-up on dumbbell handles."] }
+          { id: "a_b1", name: "Single-Leg DB Hip Thrust", target: "Gluteus Maximus", primary: "glutes", sets: 4, reps: 12, rest: 45, tempo: "2-2-1", ecc: 2, pause: 2, conc: 1, defaultKg: 6.0, img: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80", cues: "One foot grounded; lock out glute at top with level hips.", execution: ["Upper back on bench, one leg lifted.", "Drive through grounded heel to full extension, hold 2s."] }
         ],
         C: [
-          { id: "a_c1", name: "Clean to Squat to Press", target: "Quadriceps & Deltoids", primary: "quads", sets: 4, reps: 10, rest: 45, tempo: "Continuous", defaultKg: 6.0, img: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=600&q=80", cues: "Hinge, catch at shoulders, squat deep, press overhead.", execution: ["Hinge and pull dumbbells from shins to shoulders in a clean.", "Immediately descend into deep front squat.", "Explode upward and press dumbbells overhead in one fluid complex."] },
-          { id: "a_c2", name: "DB Sumo Squat Pulses", target: "Quadriceps & Glutes", primary: "quads", sets: 4, reps: 15, rest: 30, tempo: "Pulse", defaultKg: 10.0, img: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Stay in bottom half of squat for constant tension.", execution: ["Descend into deep sumo squat.", "Pulse up and down 5cm at bottom range for 15 reps."] }
+          { id: "a_c1", name: "Clean to Squat to Press", target: "Metabolic Complex", primary: "quads", sets: 4, reps: 10, rest: 45, tempo: "1-0-1", ecc: 1, pause: 0, conc: 1, defaultKg: 6.0, img: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=600&q=80", cues: "Hinge, catch at shoulders, deep squat, and press overhead seamlessly.", execution: ["Clean dumbbells to shoulders, sink into deep squat, press overhead."] }
         ]
       }
     };
 
-    // --- Complete 7-Day Meal Plan (No Prices) ---
-    const SA_MEALS = [
-      {
-        day: "Monday",
-        type: "Workout A (Carb Load)",
-        target: "1,720 kcal • 150g Protein",
-        meals: [
-          { name: "Breakfast", title: "Classic Protein Oats w/ Blueberries", img: "https://images.unsplash.com/photo-1517673132405-a56a62b18caf?auto=format&fit=crop&w=600&q=80", desc: "1 cup Jungle Oats, 1 scoop protein powder, ½ cup blueberries.", steps: ["Bring 1 cup water/almond milk to a simmer.", "Stir in oats; cook 3 mins on medium heat until thick.", "Remove from heat, whisk in protein powder until smooth.", "Top with fresh blueberries and cinnamon."] },
-          { name: "Lunch", title: "Skinless Chicken Breast w/ Roasted Patats", img: "https://images.unsplash.com/photo-1532550907401-a500c9a57435?auto=format&fit=crop&w=600&q=80", desc: "160g chicken breast, 120g sweet potato cubes, 1 cup green beans.", steps: ["Preheat oven to 200°C. Toss cubed patats in 1 tsp olive oil & smoked paprika; roast 22 mins.", "Season chicken with peri-peri herbs; pan-sear for 5 mins per side.", "Steam green beans 4 mins until vibrant green and crisp."] },
-          { name: "Snack", title: "Greek Yogurt & Chia Protein Pot", img: "https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=600&q=80", desc: "1 cup 0% Greek yogurt, 1 tbsp chia seeds, vanilla.", steps: ["Scoop cold yogurt into a bowl.", "Fold in chia seeds and vanilla.", "Let sit 5 mins for chia seeds to bloom."] },
-          { name: "Dinner", title: "Lean Beef Mince Bolognese over Zucchini Noodles", img: "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=600&q=80", desc: "150g extra-lean beef mince (90/10), baby marrows, tomato passata, ¼ avocado.", steps: ["Brown mince with garlic and Italian herbs in a hot skillet.", "Add tomato passata and simmer on low for 8 mins.", "Flash-sauté spiralized baby marrows for 2 mins.", "Plate bolognese over zoodles and top with avocado."] }
-        ]
-      },
-      {
-        day: "Tuesday",
-        type: "Active Recovery (Healthy Fats)",
-        target: "1,640 kcal • 144g Protein",
-        meals: [
-          { name: "Breakfast", title: "Savory Egg & Spinach Cups w/ Avocado", img: "https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=600&q=80", desc: "2 whole eggs + 2 whites baked with spinach & red pepper, ½ avocado.", steps: ["Whisk eggs, egg whites, salt, and pepper.", "Fill greased muffin cups with chopped spinach and bell pepper.", "Pour eggs over veg; bake at 180°C for 20 mins.", "Serve warm with ½ sliced avocado."] },
-          { name: "Lunch", title: "Lucky Star Pilchard Protein Bowl", img: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80", desc: "½ tin (200g) pilchards in tomato sauce, mixed greens, steamed gem squash.", steps: ["Steam gem squash halves for 15 mins; scoop out seeds.", "Gently warm pilchards and mash with fresh lemon.", "Arrange pilchards over crisp greens and gem squash."] },
-          { name: "Snack", title: "Hard-Boiled Egg & Raw Almonds", img: "https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=600&q=80", desc: "1 large boiled egg, 15 raw almonds, sliced salted cucumber.", steps: ["Boil egg for 8 mins, transfer to cold water, and peel.", "Pair with raw almonds and sliced cucumber seasoned with sea salt."] },
-          { name: "Dinner", title: "Baked Cape Hake Fillet w/ Roasted Cauliflower", img: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=600&q=80", desc: "180g Cape Hake, cauliflower florets, 1 tbsp olive oil, garlic, lemon.", steps: ["Toss cauliflower florets in ½ tbsp olive oil and roast at 200°C for 20 mins.", "Place hake on a baking tray; top with garlic, lemon slices, and parsley.", "Bake hake alongside cauliflower for 12–14 mins until flaky."] }
-        ]
-      },
-      {
-        day: "Wednesday",
-        type: "Workout B (Glycogen Load)",
-        target: "1,730 kcal • 152g Protein",
-        meals: [
-          { name: "Breakfast", title: "Rooibos Vanilla Protein Smoothie", img: "https://images.unsplash.com/photo-1590301157890-4810ed352733?auto=format&fit=crop&w=600&q=80", desc: "1 cup chilled strong rooibos tea, 1 scoop protein, frozen berries, ½ banana, chia.", steps: ["Brew a strong cup of rooibos tea and chill in fridge.", "Add rooibos, protein powder, frozen berries, banana, and chia to blender.", "Blend on high for 45 seconds until smooth."] },
-          { name: "Lunch", title: "Slow-Cooker Lean Beef over Brown Basmati", img: "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=600&q=80", desc: "140g tender stewing beef, ½ cup cooked brown rice, steamed broccoli.", steps: ["Simmer cubed beef in beef bone broth, carrots, and onions in slow cooker (6-8 hrs low).", "Cook brown basmati rice per package instructions.", "Steam broccoli for 4 mins and serve alongside beef and rice."] },
-          { name: "Snack", title: "Cottage Cheese & Cinnamon Green Apple", img: "https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=600&q=80", desc: "½ cup low-fat cottage cheese, ½ green apple sliced, cinnamon.", steps: ["Scoop cottage cheese into a bowl.", "Slice crisp green apple thinly.", "Top cottage cheese with apple slices and cinnamon."] },
-          { name: "Dinner", title: "Pan-Grilled Chicken Breast w/ Morogo & Butternut", img: "https://images.unsplash.com/photo-1532550907401-a500c9a57435?auto=format&fit=crop&w=600&q=80", desc: "160g chicken breast, 100g roasted butternut cubes, 1 cup Swiss chard.", steps: ["Roast butternut cubes at 200°C for 25 mins until caramelized.", "Grill chicken breast in a skillet for 5 mins per side with smoked paprika.", "Sauté Swiss chard in the warm skillet for 3 mins with garlic."] }
-        ]
-      },
-      {
-        day: "Thursday",
-        type: "Active Rest & Mobility",
-        target: "1,650 kcal • 148g Protein",
-        meals: [
-          { name: "Breakfast", title: "Morogo & Feta Scrambled Eggs", img: "https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=600&q=80", desc: "3 whole eggs, chopped tomatoes, onions, Swiss chard, 30g feta.", steps: ["Sauté diced onions, tomatoes, and chopped morogo in 1 tsp olive oil for 3 mins.", "Pour in beaten eggs; scramble gently over medium-low heat.", "Crumble feta over top right before serving."] },
-          { name: "Lunch", title: "Chicken Caesar Romaine Wraps", img: "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80", desc: "150g grilled chicken strips, romaine leaves, parmesan, light Caesar.", steps: ["Slice pre-cooked grilled chicken into strips.", "Lay out 4 large, crisp romaine lettuce leaves.", "Divide chicken into leaves; drizzle with light Caesar and parmesan."] },
-          { name: "Snack", title: "Tuna in Spring Water & Cucumber Boats", img: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80", desc: "1 tin chunk tuna (drained), lemon juice, black pepper, sliced cucumbers.", steps: ["Drain tuna and flake into a bowl with fresh lemon juice and black pepper.", "Halve cucumber lengthwise and scoop out seeds to create boats.", "Fill cucumber boats with seasoned tuna."] },
-          { name: "Dinner", title: "Grilled Ostrich Steak w/ Mediterranean Veg", img: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80", desc: "160g ostrich steak, baby marrows, bell peppers, red onion.", steps: ["Chop baby marrows, bell peppers, and red onion; roast at 200°C for 20 mins.", "Heat grill pan until smoking hot; sear ostrich for 2.5 mins per side.", "Let meat rest for 4 mins before slicing."] }
-        ]
-      },
-      {
-        day: "Friday",
-        type: "Workout C (Metabolic Surge)",
-        target: "1,740 kcal • 154g Protein",
-        meals: [
-          { name: "Breakfast", title: "Warm Spiced Jungle Protein Oats", img: "https://images.unsplash.com/photo-1517673132405-a56a62b18caf?auto=format&fit=crop&w=600&q=80", desc: "⅓ cup Jungle Oats, 1 scoop vanilla protein, 1 tbsp flaxseed, nutmeg, berries.", steps: ["Simmer oats in 1 cup water with a pinch of nutmeg for 3 mins.", "Turn off heat, stir in ground flaxseed and vanilla protein powder.", "Top with fresh berries."] },
-          { name: "Lunch", title: "Chicken Breast Strips w/ Sweet Potato Mash", img: "https://images.unsplash.com/photo-1532550907401-a500c9a57435?auto=format&fit=crop&w=600&q=80", desc: "160g chicken breast, 120g boiled patats, steamed green beans.", steps: ["Boil peeled sweet potato chunks until soft (12 mins); mash with sea salt.", "Slice chicken breast and pan-sear with garlic and peri-peri seasoning.", "Serve chicken over the mash alongside steamed green beans."] },
-          { name: "Snack", title: "Greek Yogurt & Raw Walnuts", img: "https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=600&q=80", desc: "1 cup plain 0% Greek yogurt, 10 raw walnut halves.", steps: ["Spoon cold Greek yogurt into a bowl.", "Crush raw walnuts over top and serve."] },
-          { name: "Dinner", title: "Savory Lean Mince Bowl over Cauliflower Mash", img: "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=600&q=80", desc: "150g extra-lean beef mince, cumin, diced peppers, cauliflower mash.", steps: ["Steam cauliflower florets until tender; blend with salt & pepper into a smooth mash.", "Brown mince in a skillet with cumin, diced bell peppers, and onions.", "Ladle seasoned mince over warm cauliflower mash."] }
-        ]
-      },
-      {
-        day: "Saturday",
-        type: "Zone 2 Cardio Day",
-        target: "1,670 kcal • 146g Protein",
-        meals: [
-          { name: "Breakfast", title: "Poached Eggs on 100% Seeded Rye Toast", img: "https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=600&q=80", desc: "2 poached eggs, 1 slice toasted rye bread, sliced tomato & cucumber.", steps: ["Poach 2 eggs in simmering water for 3.5 mins.", "Toast 1 slice of seeded rye bread.", "Place poached eggs on toast; serve with sliced tomatoes and cucumbers."] },
-          { name: "Lunch", title: "Mediterranean Chopped Chicken Salad", img: "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80", desc: "150g chicken breast, cucumber, cherry tomatoes, Kalamata olives, 30g feta.", steps: ["Chop grilled chicken breast, cucumber, and cherry tomatoes.", "Toss with 6 pitted Kalamata olives and crumbled feta.", "Dress with 1 tsp olive oil and lemon juice."] },
-          { name: "Snack", title: "Pre-Made Egg & Spinach Muffins", img: "https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=600&q=80", desc: "2 pre-baked savory egg muffin cups.", steps: ["Warm 2 prepped egg cups in microwave for 30 seconds.", "Enjoy as a convenient high-protein snack."] },
-          { name: "Dinner", title: "Baked Cape Hake w/ Garlic Butter & Green Beans", img: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=600&q=80", desc: "180g hake fillet, 1 tsp butter, minced garlic, parsley, green beans.", steps: ["Place hake fillet in a baking dish; top with minced garlic, butter, and parsley.", "Bake at 190°C for 14 mins until tender.", "Steam green beans and serve alongside fish."] }
-        ]
-      },
-      {
-        day: "Sunday",
-        type: "Rest & Batch Prep Day",
-        target: "1,660 kcal • 150g Protein",
-        meals: [
-          { name: "Breakfast", title: "Sunday Scramble w/ Mushrooms & Swiss Chard", img: "https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=600&q=80", desc: "2 whole eggs + 2 whites, sliced mushrooms, onions, Swiss chard.", steps: ["Sauté sliced mushrooms and onions in a skillet until golden.", "Add Swiss chard and let wilt for 2 mins.", "Pour in whisked eggs and scramble over gentle heat until set."] },
-          { name: "Lunch", title: "Leftover Lean Beef Stew w/ Steamed Cabbage", img: "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=600&q=80", desc: "140g slow-cooked beef stew, shredded steamed cabbage ribbons.", steps: ["Finely shred green cabbage and steam for 4 mins.", "Reheat slow-cooker beef stew.", "Serve warm stew over a bed of tender cabbage ribbons."] },
-          { name: "Snack", title: "Warm Bone Broth & Hard-Boiled Egg", img: "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=600&q=80", desc: "1 cup beef bone broth, 1 boiled egg, black pepper.", steps: ["Heat 1 cup of bone broth in a mug until piping hot.", "Season with sea salt and cracked black pepper.", "Enjoy with 1 peeled hard-boiled egg."] },
-          { name: "Dinner", title: "Grilled Lean Beef Patties w/ Garlic Mushrooms", img: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80", desc: "150g extra-lean beef mince (formed into patties), button mushrooms, rocket salad.", steps: ["Shape mince into 2 patties; season with salt, pepper, and garlic powder.", "Pan-sear patties for 4 mins per side.", "Sauté mushrooms in the pan juices.", "Serve patties with sautéed mushrooms and fresh rocket."] }
-        ]
-      }
-    ];
-
-    // --- Master Grocery Checklist Data ---
-    const GROCERY_CATEGORIES = {
-      "Lean Proteins": [
-        "Skinless Chicken Breast fillets (2kg bulk pack)",
-        "Extra-Lean Beef Mince (90/10)",
-        "Frozen Cape Hake Fillets (I&J or Sea Harvest)",
-        "Tray of 30 Large Free-Range Eggs",
-        "Liquid Egg Whites (carton)",
-        "Tinned Pilchards in Tomato Sauce (Lucky Star)",
-        "Tinned Chunk Tuna in Spring Water",
-        "Plain 0% Greek Yogurt",
-        "Low-Fat Cottage Cheese",
-        "Whey or Plant Protein Powder"
-      ],
-      "Workout Carbs": [
-        "Sweet Potatoes (*Patats*)",
-        "Butternut Squash",
-        "Jungle Rolled Oats",
-        "Brown Basmati Rice",
-        "100% Seeded Rye Bread",
-        "Quinoa"
-      ],
-      "Fresh Produce & Greens": [
-        "Swiss Chard / Morogo (fresh bunch)",
-        "Green Cabbage (whole head)",
-        "Baby Marrows (Zucchini)",
-        "Fresh Green Beans",
-        "Gem Squash (pack of 4)",
-        "Broccoli & Cauliflower",
-        "Baby Spinach & Salad Greens",
-        "Cucumbers & Cherry Tomatoes",
-        "Brown Onions & Fresh Garlic",
-        "Fresh Lemons",
-        "Fresh Blueberries & Bananas",
-        "Frozen Mixed Berries"
-      ],
-      "Healthy Fats & Pantry Staples": [
-        "Ripe Avocados",
-        "Raw Almonds & Walnuts",
-        "Pumpkin Seeds & Sunflower Seeds",
-        "Chia Seeds & Ground Flaxseed",
-        "Cold-Pressed Extra Virgin Olive Oil",
-        "Cold-Pressed Canola Oil",
-        "100% Sugar-Free Peanut Butter",
-        "Tagless Rooibos Tea",
-        "Beef Bone Broth (liquid or powder)",
-        "Smoked Paprika, Peri-Peri, Cumin & Sea Salt"
-      ]
-    };
-
-    const SUBSTITUTIONS = {
-      "Lean Proteins": ["Chicken breast (skinless)", "Turkey breast mince", "Cape Hake / Kingklip / Snoek", "Extra-lean Beef mince (90/10)", "Lean Ostrich steaks / mince", "Tinned Tuna in spring water", "Eggs & Liquid egg whites", "Whey / Plant protein powder"],
-      "Workout Carbs": ["Sweet Potato (*patats*)", "Butternut squash", "Quinoa", "Brown Basmati Rice", "Rolled Oats (*Jungle Oats*)", "100% Seeded Rye Bread"],
-      "Fibrous Veg": ["Swiss Chard / Morogo", "Green Cabbage", "Baby Marrows (Zucchini)", "Green Beans", "Gem Squash", "Broccoli & Cauliflower"],
-      "Healthy Fats": ["Local Avocados", "Sunflower Seeds & Pumpkin Seeds", "Cold-Pressed Canola / Olive Oil", "Sugar-Free Peanut Butter", "Raw Almonds & Walnuts"]
-    };
-
-    // --- Dual-Silhouette Anatomical Body Map ---
-    function ProBodyMap({ activeMuscle, exerciseName }) {
+    // --- Feminine Dual-Silhouette Body Map ---
+    function FeminineBodyMap({ activeMuscle, exerciseName }) {
       const isTarget = (m) => activeMuscle === m;
 
       return (
-        <div className="card-dark rounded-3xl p-4 space-y-3">
+        <div className="card-light rounded-3xl p-4 space-y-3">
           <div className="flex justify-between items-center">
             <div>
-              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Target Biomechanics</p>
-              <h3 className="text-sm font-black text-white">{exerciseName}</h3>
+              <p className="text-[10px] font-bold text-roseGold uppercase tracking-wider">Target Biomechanics</p>
+              <h3 className="text-sm font-serif font-bold text-charcoal">{exerciseName}</h3>
             </div>
-            <div className="flex items-center gap-1.5 bg-slate-950 px-2.5 py-1 rounded-full border border-slate-800">
-              <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-              <span className="text-[10px] font-bold text-amber-400 capitalize">{activeMuscle} Target</span>
+            <div className="flex items-center gap-1.5 bg-blush-50 px-3 py-1 rounded-full border border-blush-200">
+              <span className="w-2 h-2 rounded-full bg-blush-500 animate-pulse"></span>
+              <span className="text-[11px] font-semibold text-blush-600 capitalize">{activeMuscle} Focus</span>
             </div>
           </div>
 
-          <div className="bg-[#070a12] rounded-2xl p-4 border border-slate-800/80 flex items-center justify-around">
+          <div className="bg-blush-50/60 rounded-2xl p-4 border border-blush-100 flex items-center justify-around">
             {/* FRONT SILHOUETTE */}
             <div className="flex flex-col items-center">
-              <span className="text-[9px] font-bold uppercase text-slate-400 mb-1">Anterior (Front)</span>
-              <svg viewBox="0 0 100 200" className="w-24 h-48 drop-shadow-md">
-                <circle cx="50" cy="18" r="10" fill="#334155" />
-                <rect x="46" y="28" width="8" height="6" fill="#334155" />
-                <path d="M 28 35 Q 50 32 72 35 L 78 50 L 22 50 Z" fill={isTarget("shoulders") ? "#f59e0b" : "#334155"} className={isTarget("shoulders") ? "muscle-glow" : ""} />
-                <rect x="30" y="48" width="40" height="20" rx="3" fill={isTarget("chest") ? "#f59e0b" : "#1e293b"} className={isTarget("chest") ? "muscle-glow" : ""} />
-                <rect x="34" y="70" width="32" height="28" rx="4" fill={isTarget("core") ? "#f59e0b" : "#1e293b"} className={isTarget("core") ? "muscle-glow" : ""} />
-                <rect x="18" y="52" width="9" height="42" rx="4" fill="#334155" />
-                <rect x="73" y="52" width="9" height="42" rx="4" fill="#334155" />
-                <path d="M 28 102 L 46 102 L 43 148 L 26 148 Z" fill={isTarget("quads") ? "#f59e0b" : "#1e293b"} className={isTarget("quads") ? "muscle-glow" : ""} />
-                <path d="M 54 102 L 72 102 L 74 148 L 57 148 Z" fill={isTarget("quads") ? "#f59e0b" : "#1e293b"} className={isTarget("quads") ? "muscle-glow" : ""} />
-                <rect x="27" y="152" width="13" height="32" rx="3" fill="#334155" />
-                <rect x="60" y="152" width="13" height="32" rx="3" fill="#334155" />
+              <span className="text-[9px] font-semibold uppercase tracking-wider text-mutedMauve mb-1">Anterior (Front)</span>
+              <svg viewBox="0 0 100 200" className="w-24 h-48 drop-shadow-sm">
+                <circle cx="50" cy="18" r="9" fill="#E49B90" opacity="0.5" />
+                <rect x="46" y="27" width="8" height="6" fill="#E49B90" opacity="0.5" />
+                <path d="M 28 35 Q 50 32 72 35 L 77 48 L 23 48 Z" fill={isTarget("shoulders") ? "#D97365" : "#F6DDD9"} className={isTarget("shoulders") ? "muscle-glow" : ""} />
+                <rect x="30" y="47" width="40" height="18" rx="4" fill={isTarget("chest") ? "#D97365" : "#FBF0EE"} className={isTarget("chest") ? "muscle-glow" : ""} />
+                <rect x="34" y="68" width="32" height="26" rx="5" fill={isTarget("core") ? "#D97365" : "#FBF0EE"} className={isTarget("core") ? "muscle-glow" : ""} />
+                <rect x="18" y="50" width="8" height="42" rx="4" fill="#F6DDD9" />
+                <rect x="74" y="50" width="8" height="42" rx="4" fill="#F6DDD9" />
+                <path d="M 28 98 L 46 98 L 43 145 L 26 145 Z" fill={isTarget("quads") ? "#D97365" : "#FBF0EE"} className={isTarget("quads") ? "muscle-glow" : ""} />
+                <path d="M 54 98 L 72 98 L 74 145 L 57 145 Z" fill={isTarget("quads") ? "#D97365" : "#FBF0EE"} className={isTarget("quads") ? "muscle-glow" : ""} />
+                <rect x="27" y="150" width="13" height="32" rx="4" fill="#F6DDD9" />
+                <rect x="60" y="150" width="13" height="32" rx="4" fill="#F6DDD9" />
               </svg>
             </div>
 
-            <div className="w-[1px] h-36 bg-slate-800"></div>
+            <div className="w-[1px] h-36 bg-blush-200"></div>
 
             {/* BACK SILHOUETTE */}
             <div className="flex flex-col items-center">
-              <span className="text-[9px] font-bold uppercase text-slate-400 mb-1">Posterior (Back)</span>
-              <svg viewBox="0 0 100 200" className="w-24 h-48 drop-shadow-md">
-                <circle cx="50" cy="18" r="10" fill="#334155" />
-                <rect x="46" y="28" width="8" height="6" fill="#334155" />
-                <path d="M 26 35 Q 50 32 74 35 L 70 70 L 30 70 Z" fill={isTarget("lats") || isTarget("back") ? "#f59e0b" : "#1e293b"} className={isTarget("lats") || isTarget("back") ? "muscle-glow" : ""} />
-                <rect x="34" y="72" width="32" height="18" rx="2" fill={isTarget("back") ? "#f59e0b" : "#1e293b"} className={isTarget("back") ? "muscle-glow" : ""} />
-                <rect x="18" y="52" width="9" height="42" rx="4" fill="#334155" />
-                <rect x="73" y="52" width="9" height="42" rx="4" fill="#334155" />
-                <rect x="28" y="92" width="44" height="24" rx="6" fill={isTarget("glutes") ? "#f59e0b" : "#1e293b"} className={isTarget("glutes") ? "muscle-glow" : ""} />
-                <path d="M 28 118 L 46 118 L 43 148 L 26 148 Z" fill={isTarget("hamstrings") ? "#f59e0b" : "#1e293b"} className={isTarget("hamstrings") ? "muscle-glow" : ""} />
-                <path d="M 54 118 L 72 118 L 74 148 L 57 148 Z" fill={isTarget("hamstrings") ? "#f59e0b" : "#1e293b"} className={isTarget("hamstrings") ? "muscle-glow" : ""} />
-                <rect x="27" y="152" width="13" height="32" rx="3" fill="#334155" />
-                <rect x="60" y="152" width="13" height="32" rx="3" fill="#334155" />
+              <span className="text-[9px] font-semibold uppercase tracking-wider text-mutedMauve mb-1">Posterior (Back)</span>
+              <svg viewBox="0 0 100 200" className="w-24 h-48 drop-shadow-sm">
+                <circle cx="50" cy="18" r="9" fill="#E49B90" opacity="0.5" />
+                <rect x="46" y="27" width="8" height="6" fill="#E49B90" opacity="0.5" />
+                <path d="M 26 35 Q 50 32 74 35 L 70 68 L 30 68 Z" fill={isTarget("lats") || isTarget("back") ? "#D97365" : "#FBF0EE"} className={isTarget("lats") || isTarget("back") ? "muscle-glow" : ""} />
+                <rect x="34" y="70" width="32" height="18" rx="3" fill={isTarget("back") ? "#D97365" : "#FBF0EE"} className={isTarget("back") ? "muscle-glow" : ""} />
+                <rect x="18" y="50" width="8" height="42" rx="4" fill="#F6DDD9" />
+                <rect x="74" y="50" width="8" height="42" rx="4" fill="#F6DDD9" />
+                <rect x="28" y="90" width="44" height="24" rx="7" fill={isTarget("glutes") ? "#D97365" : "#FBF0EE"} className={isTarget("glutes") ? "muscle-glow" : ""} />
+                <path d="M 28 116 L 46 116 L 43 145 L 26 145 Z" fill={isTarget("hamstrings") ? "#D97365" : "#FBF0EE"} className={isTarget("hamstrings") ? "muscle-glow" : ""} />
+                <path d="M 54 116 L 72 116 L 74 145 L 57 145 Z" fill={isTarget("hamstrings") ? "#D97365" : "#FBF0EE"} className={isTarget("hamstrings") ? "muscle-glow" : ""} />
+                <rect x="27" y="150" width="13" height="32" rx="4" fill="#F6DDD9" />
+                <rect x="60" y="150" width="13" height="32" rx="4" fill="#F6DDD9" />
               </svg>
             </div>
           </div>
@@ -375,19 +256,62 @@
       );
     }
 
-    // --- Main App Component ---
+    // --- Master Meal Plan ---
+    const SA_MEALS = [
+      {
+        day: "Monday",
+        type: "Workout A (Glycogen Glow)",
+        target: "1,720 kcal • 150g Protein",
+        meals: [
+          { name: "Breakfast", title: "Berries & Vanilla Protein Oats", img: "https://images.unsplash.com/photo-1517673132405-a56a62b18caf?auto=format&fit=crop&w=600&q=80", desc: "1 cup Jungle Rolled Oats, 1 scoop vanilla protein, ½ cup fresh blueberries.", steps: ["Simmer oats in 1 cup almond milk for 3 mins until creamy.", "Remove from heat, gently whisk in protein powder until silky.", "Garnish with fresh blueberries and cinnamon."] },
+          { name: "Lunch", title: "Herb Chicken Breast & Roasted Patats", img: "https://images.unsplash.com/photo-1532550907401-a500c9a57435?auto=format&fit=crop&w=600&q=80", desc: "160g chicken fillet, 120g roasted sweet potato cubes, steamed green beans.", steps: ["Roast cubed sweet potatoes at 200°C with 1 tsp olive oil for 22 mins.", "Pan-sear seasoned chicken breast for 5 mins each side.", "Steam green beans 4 mins until crisp and vibrant."] },
+          { name: "Snack", title: "Greek Yogurt & Chia Glow Pot", img: "https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=600&q=80", desc: "1 cup 0% Greek yogurt, 1 tbsp chia seeds, vanilla extract.", steps: ["Spoon yogurt into glass pot, fold in chia seeds and vanilla.", "Let sit 5 mins for chia seeds to blossom."] },
+          { name: "Dinner", title: "Lean Beef Bolognese over Zoodles", img: "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=600&q=80", desc: "150g lean beef mince (90/10), baby marrows (zucchini), tomato passata, ¼ avocado.", steps: ["Brown mince with Italian herbs in a hot skillet.", "Add tomato passata and simmer on low for 8 mins.", "Toss spiralized baby marrows in the pan for 2 mins.", "Serve with sliced avocado."] }
+        ]
+      },
+      {
+        day: "Tuesday",
+        type: "Restorative Recovery",
+        target: "1,640 kcal • 144g Protein",
+        meals: [
+          { name: "Breakfast", title: "Savory Egg & Spinach Cups w/ Avocado", img: "https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=600&q=80", desc: "2 whole eggs + 2 whites baked with morogo/spinach, ½ avocado.", steps: ["Whisk eggs with chopped spinach and bell peppers.", "Bake in muffin tins at 180°C for 20 mins.", "Serve warm with fresh avocado."] },
+          { name: "Lunch", title: "Lucky Star Pilchard Protein Bowl", img: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80", desc: "½ tin pilchards in tomato sauce, mixed greens, steamed gem squash.", steps: ["Steam gem squash halves for 15 mins.", "Warm pilchards and flake over fresh salad greens and squash."] }
+        ]
+      }
+    ];
+
+    // --- Grocery Checklist ---
+    const GROCERY_CATEGORIES = {
+      "Lean Proteins": ["Skinless Chicken Breast", "Extra-Lean Beef Mince", "Cape Hake Fillets", "Free-Range Eggs", "0% Greek Yogurt", "Low-Fat Cottage Cheese", "Vanilla Whey/Plant Protein"],
+      "Glowing Carbs": ["Sweet Potatoes (*Patats*)", "Jungle Rolled Oats", "Brown Basmati Rice", "100% Seeded Rye Bread", "Quinoa"],
+      "Fresh Produce": ["Swiss Chard / Morogo", "Baby Marrows (Zucchini)", "Green Beans", "Gem Squash", "Broccoli", "Baby Spinach", "Fresh Blueberries & Lemons"],
+      "Healthy Fats": ["Ripe Avocados", "Raw Almonds & Walnuts", "Chia Seeds & Flaxseeds", "Extra Virgin Olive Oil", "Sugar-Free Peanut Butter"]
+    };
+
+    const SUBSTITUTIONS = {
+      "Lean Proteins": ["Chicken breast", "Turkey mince", "Cape Hake / Kingklip", "Extra-lean Beef mince", "Ostrich steaks", "Tinned Tuna", "Free-Range Eggs"],
+      "Glowing Carbs": ["Sweet Potato", "Butternut", "Rolled Oats", "Brown Rice", "100% Seeded Rye Bread"],
+      "Fibrous Greens": ["Swiss Chard / Morogo", "Zucchini", "Green Beans", "Gem Squash", "Broccoli", "Spinach"],
+      "Healthy Fats": ["Avocado", "Raw Almonds", "Chia Seeds", "Olive Oil", "Sugar-Free Peanut Butter"]
+    };
+
+    // --- Main Application Component ---
     function App() {
       const [tab, setTab] = useState("train"); // train, fuel, progress, profile
       const [difficulty, setDifficulty] = useState(() => getStored("m60_diff", "intermediate"));
       const [workoutDay, setWorkoutDay] = useState(() => getStored("m60_day", "A"));
       const [focusedId, setFocusedId] = useState("i_a1");
-      const [expandedExerciseId, setExpandedExerciseId] = useState(null);
       
+      // Interactive Exercise Timing & Live Cadence Modal
+      const [activeModalExercise, setActiveModalExercise] = useState(null);
+      const [activeModalPacing, setActiveModalPacing] = useState(false);
+      const [modalPacePhase, setModalPacePhase] = useState("Ready");
+      const [modalPaceCount, setModalPaceCount] = useState(3);
+
       const [weights, setWeights] = useState(() => getStored("m60_weights", {}));
       const [completedSets, setCompletedSets] = useState(() => getStored("m60_sets", {}));
       const [history, setHistory] = useState(() => getStored("m60_history", []));
 
-      // Selected calendar day for detail popover
       const [selectedCalendarDate, setSelectedCalendarDate] = useState(null);
 
       // Onboarding & Profile State
@@ -412,13 +336,13 @@
       const [onboardingStep, setOnboardingStep] = useState(1);
       const [tempProfile, setTempProfile] = useState({ ...userProfile });
 
-      // Fuel Subtab State
-      const [fuelSubTab, setFuelSubTab] = useState("meals"); // meals, checklist, swaps
+      // Fuel State
+      const [fuelSubTab, setFuelSubTab] = useState("meals");
       const [mealDayIdx, setMealDayIdx] = useState(0);
       const [expandedMealIdx, setExpandedMealIdx] = useState(null);
       const [checkedGroceries, setCheckedGroceries] = useState(() => getStored("m60_grocery", {}));
 
-      // 3L Water Tracker State
+      // 3L Water Tracker
       const todayDateStr = getLocalDateStr();
       const [waterGlasses, setWaterGlasses] = useState(() => getStored(`m60_water_${todayDateStr}`, 0));
 
@@ -427,40 +351,17 @@
       const [targetRestSec, setTargetRestSec] = useState(60);
       const [isResting, setIsResting] = useState(false);
 
-      // Metronome
+      // Global Metronome State
       const [showTempo, setShowTempo] = useState(false);
       const [tempoRunning, setTempoRunning] = useState(false);
       const [tempoCount, setTempoCount] = useState(3);
       const [tempoPhase, setTempoPhase] = useState("Lower (3s)");
 
-      // Toast Notification
       const [toastMsg, setToastMsg] = useState(null);
 
-      // Menstrual Cycle State (Configured in Profile, displayed across App)
+      // Menstrual Cycle State (Accessible directly in Train & Profile)
       const [periodStart, setPeriodStart] = useState(() => getStored("m60_pstart", "2026-08-01"));
       const [cycleLen, setCycleLen] = useState(() => getStored("m60_clen", 28));
-
-      // Dynamic BMR & Macro Calculation Engine
-      const calcMetabolicTargets = (p) => {
-        const w = Number(p.currentWeight) || 75;
-        const h = Number(p.height) || 165;
-        const a = Number(p.age) || 30;
-        const bmr = Math.round(10 * w + 6.25 * h - 5 * a - 161);
-        const tdee = Math.round(bmr * 1.375);
-        const deficitCals = Math.max(1450, tdee - 350);
-        
-        let pRatio = 0.40, cRatio = 0.30, fRatio = 0.30;
-        if (p.somatotype === "Ectomorph") { pRatio = 0.30; cRatio = 0.50; fRatio = 0.20; }
-        else if (p.somatotype === "Mesomorph") { pRatio = 0.35; cRatio = 0.40; fRatio = 0.25; }
-
-        const pGrams = Math.round((deficitCals * pRatio) / 4);
-        const cGrams = Math.round((deficitCals * cRatio) / 4);
-        const fGrams = Math.round((deficitCals * fRatio) / 9);
-
-        return { calories: deficitCals, pGrams, cGrams, fGrams, pRatio: Math.round(pRatio * 100), cRatio: Math.round(cRatio * 100), fRatio: Math.round(fRatio * 100) };
-      };
-
-      const metabolicTargets = calcMetabolicTargets(userProfile);
 
       // Persistence
       useEffect(() => { setStored("m60_diff", difficulty); }, [difficulty]);
@@ -481,7 +382,7 @@
           timer = setInterval(() => {
             setRestSec(prev => {
               if (prev <= 4 && prev > 1) {
-                playBeep(520, 0.08);
+                playBeep(587.33, 0.08);
                 triggerHaptic(10);
               }
               if (prev === 1) {
@@ -496,23 +397,60 @@
         return () => clearInterval(timer);
       }, [isResting, restSec]);
 
-      // Metronome Engine
+      // Global Metronome Engine
       useEffect(() => {
         let timer = null;
         if (tempoRunning) {
           let step = 0;
           timer = setInterval(() => {
-            if (step === 0) { setTempoPhase("Lower (3s)"); setTempoCount(3); playBeep(420, 0.05); triggerHaptic(10); }
-            else if (step === 1) { setTempoCount(2); playBeep(420, 0.05); }
-            else if (step === 2) { setTempoCount(1); playBeep(420, 0.05); }
-            else if (step === 3) { setTempoPhase("Drive Up (1s)"); setTempoCount(1); playBeep(840, 0.1); triggerHaptic(20); }
+            if (step === 0) { setTempoPhase("Lower (3s)"); setTempoCount(3); playBeep(440, 0.05); triggerHaptic(8); }
+            else if (step === 1) { setTempoCount(2); playBeep(440, 0.05); }
+            else if (step === 2) { setTempoCount(1); playBeep(440, 0.05); }
+            else if (step === 3) { setTempoPhase("Drive Up (1s)"); setTempoCount(1); playBeep(880, 0.1); triggerHaptic(20); }
             step = (step + 1) % 4;
           }, 1000);
         }
         return () => clearInterval(timer);
       }, [tempoRunning]);
 
-      // Cycle Math with Normalized Midnight Timestamps
+      // Exercise-Specific Live Tempo & Cadence Engine
+      useEffect(() => {
+        let timer = null;
+        if (activeModalExercise && activeModalPacing) {
+          const ecc = activeModalExercise.ecc || 3;
+          const pause = activeModalExercise.pause || 0;
+          const conc = activeModalExercise.conc || 1;
+          const totalCycle = ecc + pause + conc;
+
+          let tick = 0;
+          timer = setInterval(() => {
+            const pos = tick % totalCycle;
+            if (pos < ecc) {
+              setModalPacePhase(`Lowering (Down)`);
+              setModalPaceCount(ecc - pos);
+              playBeep(440, 0.05);
+              triggerHaptic(8);
+            } else if (pos < ecc + pause) {
+              setModalPacePhase(`Pause & Hold`);
+              setModalPaceCount(ecc + pause - pos);
+              playBeep(520, 0.08);
+              triggerHaptic(12);
+            } else {
+              setModalPacePhase(`Drive Up (Lift)`);
+              setModalPaceCount(1);
+              playBeep(880, 0.12);
+              triggerHaptic(25);
+            }
+            tick++;
+          }, 1000);
+        } else {
+          setModalPacePhase("Ready");
+          setModalPaceCount(activeModalExercise ? (activeModalExercise.ecc || 3) : 3);
+        }
+        return () => clearInterval(timer);
+      }, [activeModalExercise, activeModalPacing]);
+
+      // Cycle Math
       const calcCycle = () => {
         const start = new Date(periodStart);
         start.setHours(0, 0, 0, 0);
@@ -532,7 +470,7 @@
       const currentList = EXERCISE_DATA[difficulty][workoutDay] || EXERCISE_DATA.intermediate.A;
       const activeEx = currentList.find(e => e.id === focusedId) || currentList[0];
 
-      // Live Session Volume Math
+      // Live Session Volume
       const currentLoadMod = cycle.info.mod;
       const liveSessionVolume = currentList.reduce((sum, ex) => {
         const loggedKg = (Number(weights[ex.id]) || ex.defaultKg) * currentLoadMod;
@@ -552,7 +490,7 @@
         return sum + done;
       }, 0);
 
-      // Auto-Advancing Set Toggle with Haptic Feedback
+      // Set Check Toggle
       const toggleSet = (key, restDuration, exId, ex) => {
         const next = !completedSets[key];
         const updated = { ...completedSets, [key]: next };
@@ -561,7 +499,7 @@
 
         if (next) {
           triggerHaptic(15);
-          playBeep(600, 0.1);
+          playBeep(659.25, 0.1);
           setTargetRestSec(restDuration);
           setRestSec(restDuration);
           setIsResting(true);
@@ -590,32 +528,20 @@
         setRestSec(seconds);
         setIsResting(true);
         triggerHaptic(15);
-        playBeep(580, 0.08);
+        playBeep(587.33, 0.08);
       };
 
       const toggleGroceryItem = (item) => {
         setCheckedGroceries(prev => ({ ...prev, [item]: !prev[item] }));
         triggerHaptic(12);
-        playBeep(700, 0.05);
+        playBeep(659.25, 0.05);
       };
 
       const setWater = (idx) => {
         const nextVal = (idx + 1 === waterGlasses) ? idx : idx + 1;
         setWaterGlasses(nextVal);
         triggerHaptic(20);
-        playBeep(650, 0.06);
-      };
-
-      const shareWorkoutSummary = () => {
-        const summaryText = `⚡ metabolic60 Workout Complete!\n🏋️ Workout ${workoutDay} (${difficulty.toUpperCase()})\n💪 ${completedSetsCount}/${totalSetsCount} Sets Completed\n🔥 ${liveSessionVolume.toLocaleString()} kg Volume Moved\n🗓️ Cycle Day ${cycle.day} (${cycle.info.short})\n#metabolic60 #${userProfile.somatotype}Protocol`;
-        
-        if (navigator.clipboard) {
-          navigator.clipboard.writeText(summaryText).then(() => {
-            setToastMsg("Workout summary copied to clipboard!");
-            setTimeout(() => setToastMsg(null), 3000);
-          });
-        }
-        triggerHaptic([30, 40, 30]);
+        playBeep(659.25, 0.06);
       };
 
       const finishWorkout = () => {
@@ -631,101 +557,48 @@
         };
         setHistory([entry, ...history]);
         triggerHaptic([50, 100, 50, 100]);
-        if (window.confetti) window.confetti({ particleCount: 120, spread: 70 });
+        if (window.confetti) window.confetti({ particleCount: 120, spread: 70, colors: ['#E49B90', '#D97365', '#F6DDD9'] });
         
-        // Clean completed sets for next round
         const nextDay = workoutDay === "A" ? "B" : workoutDay === "B" ? "C" : "A";
         setWorkoutDay(nextDay);
         setFocusedId(EXERCISE_DATA[difficulty][nextDay][0].id);
       };
 
-      // Onboarding Handlers
-      const completeOnboarding = () => {
-        const finalized = { ...tempProfile, onboardingCompleted: true };
-        setUserProfile(finalized);
-        setStored("m60_user_profile", finalized);
-        setShowOnboardingModal(false);
-        setShowWelcomeScreen(false);
-        if (window.confetti) window.confetti({ particleCount: 150, spread: 90 });
-        triggerHaptic([50, 50, 50]);
-      };
-
-      const startOnboardingWizard = () => {
-        setTempProfile({ ...userProfile });
-        setOnboardingStep(1);
-        setShowOnboardingModal(true);
-      };
-
-      // Full Profile & App Reset
-      const executeFullReset = () => {
-        try {
-          localStorage.removeItem("m60_user_profile");
-          localStorage.removeItem("m60_weights");
-          localStorage.removeItem("m60_sets");
-          localStorage.removeItem("m60_history");
-          localStorage.removeItem("m60_grocery");
-          localStorage.removeItem("m60_diff");
-          localStorage.removeItem("m60_day");
-          localStorage.removeItem("m60_pstart");
-          localStorage.removeItem("m60_clen");
-          localStorage.removeItem(`m60_water_${todayDateStr}`);
-        } catch (e) {}
-
-        setUserProfile(defaultProfile);
-        setWeights({});
-        setCompletedSets({});
-        setHistory([]);
-        setCheckedGroceries({});
-        setWaterGlasses(0);
-        setDifficulty("intermediate");
-        setWorkoutDay("A");
-        setShowResetConfirmModal(false);
-        setShowWelcomeScreen(true);
-        triggerHaptic([100, 50, 100]);
-      };
-
-      // Milestone Badges Math
+      // Milestone Badges
       const totalHistoricalTonnage = history.reduce((sum, h) => sum + (h.tonnage || 0), 0) + liveSessionVolume;
       const badges = [
-        { id: "b1", name: "Consistency Starter", desc: "Finished 1+ workout", icon: "🔥", unlocked: history.length >= 1 },
-        { id: "b2", name: "3-Session Momentum", desc: "Finished 3+ workouts", icon: "⚡", unlocked: history.length >= 3 },
-        { id: "b3", name: "10k kg Lifter Club", desc: "Moved 10,000+ kg total volume", icon: "🏆", unlocked: totalHistoricalTonnage >= 10000 },
-        { id: "b4", name: "Hydration Master", desc: "Drank 3L water today (8/8 glasses)", icon: "💧", unlocked: waterGlasses >= 8 },
-        { id: "b5", name: "Hormonal Sync", desc: "Menstrual cycle tracker configured", icon: "🗓️", unlocked: !!periodStart }
+        { id: "b1", name: "Radiant Starter", desc: "Finished 1+ workout session", icon: "✨", unlocked: history.length >= 1 },
+        { id: "b2", name: "Grace in Momentum", desc: "Completed 3+ workouts", icon: "🌸", unlocked: history.length >= 3 },
+        { id: "b3", name: "10k kg Sculpt Club", desc: "Moved 10,000+ kg sculpted load", icon: "👑", unlocked: totalHistoricalTonnage >= 10000 },
+        { id: "b4", name: "Hydration Radiance", desc: "Drank 3L water today (8/8 glasses)", icon: "💧", unlocked: waterGlasses >= 8 },
+        { id: "b5", name: "Hormonal Symphony", desc: "Menstrual cycle engine synchronized", icon: "🌙", unlocked: !!periodStart }
       ];
 
-      // Circular Arc Math (Protected against division by zero)
+      // Circular Arc Math
       const safeTargetSec = Math.max(1, targetRestSec || 60);
       const arcRadius = 18;
       const arcCircumference = 2 * Math.PI * arcRadius;
       const arcOffset = arcCircumference - (restSec / safeTargetSec) * arcCircumference;
 
-      // Calendar Construction (Current Month)
+      // Calendar Construction
       const now = new Date();
       const currentYear = now.getFullYear();
       const currentMonth = now.getMonth();
-      const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay(); // 0 is Sun
+      const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay();
       const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
       const monthName = now.toLocaleString("default", { month: "long" });
 
       return (
-        <div className="min-h-screen max-w-md mx-auto pb-24 text-slate-100 flex flex-col justify-between">
+        <div className="min-h-screen max-w-md mx-auto pb-24 flex flex-col justify-between">
           
-          {/* Toast Alert */}
-          {toastMsg && (
-            <div className="fixed top-4 left-4 right-4 max-w-sm mx-auto bg-amber-500 text-slate-950 font-black text-xs px-4 py-2.5 rounded-2xl shadow-2xl z-50 text-center animate-bounce">
-              {toastMsg}
-            </div>
-          )}
-
-          {/* TOP APP BAR */}
-          <header className="sticky top-0 z-30 bg-[#070a12]/95 backdrop-blur border-b border-slate-800 px-4 py-3 flex items-center justify-between">
+          {/* Header */}
+          <header className="sticky top-0 z-30 bg-[#FAF6F4]/90 backdrop-blur border-b border-blush-200 px-4 py-3.5 flex items-center justify-between shadow-sm">
             <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
-              <h1 className="text-sm font-black tracking-tight text-white">metabolic60 ⚡</h1>
+              <span className="w-2.5 h-2.5 rounded-full bg-blush-500"></span>
+              <h1 className="text-base font-serif font-bold text-charcoal tracking-tight">metabolic60 ✨</h1>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-[11px] font-semibold text-slate-400 bg-slate-900 px-2.5 py-0.5 rounded-full border border-slate-800">
+              <span className="text-[11px] font-medium text-blush-600 bg-blush-100/80 px-3 py-0.5 rounded-full border border-blush-200">
                 {userProfile.name} • Day {cycle.day}
               </span>
             </div>
@@ -737,36 +610,61 @@
             {tab === "train" && (
               <div className="space-y-3.5">
                 
-                {/* 1. MENSTRUAL PHASE DISPLAY BADGE */}
-                <div className="card-dark p-3.5 rounded-3xl space-y-2 border-rose-500/30">
+                {/* 1. MENSTRUAL PHASE DISPLAY & DIRECT INPUT CARD */}
+                <div className="card-light rounded-3xl p-4 space-y-3 border-blush-300">
                   <div className="flex justify-between items-center">
-                    <span className="text-[9px] font-bold text-rose-400 uppercase tracking-widest">Active Hormonal Phase</span>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${cycle.info.color}`}>
+                    <span className="text-[10px] font-bold text-roseGold uppercase tracking-widest">Hormonal Rhythm</span>
+                    <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${cycle.info.color}`}>
                       Day {cycle.day} • {cycle.info.short} ({Math.round(cycle.info.mod * 100)}% Load)
                     </span>
                   </div>
-                  <p className="text-xs text-slate-200 leading-relaxed font-semibold">
-                    {cycle.info.name}
-                  </p>
-                  <p className="text-[10px] text-slate-400 bg-slate-950/80 p-2 rounded-xl leading-relaxed">
-                    💡 <strong>Training Tip:</strong> {cycle.info.tip} (Edit cycle dates under Profile tab)
+
+                  {/* Direct Menstruation Inputs */}
+                  <div className="grid grid-cols-2 gap-2.5 bg-blush-50/70 p-3 rounded-2xl border border-blush-200">
+                    <div>
+                      <label className="block text-[9px] font-semibold text-mutedMauve uppercase mb-1">Period Start</label>
+                      <input
+                        type="date"
+                        value={periodStart}
+                        onChange={e => setPeriodStart(e.target.value)}
+                        className="w-full bg-white border border-blush-200 text-charcoal text-[11px] font-medium p-1.5 rounded-xl focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <div className="flex justify-between text-[9px] font-semibold text-mutedMauve uppercase mb-1">
+                        <span>Cycle Length</span>
+                        <span className="text-blush-600 font-bold">{cycleLen}d</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="21"
+                        max="35"
+                        value={cycleLen}
+                        onChange={e => setCycleLen(Number(e.target.value))}
+                        className="w-full h-1 bg-blush-200 rounded accent-blush-500 mt-2.5"
+                      />
+                    </div>
+                  </div>
+
+                  <p className="text-[11px] text-charcoal/80 bg-white/80 p-2.5 rounded-2xl leading-relaxed border border-blush-100">
+                    🌸 <strong>{cycle.info.tag}:</strong> {cycle.info.tip}
                   </p>
                 </div>
 
-                {/* 2. REAL-TIME SESSION VOLUME & STATS */}
-                <div className="card-dark p-3 rounded-2xl flex items-center justify-between shadow-sm">
+                {/* 2. REAL-TIME LOAD & PROGRESS HUD */}
+                <div className="card-light p-3.5 rounded-2xl flex items-center justify-between">
                   <div>
-                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Live Session Load</span>
-                    <p className="text-xs font-black text-amber-400 font-mono">{liveSessionVolume.toLocaleString()} kg Moved</p>
+                    <span className="text-[9px] font-bold text-roseGold uppercase tracking-wider">Session Load</span>
+                    <p className="text-xs font-black text-blush-600 font-mono">{liveSessionVolume.toLocaleString()} kg Sculpted</p>
                   </div>
                   <div className="text-right">
-                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Workout Progress</span>
-                    <p className="text-xs font-black text-white font-mono">{completedSetsCount} / {totalSetsCount} Sets Done</p>
+                    <span className="text-[9px] font-bold text-roseGold uppercase tracking-wider">Workout Progress</span>
+                    <p className="text-xs font-black text-charcoal font-mono">{completedSetsCount} / {totalSetsCount} Sets Completed</p>
                   </div>
                 </div>
 
                 {/* 3. 3-TIER DIFFICULTY SELECTOR */}
-                <div className="card-dark p-1 rounded-2xl flex gap-1 shadow-sm">
+                <div className="card-light p-1 rounded-2xl flex gap-1">
                   {["beginner", "intermediate", "advanced"].map(tier => (
                     <button
                       key={tier}
@@ -776,8 +674,8 @@
                         setFocusedId(EXERCISE_DATA[tier][workoutDay][0].id);
                         triggerHaptic(10);
                       }}
-                      className={`flex-1 py-1.5 rounded-xl text-xs font-bold capitalize transition-all ${
-                        difficulty === tier ? "bg-rose-600 text-white shadow-md" : "text-slate-400 hover:text-white"
+                      className={`flex-1 py-1.5 rounded-xl text-xs font-semibold capitalize transition-all ${
+                        difficulty === tier ? "bg-blush-500 text-white shadow-sm font-bold" : "text-mutedMauve hover:text-charcoal"
                       }`}
                     >
                       {tier}
@@ -785,7 +683,7 @@
                   ))}
                 </div>
 
-                {/* 4. DAY SELECTOR & QUICK REST TIMER PRESETS */}
+                {/* 4. WORKOUT SELECTOR & TEMPO */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex gap-1.5 flex-1">
@@ -798,7 +696,7 @@
                             triggerHaptic(10);
                           }}
                           className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all border ${
-                            workoutDay === d ? "bg-slate-800 text-rose-400 border-rose-500/50 shadow" : "card-dark text-slate-400"
+                            workoutDay === d ? "bg-white text-blush-600 border-blush-400 shadow-sm" : "bg-blush-50/60 text-mutedMauve border-blush-100"
                           }`}
                         >
                           Workout {d}
@@ -807,21 +705,21 @@
                     </div>
                     <button
                       onClick={() => { setShowTempo(!showTempo); triggerHaptic(12); }}
-                      className="card-dark px-3 py-2 rounded-xl text-xs font-bold text-slate-300 hover:text-white"
+                      className="card-light px-3 py-2 rounded-xl text-xs font-semibold text-charcoal hover:bg-blush-50"
                     >
                       ⏱️ 3-0-1 Tempo
                     </button>
                   </div>
 
                   {/* Manual Quick-Timer Presets */}
-                  <div className="card-dark p-2.5 rounded-2xl flex items-center justify-between gap-2">
-                    <span className="text-[9px] font-bold uppercase text-slate-400">Quick Rest:</span>
+                  <div className="card-light p-2.5 rounded-2xl flex items-center justify-between gap-2">
+                    <span className="text-[9px] font-bold uppercase text-roseGold">Quick Rest:</span>
                     <div className="flex gap-1.5">
                       {[30, 45, 60, 90].map(s => (
                         <button
                           key={s}
                           onClick={() => startManualTimer(s)}
-                          className="bg-slate-950 hover:bg-slate-800 text-slate-300 px-2.5 py-1 rounded-lg text-[10px] font-bold border border-slate-800"
+                          className="bg-blush-50 hover:bg-blush-100 text-blush-600 px-2.5 py-1 rounded-lg text-[10px] font-bold border border-blush-200"
                         >
                           {s}s
                         </button>
@@ -830,17 +728,17 @@
                   </div>
                 </div>
 
-                {/* 5. ACTIVE REST TIMER BANNER */}
+                {/* 5. REST COUNTDOWN BANNER */}
                 {isResting && (
-                  <div className="card-dark border-amber-500/50 p-3 rounded-2xl flex items-center justify-between animate-pulse">
+                  <div className="card-light border-blush-400 p-3.5 rounded-2xl flex items-center justify-between animate-pulse">
                     <div className="flex items-center gap-3">
                       <svg width="40" height="40" className="w-10 h-10 shrink-0">
-                        <circle cx="20" cy="20" r={arcRadius} stroke="#1e293b" strokeWidth="3.5" fill="transparent" />
+                        <circle cx="20" cy="20" r={arcRadius} stroke="#FBF0EE" strokeWidth="3.5" fill="transparent" />
                         <circle
                           cx="20"
                           cy="20"
                           r={arcRadius}
-                          stroke="#f59e0b"
+                          stroke="#D97365"
                           strokeWidth="3.5"
                           fill="transparent"
                           strokeDasharray={arcCircumference}
@@ -848,14 +746,14 @@
                           strokeLinecap="round"
                           className="timer-arc"
                         />
-                        <text x="20" y="24" textAnchor="middle" fill="#ffffff" fontSize="10" fontWeight="bold">{restSec}s</text>
+                        <text x="20" y="24" textAnchor="middle" fill="#2D2726" fontSize="10" fontWeight="bold">{restSec}s</text>
                       </svg>
                       <div>
-                        <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Rest Countdown</span>
-                        <p className="text-xs font-bold text-amber-400">Catch your breath for next set</p>
+                        <span className="text-[9px] font-bold uppercase tracking-wider text-roseGold">Resting Interval</span>
+                        <p className="text-xs font-bold text-blush-600">Breathe & prepare for your next set</p>
                       </div>
                     </div>
-                    <button onClick={() => { setIsResting(false); triggerHaptic(10); }} className="text-[10px] text-slate-400 underline">
+                    <button onClick={() => { setIsResting(false); triggerHaptic(10); }} className="text-[10px] text-mutedMauve underline">
                       Skip
                     </button>
                   </div>
@@ -863,19 +761,19 @@
 
                 {/* 6. METRONOME DRAWER */}
                 {showTempo && (
-                  <div className="card-dark p-4 rounded-2xl text-center space-y-3 border-amber-500/40">
+                  <div className="card-light p-4 rounded-2xl text-center space-y-3 border-blush-300">
                     <div className="flex justify-between items-center">
-                      <span className="text-xs font-bold text-amber-400">3-0-1 Rep Metronome</span>
-                      <button onClick={() => setShowTempo(false)} className="text-xs text-slate-400">✕</button>
+                      <span className="text-xs font-bold text-blush-600 font-serif">3-0-1 Rep Metronome</span>
+                      <button onClick={() => setShowTempo(false)} className="text-xs text-mutedMauve">✕</button>
                     </div>
-                    <div className="py-3 bg-slate-950 rounded-xl">
-                      <div className="text-3xl font-black font-mono text-white">{tempoRunning ? tempoCount : "3-0-1"}</div>
-                      <p className="text-[10px] text-amber-300 font-bold uppercase mt-1">{tempoPhase}</p>
+                    <div className="py-3 bg-blush-50/80 rounded-2xl border border-blush-200">
+                      <div className="text-3xl font-black font-mono text-charcoal">{tempoRunning ? tempoCount : "3-0-1"}</div>
+                      <p className="text-[10px] text-blush-600 font-bold uppercase tracking-wider mt-1">{tempoPhase}</p>
                     </div>
                     <button
                       onClick={() => { setTempoRunning(!tempoRunning); triggerHaptic(15); }}
-                      className={`w-full py-2 rounded-xl text-xs font-bold transition-all ${
-                        tempoRunning ? "bg-amber-600 text-white" : "bg-slate-800 text-slate-200"
+                      className={`w-full py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm ${
+                        tempoRunning ? "bg-blush-600 text-white" : "bg-blush-100 text-blush-600 hover:bg-blush-200"
                       }`}
                     >
                       {tempoRunning ? "Pause Metronome" : "Start 3-0-1 Metronome"}
@@ -883,14 +781,13 @@
                   </div>
                 )}
 
-                {/* 7. DUAL SILHOUETTE BODY HEATMAP */}
-                <ProBodyMap activeMuscle={activeEx.primary} exerciseName={activeEx.name} />
+                {/* 7. FEMININE BODY HEATMAP */}
+                <FeminineBodyMap activeMuscle={activeEx.primary} exerciseName={activeEx.name} />
 
-                {/* 8. EXERCISE LIST WITH EXPANDABLE FORM & EXECUTION INSTRUCTIONS */}
+                {/* 8. INTERACTIVE EXERCISE CARDS (Tap opens Cadence & Cues Modal) */}
                 <div className="space-y-3">
                   {currentList.map(ex => {
                     const isCurrent = focusedId === ex.id;
-                    const isExpanded = expandedExerciseId === ex.id;
                     const loggedKg = weights[ex.id] !== undefined ? weights[ex.id] : ex.defaultKg;
                     
                     let exDone = true;
@@ -901,23 +798,28 @@
                     return (
                       <div
                         key={ex.id}
-                        onClick={() => { setFocusedId(ex.id); triggerHaptic(8); }}
-                        className={`p-3.5 rounded-2xl transition-all cursor-pointer ${
-                          isCurrent ? "card-active" : "card-dark"
+                        onClick={() => {
+                          setFocusedId(ex.id);
+                          setActiveModalExercise(ex);
+                          setActiveModalPacing(false);
+                          triggerHaptic(12);
+                        }}
+                        className={`p-4 rounded-3xl transition-all cursor-pointer hover:border-blush-400 ${
+                          isCurrent ? "card-active" : "card-light"
                         }`}
                       >
-                        {/* Exercise Header */}
-                        <div className="flex items-center justify-between mb-2.5">
+                        <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center gap-3">
-                            <img src={ex.img} alt={ex.name} className="w-12 h-12 rounded-xl object-cover border border-slate-700 shadow-inner shrink-0" />
+                            <img src={ex.img} alt={ex.name} className="w-12 h-12 rounded-2xl object-cover border border-blush-200 shadow-sm shrink-0" />
                             <div>
                               <div className="flex items-center gap-1.5">
-                                <h4 className="text-xs font-bold text-white">{ex.name}</h4>
-                                {exDone && <span className="text-[8px] bg-emerald-950 text-emerald-400 px-1.5 py-0.5 rounded border border-emerald-800">Done</span>}
+                                <h4 className="text-xs font-serif font-bold text-charcoal">{ex.name}</h4>
+                                {exDone && <span className="text-[8px] bg-rose-100 text-blush-600 px-2 py-0.5 rounded-full font-bold">Done</span>}
                               </div>
-                              <p className="text-[10px] text-slate-400">{ex.target} • Tempo: {ex.tempo}</p>
+                              <p className="text-[10px] text-blush-600 font-medium mt-0.5">⏱️ Tempo: {ex.tempo} • {ex.target}</p>
                             </div>
                           </div>
+                          
                           <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
                             <input
                               type="number"
@@ -927,14 +829,14 @@
                                 const v = e.target.value;
                                 setWeights({ ...weights, [ex.id]: v === '' ? '' : parseFloat(v) });
                               }}
-                              className="w-12 bg-slate-950 border border-slate-700 text-center text-xs font-bold text-white py-1 rounded-lg focus:outline-none"
+                              className="w-12 bg-blush-50 border border-blush-200 text-center text-xs font-bold text-charcoal py-1 rounded-xl focus:outline-none focus:border-blush-400"
                             />
-                            <span className="text-[10px] text-slate-400">kg</span>
+                            <span className="text-[10px] text-mutedMauve">kg</span>
                           </div>
                         </div>
 
-                        {/* Set Checkboxes */}
-                        <div className="flex gap-2 mb-2.5">
+                        {/* Set Buttons */}
+                        <div className="flex gap-2" onClick={e => e.stopPropagation()}>
                           {Array.from({ length: ex.sets }).map((_, sIdx) => {
                             const setKey = `${ex.id}_s_${sIdx}`;
                             const isDone = !!completedSets[setKey];
@@ -946,7 +848,7 @@
                                   toggleSet(setKey, ex.rest, ex.id, ex);
                                 }}
                                 className={`flex-1 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                                  isDone ? "bg-amber-500 text-slate-950 font-black shadow-sm" : "bg-slate-950 text-slate-400 border border-slate-800"
+                                  isDone ? "bg-blush-500 text-white shadow-sm" : "bg-blush-50 text-mutedMauve border border-blush-100 hover:bg-blush-100"
                                 }`}
                               >
                                 {isDone ? "✓" : sIdx + 1}
@@ -955,54 +857,21 @@
                           })}
                         </div>
 
-                        {/* Expandable Form & Execution Instructions */}
-                        <div className="pt-2 border-t border-slate-800/80">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setExpandedExerciseId(isExpanded ? null : ex.id);
-                              triggerHaptic(8);
-                            }}
-                            className="w-full text-left flex justify-between items-center text-[10px] font-bold text-amber-400 hover:text-amber-300"
-                          >
-                            <span>📖 Form Cues & Execution Guide</span>
-                            <span>{isExpanded ? "▲ Hide" : "▼ Show"}</span>
-                          </button>
-
-                          {isExpanded && (
-                            <div className="mt-2 p-2.5 bg-slate-950 rounded-xl space-y-2 text-[11px] text-slate-300 border border-slate-800">
-                              <p><strong className="text-amber-400">Key Cue:</strong> {ex.cues}</p>
-                              <div className="space-y-1">
-                                <span className="text-[9px] font-bold uppercase text-slate-400">Step-by-Step Execution:</span>
-                                <ol className="list-decimal list-inside space-y-0.5 text-slate-300">
-                                  {ex.execution ? ex.execution.map((st, sIdx) => (
-                                    <li key={sIdx}>{st}</li>
-                                  )) : <li>Maintain full core tension and controlled tempo throughout.</li>}
-                                </ol>
-                              </div>
-                            </div>
-                          )}
+                        <div className="mt-2.5 text-center text-[10px] text-roseGold font-medium flex items-center justify-center gap-1">
+                          <span>✨ Tap card for Live Cadence Metronome & Form Cues</span>
                         </div>
                       </div>
                     );
                   })}
                 </div>
 
-                {/* Finish & Share Action Strip */}
-                <div className="space-y-2 pt-1">
-                  <button
-                    onClick={finishWorkout}
-                    className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 text-white font-bold text-xs shadow-lg transition-all"
-                  >
-                    🏆 Log & Finish Workout {workoutDay}
-                  </button>
-                  <button
-                    onClick={shareWorkoutSummary}
-                    className="w-full py-2.5 rounded-xl card-dark text-slate-300 font-bold text-xs hover:text-white transition-all flex items-center justify-center gap-1.5"
-                  >
-                    <span>📋</span> Copy Session Summary (WhatsApp/Notes)
-                  </button>
-                </div>
+                {/* Log & Finish Session */}
+                <button
+                  onClick={finishWorkout}
+                  className="w-full py-4 rounded-2xl bg-gradient-to-r from-blush-400 via-blush-500 to-roseGold text-white font-bold text-xs shadow-md transition-all flex items-center justify-center gap-1.5"
+                >
+                  <span>🌸 Log & Finish Workout {workoutDay}</span>
+                </button>
               </div>
             )}
 
@@ -1010,41 +879,15 @@
             {tab === "fuel" && (
               <div className="space-y-4">
                 
-                {/* Personalized Metabolic Blueprint Target */}
-                <div className="card-dark p-4 rounded-3xl space-y-2 border-emerald-500/30">
-                  <div className="flex justify-between items-center">
-                    <span className="text-[9px] font-bold text-emerald-400 uppercase tracking-widest">Personalized Fuel Targets</span>
-                    <span className="text-[10px] font-bold text-slate-400">{userProfile.somatotype} Calibrated</span>
-                  </div>
-                  <div className="flex justify-between items-baseline">
-                    <span className="text-xl font-black text-white">{metabolicTargets.calories.toLocaleString()} <span className="text-xs font-normal text-slate-400">kcal / day</span></span>
-                    <span className="text-xs font-mono font-bold text-rose-400">{metabolicTargets.pRatio}P / {metabolicTargets.cRatio}C / {metabolicTargets.fRatio}F</span>
-                  </div>
-                  <div className="grid grid-cols-3 gap-2 pt-1">
-                    <div className="bg-slate-950 p-2 rounded-xl text-center">
-                      <span className="text-[9px] text-slate-400 uppercase block font-bold">Protein</span>
-                      <span className="text-xs font-black text-white">{metabolicTargets.pGrams}g</span>
-                    </div>
-                    <div className="bg-slate-950 p-2 rounded-xl text-center">
-                      <span className="text-[9px] text-slate-400 uppercase block font-bold">Carbs</span>
-                      <span className="text-xs font-black text-white">{metabolicTargets.cGrams}g</span>
-                    </div>
-                    <div className="bg-slate-950 p-2 rounded-xl text-center">
-                      <span className="text-[9px] text-slate-400 uppercase block font-bold">Healthy Fats</span>
-                      <span className="text-xs font-black text-white">{metabolicTargets.fGrams}g</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 3L Daily Water Tracker */}
-                <div className="card-dark p-4 rounded-2xl space-y-2.5">
+                {/* 3L Hydration Tracker */}
+                <div className="card-light p-4 rounded-3xl space-y-2.5">
                   <div className="flex justify-between items-center">
                     <div>
-                      <h3 className="text-xs font-bold text-white uppercase tracking-wider">3L Daily Hydration Tracker</h3>
-                      <p className="text-[10px] text-sky-400 font-medium">8 Glasses (~375ml each) • {waterGlasses * 375} / 3000 ml</p>
+                      <h3 className="text-xs font-bold text-charcoal uppercase tracking-wider">3L Daily Hydration Radiance</h3>
+                      <p className="text-[10px] text-blush-600 font-medium">8 Glasses (~375ml each) • {waterGlasses * 375} / 3000 ml</p>
                     </div>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
-                      waterGlasses >= 8 ? "bg-sky-950 text-sky-300 border-sky-700" : "bg-slate-950 text-slate-400 border-slate-800"
+                    <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
+                      waterGlasses >= 8 ? "bg-rose-100 text-blush-600 border-blush-300" : "bg-blush-50 text-mutedMauve border-blush-200"
                     }`}>
                       {waterGlasses >= 8 ? "Goal Reached! 💧" : `${8 - waterGlasses} Left`}
                     </span>
@@ -1058,7 +901,7 @@
                           key={gIdx}
                           onClick={() => setWater(gIdx)}
                           className={`h-10 rounded-xl text-sm font-bold flex items-center justify-center border transition-all ${
-                            isFilled ? "bg-sky-500 text-white border-sky-400 shadow-md shadow-sky-900/40 scale-105" : "bg-slate-950 text-slate-600 border-slate-800"
+                            isFilled ? "bg-blush-400 text-white border-blush-500 shadow-sm scale-105" : "bg-blush-50 text-blush-200 border-blush-100"
                           }`}
                         >
                           💧
@@ -1068,44 +911,44 @@
                   </div>
                 </div>
 
-                {/* Fuel Subtab Switcher */}
-                <div className="card-dark p-1 rounded-2xl flex gap-1 text-xs font-bold">
+                {/* Sub-tabs */}
+                <div className="card-light p-1 rounded-2xl flex gap-1 text-xs font-semibold">
                   <button
                     onClick={() => { setFuelSubTab("meals"); triggerHaptic(8); }}
                     className={`flex-1 py-1.5 rounded-xl transition-all ${
-                      fuelSubTab === "meals" ? "bg-rose-600 text-white shadow" : "text-slate-400 hover:text-white"
+                      fuelSubTab === "meals" ? "bg-blush-500 text-white shadow-sm font-bold" : "text-mutedMauve hover:text-charcoal"
                     }`}
                   >
-                    7-Day Meals
+                    Recipes
                   </button>
                   <button
                     onClick={() => { setFuelSubTab("checklist"); triggerHaptic(8); }}
                     className={`flex-1 py-1.5 rounded-xl transition-all ${
-                      fuelSubTab === "checklist" ? "bg-rose-600 text-white shadow" : "text-slate-400 hover:text-white"
+                      fuelSubTab === "checklist" ? "bg-blush-500 text-white shadow-sm font-bold" : "text-mutedMauve hover:text-charcoal"
                     }`}
                   >
-                    🛒 Grocery List
+                    Grocery List
                   </button>
                   <button
                     onClick={() => { setFuelSubTab("swaps"); triggerHaptic(8); }}
                     className={`flex-1 py-1.5 rounded-xl transition-all ${
-                      fuelSubTab === "swaps" ? "bg-rose-600 text-white shadow" : "text-slate-400 hover:text-white"
+                      fuelSubTab === "swaps" ? "bg-blush-500 text-white shadow-sm font-bold" : "text-mutedMauve hover:text-charcoal"
                     }`}
                   >
                     Swaps
                   </button>
                 </div>
 
-                {/* SUBTAB 1: 7-DAY MEALS */}
+                {/* Recipes */}
                 {fuelSubTab === "meals" && (
-                  <div className="space-y-3.5">
-                    <div className="flex gap-1 overflow-x-auto pb-1">
+                  <div className="space-y-3">
+                    <div className="flex gap-1.5 overflow-x-auto pb-1">
                       {SA_MEALS.map((m, idx) => (
                         <button
                           key={idx}
                           onClick={() => { setMealDayIdx(idx); setExpandedMealIdx(null); triggerHaptic(8); }}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 border transition-all ${
-                            mealDayIdx === idx ? "bg-rose-600 text-white border-rose-500" : "card-dark text-slate-400"
+                          className={`px-3.5 py-1.5 rounded-xl text-xs font-bold shrink-0 border transition-all ${
+                            mealDayIdx === idx ? "bg-white text-blush-600 border-blush-400 shadow-sm" : "bg-blush-50 text-mutedMauve border-blush-100"
                           }`}
                         >
                           {m.day.slice(0, 3)}
@@ -1113,48 +956,35 @@
                       ))}
                     </div>
 
-                    <div className="card-dark p-3.5 rounded-2xl flex justify-between items-center">
-                      <div>
-                        <h3 className="text-sm font-black text-white">{SA_MEALS[mealDayIdx].day} Blueprint</h3>
-                        <p className="text-[10px] text-rose-400 font-semibold">{SA_MEALS[mealDayIdx].type}</p>
-                      </div>
-                      <span className="text-[10px] font-mono font-bold bg-slate-950 text-slate-300 px-2 py-1 rounded-lg border border-slate-800">
-                        {SA_MEALS[mealDayIdx].target}
-                      </span>
-                    </div>
-
                     <div className="space-y-2.5">
                       {SA_MEALS[mealDayIdx].meals.map((meal, mIdx) => {
                         const isExpanded = expandedMealIdx === mIdx;
                         return (
-                          <div key={mIdx} className="card-dark rounded-2xl overflow-hidden transition-all">
+                          <div key={mIdx} className="card-light rounded-2xl overflow-hidden transition-all">
                             <div
                               onClick={() => { setExpandedMealIdx(isExpanded ? null : mIdx); triggerHaptic(8); }}
-                              className="p-3 flex items-center justify-between cursor-pointer hover:bg-slate-800/40 gap-2.5"
+                              className="p-3 flex items-center justify-between cursor-pointer hover:bg-blush-50/50 gap-2.5"
                             >
-                              <img src={meal.img} alt={meal.title} className="w-12 h-12 rounded-xl object-cover border border-slate-700 shrink-0" />
+                              <img src={meal.img} alt={meal.title} className="w-12 h-12 rounded-xl object-cover border border-blush-100 shrink-0" />
                               <div className="flex-1">
-                                <span className="text-[9px] font-bold uppercase tracking-wider text-rose-400">{meal.name}</span>
-                                <h4 className="text-xs font-bold text-white mt-0.5">{meal.title}</h4>
+                                <span className="text-[9px] font-bold uppercase tracking-wider text-blush-600">{meal.name}</span>
+                                <h4 className="text-xs font-serif font-bold text-charcoal">{meal.title}</h4>
                               </div>
-                              <span className={`text-xs text-slate-400 transition-transform ${isExpanded ? 'rotate-180 text-rose-400' : ''}`}>
+                              <span className={`text-xs text-mutedMauve transition-transform ${isExpanded ? 'rotate-180 text-blush-600' : ''}`}>
                                 ▼
                               </span>
                             </div>
 
                             {isExpanded && (
-                              <div className="p-3.5 pt-0 space-y-2.5 border-t border-slate-800/80 bg-slate-950/40">
-                                <p className="text-[11px] text-slate-300 bg-slate-950 p-2.5 rounded-xl border border-slate-800/80 mt-2">
+                              <div className="p-3.5 pt-0 space-y-2 border-t border-blush-100 bg-blush-50/30">
+                                <p className="text-[11px] text-charcoal/80 bg-white p-2.5 rounded-xl border border-blush-100 mt-2">
                                   <strong>Ingredients:</strong> {meal.desc}
                                 </p>
-                                <div className="space-y-1">
-                                  <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Step-by-Step Cooking:</span>
-                                  <ol className="text-[11px] text-slate-300 space-y-1 list-decimal list-inside leading-relaxed pl-0.5">
-                                    {meal.steps.map((st, sIdx) => (
-                                      <li key={sIdx} className="text-slate-300">{st}</li>
-                                    ))}
-                                  </ol>
-                                </div>
+                                <ol className="text-[11px] text-charcoal/80 space-y-1 list-decimal list-inside pl-0.5">
+                                  {meal.steps.map((st, sIdx) => (
+                                    <li key={sIdx}>{st}</li>
+                                  ))}
+                                </ol>
                               </div>
                             )}
                           </div>
@@ -1164,26 +994,26 @@
                   </div>
                 )}
 
-                {/* SUBTAB 2: GROCERY CHECKLIST */}
+                {/* Grocery Checklist */}
                 {fuelSubTab === "checklist" && (
-                  <div className="card-dark p-4 rounded-2xl space-y-4">
-                    <div className="flex justify-between items-center pb-1 border-b border-slate-800">
+                  <div className="card-light p-4 rounded-3xl space-y-3.5">
+                    <div className="flex justify-between items-center pb-1 border-b border-blush-100">
                       <div>
-                        <h3 className="text-xs font-bold text-white uppercase tracking-wider">Supermarket Checklist</h3>
-                        <p className="text-[10px] text-slate-400">Tap items as you shop to mark them off</p>
+                        <h3 className="text-xs font-serif font-bold text-charcoal uppercase tracking-wider">Supermarket Checklist</h3>
+                        <p className="text-[10px] text-mutedMauve">Tap items to mark off as you shop</p>
                       </div>
                       <button
                         onClick={() => { setCheckedGroceries({}); triggerHaptic(15); }}
-                        className="text-[10px] font-bold text-rose-400 bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800 hover:bg-slate-900"
+                        className="text-[10px] font-bold text-blush-600 bg-blush-50 px-2.5 py-1 rounded-lg border border-blush-200"
                       >
-                        Reset List
+                        Reset
                       </button>
                     </div>
 
-                    <div className="space-y-3.5">
+                    <div className="space-y-3">
                       {Object.keys(GROCERY_CATEGORIES).map((catName) => (
                         <div key={catName} className="space-y-1.5">
-                          <span className="text-[10px] font-bold text-rose-400 uppercase tracking-widest">{catName}</span>
+                          <span className="text-[10px] font-bold text-blush-600 uppercase tracking-widest">{catName}</span>
                           <div className="space-y-1">
                             {GROCERY_CATEGORIES[catName].map((item, i) => {
                               const isDone = !!checkedGroceries[item];
@@ -1192,12 +1022,12 @@
                                   key={i}
                                   onClick={() => toggleGroceryItem(item)}
                                   className={`p-2.5 rounded-xl text-xs flex items-center justify-between cursor-pointer border transition-all ${
-                                    isDone ? "bg-slate-950/40 text-slate-600 border-slate-900 line-through" : "bg-slate-950 text-slate-200 border-slate-800 hover:border-slate-700"
+                                    isDone ? "bg-blush-50/50 text-mutedMauve line-through border-blush-100" : "bg-white text-charcoal border-blush-200 hover:border-blush-400"
                                   }`}
                                 >
                                   <span>{item}</span>
                                   <span className={`w-4 h-4 rounded flex items-center justify-center text-[10px] font-bold ${
-                                    isDone ? "bg-emerald-600 text-white" : "border border-slate-700"
+                                    isDone ? "bg-blush-500 text-white" : "border border-blush-300"
                                   }`}>
                                     {isDone ? "✓" : ""}
                                   </span>
@@ -1211,43 +1041,21 @@
                   </div>
                 )}
 
-                {/* SUBTAB 3: SUBSTITUTIONS */}
+                {/* Swaps */}
                 {fuelSubTab === "swaps" && (
-                  <div className="card-dark p-4 rounded-2xl space-y-3">
-                    <h3 className="text-xs font-bold text-white uppercase tracking-wider">Ingredient Substitutions Matrix</h3>
+                  <div className="card-light p-4 rounded-3xl space-y-3">
+                    <h3 className="text-xs font-serif font-bold text-charcoal uppercase tracking-wider">Lifestyle Substitution Matrix</h3>
                     <div className="grid grid-cols-2 gap-3 text-xs">
-                      <div className="space-y-1">
-                        <span className="text-[10px] font-bold text-rose-400 uppercase">Lean Proteins</span>
-                        <ul className="text-[10px] text-slate-300 space-y-0.5">
-                          {SUBSTITUTIONS["Lean Proteins"].map((item, i) => (
-                            <li key={i}>• {item}</li>
-                          ))}
-                        </ul>
-                      </div>
-                      <div className="space-y-1">
-                        <span className="text-[10px] font-bold text-amber-400 uppercase">Workout Carbs</span>
-                        <ul className="text-[10px] text-slate-300 space-y-0.5">
-                          {SUBSTITUTIONS["Workout Carbs"].map((item, i) => (
-                            <li key={i}>• {item}</li>
-                          ))}
-                        </ul>
-                      </div>
-                      <div className="space-y-1 pt-2 border-t border-slate-800">
-                        <span className="text-[10px] font-bold text-emerald-400 uppercase">Fibrous Veg</span>
-                        <ul className="text-[10px] text-slate-300 space-y-0.5">
-                          {SUBSTITUTIONS["Fibrous Veg"].map((item, i) => (
-                            <li key={i}>• {item}</li>
-                          ))}
-                        </ul>
-                      </div>
-                      <div className="space-y-1 pt-2 border-t border-slate-800">
-                        <span className="text-[10px] font-bold text-sky-400 uppercase">Healthy Fats</span>
-                        <ul className="text-[10px] text-slate-300 space-y-0.5">
-                          {SUBSTITUTIONS["Healthy Fats"].map((item, i) => (
-                            <li key={i}>• {item}</li>
-                          ))}
-                        </ul>
-                      </div>
+                      {Object.keys(SUBSTITUTIONS).map((cat, i) => (
+                        <div key={i} className="space-y-1">
+                          <span className="text-[10px] font-bold text-blush-600 uppercase">{cat}</span>
+                          <ul className="text-[11px] text-charcoal/80 space-y-0.5">
+                            {SUBSTITUTIONS[cat].map((item, idx) => (
+                              <li key={idx}>• {item}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 )}
@@ -1259,29 +1067,26 @@
             {tab === "progress" && (
               <div className="space-y-4">
                 
-                {/* 1. MONTHLY WORKOUT ACTIVITY CALENDAR */}
-                <div className="card-dark p-4 rounded-3xl space-y-3">
+                {/* Monthly Activity Calendar */}
+                <div className="card-light p-4 rounded-3xl space-y-3">
                   <div className="flex justify-between items-center">
                     <div>
-                      <span className="text-[9px] font-bold text-amber-400 uppercase tracking-widest">Monthly Heatmap</span>
-                      <h3 className="text-sm font-black text-white">{monthName} {currentYear}</h3>
+                      <span className="text-[9px] font-bold text-roseGold uppercase tracking-widest">Consistency Map</span>
+                      <h3 className="text-sm font-serif font-bold text-charcoal">{monthName} {currentYear}</h3>
                     </div>
-                    <span className="text-[10px] font-bold text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded-full border border-emerald-800">
+                    <span className="text-[10px] font-bold text-blush-600 bg-blush-50 px-2.5 py-0.5 rounded-full border border-blush-200">
                       {history.filter(h => h.fullDate && h.fullDate.startsWith(`${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`)).length} Workouts Done
                     </span>
                   </div>
 
-                  {/* Calendar Grid */}
-                  <div className="bg-slate-950 p-3 rounded-2xl border border-slate-800 space-y-1">
-                    <div className="grid grid-cols-7 text-center text-[9px] font-bold text-slate-500 pb-1 border-b border-slate-900">
+                  <div className="bg-blush-50/60 p-3 rounded-2xl border border-blush-100 space-y-1">
+                    <div className="grid grid-cols-7 text-center text-[9px] font-bold text-mutedMauve pb-1 border-b border-blush-200">
                       <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
                     </div>
                     <div className="grid grid-cols-7 gap-1 pt-1">
-                      {/* Empty slots for month start offset */}
                       {Array.from({ length: firstDayIndex }).map((_, i) => (
                         <div key={`empty_${i}`} className="h-9"></div>
                       ))}
-                      {/* Month Days */}
                       {Array.from({ length: daysInMonth }).map((_, dayIdx) => {
                         const dayNum = dayIdx + 1;
                         const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
@@ -1293,64 +1098,55 @@
                             key={dayNum}
                             onClick={() => workoutDone && setSelectedCalendarDate(workoutDone)}
                             className={`h-9 rounded-xl flex flex-col items-center justify-center text-[10px] font-bold relative transition-all ${
-                              workoutDone ? "bg-amber-500/20 border border-amber-500/60 text-amber-300 cursor-pointer scale-105" :
-                              isToday ? "bg-slate-800 text-white border border-slate-600" :
-                              "bg-slate-900/60 text-slate-400"
+                              workoutDone ? "bg-blush-400 text-white shadow-sm cursor-pointer scale-105" :
+                              isToday ? "bg-white text-blush-600 border border-blush-400" :
+                              "text-mutedMauve"
                             }`}
                           >
                             <span>{dayNum}</span>
-                            {workoutDone && (
-                              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 mt-0.5"></span>
-                            )}
+                            {workoutDone && <span className="w-1 h-1 rounded-full bg-white mt-0.5"></span>}
                           </div>
                         );
                       })}
                     </div>
                   </div>
 
-                  {/* Day Click Pop-up Summary */}
                   {selectedCalendarDate && (
-                    <div className="p-3 bg-slate-950 rounded-2xl border border-amber-500/40 space-y-1.5 animate-fadeIn">
-                      <div className="flex justify-between items-center">
-                        <span className="text-xs font-bold text-amber-400">Workout {selectedCalendarDate.day} Completed!</span>
-                        <button onClick={() => setSelectedCalendarDate(null)} className="text-xs text-slate-400">✕</button>
+                    <div className="p-3 bg-blush-50 rounded-2xl border border-blush-300 space-y-1 text-xs">
+                      <div className="flex justify-between items-center font-bold text-blush-600">
+                        <span>Workout {selectedCalendarDate.day} Completed</span>
+                        <button onClick={() => setSelectedCalendarDate(null)}>✕</button>
                       </div>
-                      <p className="text-[11px] text-slate-300">
-                        Logged on <strong>{selectedCalendarDate.date}</strong> ({selectedCalendarDate.difficulty} level).
-                      </p>
-                      <p className="text-[11px] text-emerald-400 font-mono font-bold">
-                        🔥 {selectedCalendarDate.tonnage ? `${selectedCalendarDate.tonnage.toLocaleString()} kg total volume moved` : 'Completed session'}
-                      </p>
+                      <p className="text-mutedMauve">{selectedCalendarDate.date} • {selectedCalendarDate.tonnage.toLocaleString()} kg sculpted volume</p>
                     </div>
                   )}
                 </div>
 
-                {/* 2. 60-DAY TRANSFORMATION TIMELINE GRID */}
-                <div className="card-dark p-4 rounded-3xl space-y-3">
+                {/* 60-Day Transformation Challenge */}
+                <div className="card-light p-4 rounded-3xl space-y-3">
                   <div className="flex justify-between items-center">
                     <div>
-                      <span className="text-[9px] font-bold text-rose-400 uppercase tracking-widest">60-Day Transformation</span>
-                      <h3 className="text-sm font-black text-white">Challenge Timeline</h3>
+                      <span className="text-[9px] font-bold text-roseGold uppercase tracking-widest">60-Day Transformation</span>
+                      <h3 className="text-sm font-serif font-bold text-charcoal">Challenge Timeline</h3>
                     </div>
-                    <span className="text-xs font-mono font-bold text-white bg-slate-950 px-2.5 py-1 rounded-xl border border-slate-800">
+                    <span className="text-xs font-mono font-bold text-blush-600 bg-blush-50 px-2.5 py-1 rounded-xl border border-blush-200">
                       {history.length} / 60 Days
                     </span>
                   </div>
 
-                  {/* Phase 1: Days 1-30 */}
                   <div className="space-y-1.5">
-                    <div className="flex justify-between text-[10px] font-bold text-slate-400">
-                      <span>Phase 1: Metabolic Reset (Days 1–30)</span>
-                      <span className="text-rose-400">{Math.min(30, history.length)} / 30</span>
+                    <div className="flex justify-between text-[10px] font-semibold text-mutedMauve">
+                      <span>Phase 1: Metabolic Sculpt (Days 1–30)</span>
+                      <span className="text-blush-600">{Math.min(30, history.length)} / 30</span>
                     </div>
-                    <div className="grid grid-cols-10 gap-1 bg-slate-950 p-2.5 rounded-2xl border border-slate-800">
+                    <div className="grid grid-cols-10 gap-1 bg-blush-50/60 p-2.5 rounded-2xl border border-blush-100">
                       {Array.from({ length: 30 }).map((_, i) => {
                         const isDone = i < history.length;
                         return (
                           <div
                             key={i}
                             className={`h-6 rounded-lg flex items-center justify-center text-[9px] font-bold transition-all ${
-                              isDone ? "bg-rose-600 text-white shadow-sm font-black" : "bg-slate-900 text-slate-600"
+                              isDone ? "bg-blush-500 text-white shadow-sm" : "bg-white text-blush-200"
                             }`}
                           >
                             {isDone ? "✓" : i + 1}
@@ -1360,20 +1156,19 @@
                     </div>
                   </div>
 
-                  {/* Phase 2: Days 31-60 */}
                   <div className="space-y-1.5 pt-1">
-                    <div className="flex justify-between text-[10px] font-bold text-slate-400">
-                      <span>Phase 2: Glute Hypertrophy & Taper (Days 31–60)</span>
-                      <span className="text-amber-400">{Math.max(0, Math.min(30, history.length - 30))} / 30</span>
+                    <div className="flex justify-between text-[10px] font-semibold text-mutedMauve">
+                      <span>Phase 2: Glute Lift & Waist Taper (Days 31–60)</span>
+                      <span className="text-roseGold">{Math.max(0, Math.min(30, history.length - 30))} / 30</span>
                     </div>
-                    <div className="grid grid-cols-10 gap-1 bg-slate-950 p-2.5 rounded-2xl border border-slate-800">
+                    <div className="grid grid-cols-10 gap-1 bg-blush-50/60 p-2.5 rounded-2xl border border-blush-100">
                       {Array.from({ length: 30 }).map((_, i) => {
                         const isDone = (i + 30) < history.length;
                         return (
                           <div
                             key={i + 30}
                             className={`h-6 rounded-lg flex items-center justify-center text-[9px] font-bold transition-all ${
-                              isDone ? "bg-amber-500 text-slate-950 shadow-sm font-black" : "bg-slate-900 text-slate-600"
+                              isDone ? "bg-roseGold text-white shadow-sm" : "bg-white text-blush-200"
                             }`}
                           >
                             {isDone ? "✓" : i + 31}
@@ -1383,200 +1178,70 @@
                     </div>
                   </div>
                 </div>
-
-                {/* 3. LOGGED WORKOUT HISTORY ARCHIVE */}
-                <div className="card-dark p-4 rounded-3xl space-y-2">
-                  <h3 className="text-xs font-bold text-white uppercase tracking-wider">Completed Sessions Log</h3>
-                  {history.length === 0 ? (
-                    <p className="text-xs text-slate-500 py-2">No completed sessions logged yet. Finish a workout in Train tab to populate your timeline.</p>
-                  ) : (
-                    <div className="space-y-1.5 max-h-52 overflow-y-auto pr-1">
-                      {history.map((h, i) => (
-                        <div key={i} className="p-2.5 bg-slate-950 rounded-xl flex justify-between items-center text-xs border border-slate-800/80">
-                          <div>
-                            <span className="font-bold text-rose-400">Workout {h.day} ({h.difficulty})</span>
-                            <p className="text-[9px] text-slate-400">{h.date}</p>
-                          </div>
-                          <span className="text-amber-400 font-mono font-bold">{h.tonnage ? `${h.tonnage.toLocaleString()} kg` : 'Done'}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
               </div>
             )}
 
-            {/* TAB 4: PROFILE & SETTINGS (WITH MENSTRUAL CYCLE INPUTS) */}
+            {/* TAB 4: PROFILE */}
             {tab === "profile" && (
               <div className="space-y-4">
-                <div className="card-dark p-4 rounded-2xl space-y-4">
-                  <div className="flex items-center justify-between pb-2 border-b border-slate-800">
+                <div className="card-light p-4 rounded-3xl space-y-4">
+                  <div className="flex items-center justify-between pb-2 border-b border-blush-100">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-amber-500 to-rose-600 text-white flex items-center justify-center font-black">
-                        M60
+                      <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-blush-300 to-blush-500 text-white flex items-center justify-center font-serif text-lg font-bold shadow-sm">
+                        {userProfile.name[0]}
                       </div>
                       <div>
-                        <h2 className="text-sm font-bold text-white">{userProfile.name}, {userProfile.age}y</h2>
-                        <p className="text-xs text-amber-400 font-semibold">{userProfile.somatotype} • {userProfile.experience}</p>
+                        <h2 className="text-sm font-serif font-bold text-charcoal">{userProfile.name}, {userProfile.age}y</h2>
+                        <p className="text-xs text-blush-600 font-medium">{userProfile.somatotype} • {userProfile.experience}</p>
                       </div>
                     </div>
                     <button
                       onClick={() => setShowWelcomeScreen(true)}
-                      className="text-[10px] font-bold text-slate-400 bg-slate-950 px-2.5 py-1 rounded-xl border border-slate-800 hover:text-white"
+                      className="text-[10px] font-bold text-blush-600 bg-blush-50 px-3 py-1 rounded-xl border border-blush-200"
                     >
-                      ▶ Watch Intro
+                      ▶ Intro Tour
                     </button>
                   </div>
 
-                  {/* MENSTRUAL CYCLE INPUTS (CONFIGURED IN PROFILE) */}
-                  <div className="bg-slate-950 p-3.5 rounded-2xl border border-rose-500/30 space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-[10px] font-bold text-rose-400 uppercase tracking-wider">Menstrual Cycle Setup</span>
-                      <span className="text-[10px] font-bold text-white bg-slate-900 px-2 py-0.5 rounded-full border border-slate-800">
-                        Phase: {cycle.info.short}
-                      </span>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2 text-xs">
-                      <div>
-                        <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Period Start Date</label>
-                        <input
-                          type="date"
-                          value={periodStart}
-                          onChange={e => setPeriodStart(e.target.value)}
-                          className="w-full bg-slate-900 border border-slate-700 text-white text-[11px] p-2 rounded-xl focus:outline-none"
-                        />
-                      </div>
-                      <div>
-                        <div className="flex justify-between text-[9px] font-bold text-slate-400 uppercase mb-1">
-                          <span>Cycle Length</span>
-                          <span className="text-rose-400">{cycleLen}d</span>
-                        </div>
-                        <input
-                          type="range"
-                          min="21"
-                          max="35"
-                          value={cycleLen}
-                          onChange={e => setCycleLen(Number(e.target.value))}
-                          className="w-full h-1 bg-slate-900 rounded accent-rose-500 mt-2.5"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Primary Goal Tag */}
-                  <div className="bg-slate-950 p-2.5 rounded-xl flex items-center justify-between text-xs">
-                    <span className="text-slate-400">Target Goal:</span>
-                    <span className="font-bold text-white text-right">{userProfile.goal}</span>
-                  </div>
-
-                  {/* Starting & Target Biometrics */}
-                  <div className="grid grid-cols-2 gap-2 bg-slate-950 p-3 rounded-xl text-xs">
-                    <div>
-                      <span className="text-[9px] text-slate-400 uppercase">Current Weight</span>
-                      <div className="flex items-baseline gap-1 mt-0.5">
-                        <input
-                          type="number"
-                          step="0.1"
-                          value={userProfile.currentWeight === '' ? '' : userProfile.currentWeight}
-                          onChange={e => {
-                            const v = e.target.value;
-                            setUserProfile({ ...userProfile, currentWeight: v === '' ? '' : parseFloat(v) });
-                          }}
-                          className="w-14 bg-transparent font-bold text-white"
-                        />
-                        <span className="text-slate-400">kg</span>
-                      </div>
-                    </div>
-                    <div>
-                      <span className="text-[9px] text-slate-400 uppercase">Target Weight</span>
-                      <div className="flex items-baseline gap-1 mt-0.5">
-                        <input
-                          type="number"
-                          step="0.1"
-                          value={userProfile.targetWeight === '' ? '' : userProfile.targetWeight}
-                          onChange={e => {
-                            const v = e.target.value;
-                            setUserProfile({ ...userProfile, targetWeight: v === '' ? '' : parseFloat(v) });
-                          }}
-                          className="w-14 bg-transparent font-bold text-emerald-400"
-                        />
-                        <span className="text-slate-400">kg</span>
-                      </div>
-                    </div>
-                    <div className="pt-2 border-t border-slate-900">
-                      <span className="text-[9px] text-slate-400 uppercase">Waist</span>
-                      <div className="flex items-baseline gap-1 mt-0.5">
-                        <input
-                          type="number"
-                          value={userProfile.waist === '' ? '' : userProfile.waist}
-                          onChange={e => {
-                            const v = e.target.value;
-                            setUserProfile({ ...userProfile, waist: v === '' ? '' : parseInt(v, 10) });
-                          }}
-                          className="w-14 bg-transparent font-bold text-white"
-                        />
-                        <span className="text-slate-400">cm</span>
-                      </div>
-                    </div>
-                    <div className="pt-2 border-t border-slate-900">
-                      <span className="text-[9px] text-slate-400 uppercase">Hips</span>
-                      <div className="flex items-baseline gap-1 mt-0.5">
-                        <input
-                          type="number"
-                          value={userProfile.hips === '' ? '' : userProfile.hips}
-                          onChange={e => {
-                            const v = e.target.value;
-                            setUserProfile({ ...userProfile, hips: v === '' ? '' : parseInt(v, 10) });
-                          }}
-                          className="w-14 bg-transparent font-bold text-white"
-                        />
-                        <span className="text-slate-400">cm</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Actions */}
                   <div className="space-y-2">
                     <button
                       onClick={startOnboardingWizard}
-                      className="w-full py-2.5 rounded-xl card-dark text-xs font-bold text-amber-400 hover:text-white transition-all flex items-center justify-center gap-1.5 border-amber-500/30"
+                      className="w-full py-2.5 rounded-xl bg-blush-50 text-xs font-bold text-blush-600 hover:bg-blush-100 transition-all border border-blush-200"
                     >
-                      <span>⚙️</span> Edit Profile & Questionnaire
+                      ✨ Edit Profile & Metabolic Equation
                     </button>
                     <button
                       onClick={() => setShowResetConfirmModal(true)}
-                      className="w-full py-2.5 rounded-xl bg-red-950/40 hover:bg-red-900/60 text-xs font-bold text-red-400 border border-red-800/40 transition-all flex items-center justify-center gap-1.5"
+                      className="w-full py-2.5 rounded-xl bg-rose-50 text-xs font-bold text-rose-600 border border-rose-200 transition-all"
                     >
-                      <span>⚠️</span> Reset Entire Profile & Clear Data
+                      ⚠️ Reset All Transformation Data
                     </button>
                   </div>
                 </div>
 
                 {/* Milestone Badges */}
-                <div className="card-dark p-4 rounded-2xl space-y-3">
+                <div className="card-light p-4 rounded-3xl space-y-3">
                   <div className="flex justify-between items-center">
-                    <h3 className="text-xs font-bold text-white uppercase tracking-wider">Milestone Badges</h3>
-                    <span className="text-[10px] font-bold text-amber-400 font-mono">{badges.filter(b => b.unlocked).length} / {badges.length} Unlocked</span>
+                    <h3 className="text-xs font-serif font-bold text-charcoal uppercase tracking-wider">Milestone Achievements</h3>
+                    <span className="text-[10px] font-bold text-blush-600">{badges.filter(b => b.unlocked).length} / {badges.length} Unlocked</span>
                   </div>
                   <div className="grid grid-cols-1 gap-2">
                     {badges.map(b => (
                       <div
                         key={b.id}
-                        className={`p-2.5 rounded-xl border flex items-center justify-between text-xs transition-all ${
-                          b.unlocked ? "bg-slate-950 border-amber-500/40 text-slate-200" : "bg-slate-950/40 border-slate-800 text-slate-500 opacity-60"
+                        className={`p-3 rounded-2xl border flex items-center justify-between text-xs transition-all ${
+                          b.unlocked ? "bg-blush-50/60 border-blush-300 text-charcoal" : "bg-white border-blush-100 text-mutedMauve opacity-50"
                         }`}
                       >
                         <div className="flex items-center gap-2.5">
-                          <span className="text-base">{b.icon}</span>
+                          <span className="text-lg">{b.icon}</span>
                           <div>
-                            <h4 className="font-bold text-white">{b.name}</h4>
-                            <p className="text-[10px] text-slate-400">{b.desc}</p>
+                            <h4 className="font-bold text-charcoal">{b.name}</h4>
+                            <p className="text-[10px] text-mutedMauve">{b.desc}</p>
                           </div>
                         </div>
-                        <span className={`text-[10px] font-bold ${b.unlocked ? "text-amber-400" : "text-slate-600"}`}>
-                          {b.unlocked ? "✓ Unlocked" : "Locked"}
+                        <span className={`text-[10px] font-bold ${b.unlocked ? "text-blush-600" : "text-mutedMauve"}`}>
+                          {b.unlocked ? "Unlocked" : "Locked"}
                         </span>
                       </div>
                     ))}
@@ -1587,346 +1252,217 @@
 
           </main>
 
-          {/* WELCOME TOUR MODAL */}
-          {showWelcomeScreen && (
-            <div className="fixed inset-0 bg-[#070a12]/95 backdrop-blur-md flex items-center justify-center p-4 z-50 overflow-y-auto">
-              <div className="card-dark rounded-3xl p-5 max-w-sm w-full space-y-4 my-auto border-amber-500/40 shadow-2xl">
-                <div className="text-center space-y-1">
-                  <span className="text-[9px] font-bold text-amber-400 uppercase tracking-widest">Welcome Tour</span>
-                  <h3 className="text-lg font-black text-white">Welcome to metabolic60 ⚡</h3>
-                  <p className="text-xs text-slate-400">Tailored metabolic strength & hormonal nutrition.</p>
-                </div>
-
-                <div className="relative rounded-2xl overflow-hidden border border-slate-700 bg-slate-950 aspect-video shadow-inner flex items-center justify-center">
-                  <video
-                    src="https://cdn.coverr.co/videos/coverr-woman-exercising-in-a-gym-5364/1080p.mp4"
-                    poster="https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=800&q=80"
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    className="w-full h-full object-cover opacity-80"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent"></div>
-                  <div className="absolute bottom-2.5 left-3 right-3 flex justify-between items-center text-[10px] text-white font-bold">
-                    <span>⚡ 60-Day Transformation</span>
-                    <span className="bg-rose-600 px-2 py-0.5 rounded-full">Preview</span>
-                  </div>
-                </div>
-
-                <div className="space-y-2 text-xs">
-                  <div className="flex items-center gap-2.5 p-2 bg-slate-950 rounded-xl border border-slate-800">
-                    <span className="text-base">🏋️</span>
+          {/* LIVE CADENCE METRONOME & CUES MODAL */}
+          {activeModalExercise && (
+            <div className="fixed inset-0 bg-charcoal/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
+              <div className="card-light rounded-3xl p-5 max-w-sm w-full space-y-4 my-auto border-blush-300 shadow-2xl">
+                
+                <div className="flex items-center justify-between border-b border-blush-100 pb-3">
+                  <div className="flex items-center gap-3">
+                    <img src={activeModalExercise.img} alt={activeModalExercise.name} className="w-10 h-10 rounded-xl object-cover border border-blush-200" />
                     <div>
-                      <h4 className="font-bold text-white">3D Biomechanics & Heatmap</h4>
-                      <p className="text-[10px] text-slate-400">Mind-muscle connection & active muscle indicators.</p>
+                      <h3 className="text-xs font-serif font-bold text-charcoal">{activeModalExercise.name}</h3>
+                      <p className="text-[10px] text-blush-600 font-semibold">{activeModalExercise.target}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2.5 p-2 bg-slate-950 rounded-xl border border-slate-800">
-                    <span className="text-base">🥗</span>
-                    <div>
-                      <h4 className="font-bold text-white">Precision Macro Timing</h4>
-                      <p className="text-[10px] text-slate-400">40P/30C/30F tailored to your somatotype.</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex gap-2 pt-2 border-t border-slate-800">
                   <button
                     onClick={() => {
-                      setShowWelcomeScreen(false);
-                      if (!userProfile.onboardingCompleted) startOnboardingWizard();
+                      setActiveModalExercise(null);
+                      setActiveModalPacing(false);
                     }}
-                    className="w-full py-3 rounded-2xl bg-gradient-to-r from-rose-600 to-amber-600 text-white font-black text-xs transition-all shadow-lg"
+                    className="w-7 h-7 rounded-full bg-blush-50 border border-blush-200 flex items-center justify-center text-xs text-mutedMauve hover:text-charcoal"
                   >
-                    {userProfile.onboardingCompleted ? "Enter Dashboard 🚀" : "Start Setup Questionnaire →"}
+                    ✕
                   </button>
                 </div>
+
+                {/* CADENCE HUD */}
+                <div className="bg-blush-50/70 p-4 rounded-2xl border border-blush-200 text-center space-y-2">
+                  <div className="flex justify-between items-center text-[10px] font-bold text-mutedMauve uppercase">
+                    <span>Sculpt Tempo</span>
+                    <span className="text-blush-600 font-mono">{activeModalExercise.tempo}</span>
+                  </div>
+
+                  <div className="py-4">
+                    <div className="text-4xl font-black font-mono text-charcoal tempo-pulse">
+                      {activeModalPacing ? modalPaceCount : activeModalExercise.tempo}
+                    </div>
+                    <p className="text-xs font-bold uppercase tracking-wider text-blush-600 mt-1.5">{modalPacePhase}</p>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      setActiveModalPacing(!activeModalPacing);
+                      triggerHaptic(15);
+                    }}
+                    className={`w-full py-2.5 rounded-xl font-bold text-xs transition-all shadow-sm ${
+                      activeModalPacing ? "bg-blush-600 text-white" : "bg-white text-blush-600 border border-blush-200 hover:bg-blush-50"
+                    }`}
+                  >
+                    {activeModalPacing ? "Pause Cadence Guide" : "Start Live Tempo Guide"}
+                  </button>
+                </div>
+
+                <div className="space-y-1.5 bg-white p-3 rounded-2xl border border-blush-100 text-xs">
+                  <p><strong className="text-blush-600">Mind-Muscle Cue:</strong> {activeModalExercise.cues}</p>
+                </div>
+
+                <button
+                  onClick={() => {
+                    startManualTimer(activeModalExercise.rest || 60);
+                    setActiveModalExercise(null);
+                    setActiveModalPacing(false);
+                  }}
+                  className="w-full py-2.5 rounded-xl bg-blush-500 text-white text-xs font-bold shadow-sm"
+                >
+                  Start Rest Interval ({activeModalExercise.rest}s)
+                </button>
               </div>
             </div>
           )}
 
-          {/* ONBOARDING QUESTIONNAIRE WIZARD MODAL */}
-          {showOnboardingModal && (
-            <div className="fixed inset-0 bg-[#070a12]/95 backdrop-blur-md flex items-center justify-center p-4 z-50 overflow-y-auto">
-              <div className="card-dark rounded-3xl p-5 max-w-sm w-full space-y-4 my-auto border-amber-500/40 shadow-2xl">
-                
-                <div className="flex justify-between items-center border-b border-slate-800 pb-3">
-                  <div>
-                    <span className="text-[9px] font-bold text-amber-400 uppercase tracking-widest">Personalization Setup</span>
-                    <h3 className="text-sm font-black text-white">Step {onboardingStep} of 5</h3>
+          {/* INTRO TOUR MODAL */}
+          {showWelcomeScreen && (
+            <div className="fixed inset-0 bg-charcoal/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
+              <div className="card-light rounded-3xl p-5 max-w-sm w-full space-y-4 my-auto border-blush-300 shadow-2xl">
+                <div className="text-center space-y-1">
+                  <span className="text-[9px] font-bold text-roseGold uppercase tracking-widest">Welcome Tour</span>
+                  <h3 className="text-lg font-serif font-bold text-charcoal">metabolic60 ✨</h3>
+                  <p className="text-xs text-mutedMauve">Feminine metabolic strength & hormonal lifestyle sync.</p>
+                </div>
+
+                <div className="relative rounded-2xl overflow-hidden border border-blush-200 bg-blush-50 aspect-video shadow-sm flex items-center justify-center">
+                  <video
+                    src="https://cdn.coverr.co/videos/coverr-woman-exercising-in-a-gym-5364/1080p.mp4"
+                    poster="https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=800&q=80"
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-charcoal/40 via-transparent to-transparent"></div>
+                  <div className="absolute bottom-2.5 left-3 right-3 flex justify-between items-center text-[10px] text-white font-bold">
+                    <span>60-Day Transformation</span>
+                    <span className="bg-blush-500 px-2 py-0.5 rounded-full">Preview</span>
                   </div>
-                  <span className="text-xs font-mono font-bold text-slate-400">{Math.round((onboardingStep / 5) * 100)}%</span>
+                </div>
+
+                <button
+                  onClick={() => {
+                    setShowWelcomeScreen(false);
+                    if (!userProfile.onboardingCompleted) startOnboardingWizard();
+                  }}
+                  className="w-full py-3 rounded-2xl bg-gradient-to-r from-blush-400 to-blush-500 text-white font-bold text-xs shadow-md"
+                >
+                  {userProfile.onboardingCompleted ? "Enter App ✨" : "Begin Personalization Setup →"}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* ONBOARDING WIZARD */}
+          {showOnboardingModal && (
+            <div className="fixed inset-0 bg-charcoal/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
+              <div className="card-light rounded-3xl p-5 max-w-sm w-full space-y-4 my-auto border-blush-300 shadow-2xl">
+                <div className="flex justify-between items-center border-b border-blush-100 pb-3">
+                  <div>
+                    <span className="text-[9px] font-bold text-roseGold uppercase tracking-widest">Personalization</span>
+                    <h3 className="text-sm font-serif font-bold text-charcoal">Step {onboardingStep} of 3</h3>
+                  </div>
                 </div>
 
                 {onboardingStep === 1 && (
-                  <div className="space-y-3.5">
-                    <div>
-                      <h4 className="text-base font-black text-white">About You</h4>
-                      <p className="text-xs text-slate-400 mt-0.5">Let's calculate your exact metabolic energy output.</p>
-                    </div>
-                    <div className="space-y-3 pt-1">
-                      <div>
-                        <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Your First Name</label>
-                        <input
-                          type="text"
-                          value={tempProfile.name}
-                          onChange={e => setTempProfile({ ...tempProfile, name: e.target.value })}
-                          placeholder="e.g. Lindiwe"
-                          className="w-full bg-slate-950 border border-slate-700 text-white rounded-xl p-3 text-xs font-bold focus:border-amber-500 focus:outline-none"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Your Age</label>
-                        <input
-                          type="number"
-                          value={tempProfile.age === '' ? '' : tempProfile.age}
-                          onChange={e => {
-                            const v = e.target.value;
-                            setTempProfile({ ...tempProfile, age: v === '' ? '' : parseInt(v, 10) });
-                          }}
-                          className="w-full bg-slate-950 border border-slate-700 text-white rounded-xl p-3 text-xs font-bold focus:border-amber-500 focus:outline-none"
-                        />
-                      </div>
-                    </div>
+                  <div className="space-y-3">
+                    <label className="block text-[10px] font-bold text-mutedMauve uppercase">Your First Name</label>
+                    <input
+                      type="text"
+                      value={tempProfile.name}
+                      onChange={e => setTempProfile({ ...tempProfile, name: e.target.value })}
+                      placeholder="e.g. Lindiwe"
+                      className="w-full bg-blush-50 border border-blush-200 text-charcoal rounded-xl p-3 text-xs font-bold focus:outline-none"
+                    />
                   </div>
                 )}
 
                 {onboardingStep === 2 && (
                   <div className="space-y-3">
-                    <div>
-                      <h4 className="text-sm font-black text-white">Select Your Body Somatotype</h4>
-                      <p className="text-[11px] text-slate-400">Tailors carbohydrate timing and insulin response.</p>
-                    </div>
-                    <div className="space-y-2">
-                      {[
-                        { type: "Endomorph", desc: "Higher carbohydrate sensitivity, stores fat easily around hips/waist. Excels on 40P/30C/30F.", img: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=400&q=80" },
-                        { type: "Mesomorph", desc: "Athletic structure, gains muscle rapidly, handles moderate carbs efficiently around workouts.", img: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=400&q=80" },
-                        { type: "Ectomorph", desc: "Naturally lean structure, fast metabolic rate, requires higher carbohydrate threshold for energy.", img: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=400&q=80" }
-                      ].map(s => (
-                        <div
-                          key={s.type}
-                          onClick={() => { setTempProfile({ ...tempProfile, somatotype: s.type }); triggerHaptic(10); }}
-                          className={`p-2.5 rounded-2xl border cursor-pointer flex items-center gap-3 transition-all ${
-                            tempProfile.somatotype === s.type ? "card-active" : "bg-slate-950 border-slate-800"
-                          }`}
-                        >
-                          <img src={s.img} alt={s.type} className="w-12 h-12 rounded-xl object-cover shrink-0 border border-slate-700" />
-                          <div className="flex-1">
-                            <span className="text-xs font-bold text-white">{s.type}</span>
-                            <p className="text-[10px] text-slate-400 leading-tight mt-0.5">{s.desc}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                    <label className="block text-[10px] font-bold text-mutedMauve uppercase">Primary Focus Goal</label>
+                    {["Fat Loss & Metabolic Reset", "Glute Lift & Waist Taper", "Full Body Recomposition"].map(g => (
+                      <div
+                        key={g}
+                        onClick={() => setTempProfile({ ...tempProfile, goal: g })}
+                        className={`p-3 rounded-2xl border text-xs font-bold cursor-pointer ${
+                          tempProfile.goal === g ? "bg-blush-50 border-blush-500 text-blush-600" : "bg-white border-blush-200 text-charcoal"
+                        }`}
+                      >
+                        {g}
+                      </div>
+                    ))}
                   </div>
                 )}
 
                 {onboardingStep === 3 && (
-                  <div className="space-y-3">
-                    <div>
-                      <h4 className="text-sm font-black text-white">Starting Biometrics</h4>
-                      <p className="text-[11px] text-slate-400">Calibrates your baseline energy equation.</p>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2.5">
-                      <div>
-                        <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Height (cm)</label>
-                        <input
-                          type="number"
-                          value={tempProfile.height === '' ? '' : tempProfile.height}
-                          onChange={e => {
-                            const v = e.target.value;
-                            setTempProfile({ ...tempProfile, height: v === '' ? '' : parseInt(v, 10) });
-                          }}
-                          className="w-full bg-slate-950 border border-slate-700 text-white rounded-xl p-2.5 text-xs font-bold"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Current Weight (kg)</label>
-                        <input
-                          type="number"
-                          step="0.1"
-                          value={tempProfile.currentWeight === '' ? '' : tempProfile.currentWeight}
-                          onChange={e => {
-                            const v = e.target.value;
-                            setTempProfile({ ...tempProfile, currentWeight: v === '' ? '' : parseFloat(v) });
-                          }}
-                          className="w-full bg-slate-950 border border-slate-700 text-white rounded-xl p-2.5 text-xs font-bold"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Target Weight (kg)</label>
-                        <input
-                          type="number"
-                          step="0.1"
-                          value={tempProfile.targetWeight === '' ? '' : tempProfile.targetWeight}
-                          onChange={e => {
-                            const v = e.target.value;
-                            setTempProfile({ ...tempProfile, targetWeight: v === '' ? '' : parseFloat(v) });
-                          }}
-                          className="w-full bg-slate-950 border border-slate-700 text-white rounded-xl p-2.5 text-xs font-bold"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Waist (cm)</label>
-                        <input
-                          type="number"
-                          value={tempProfile.waist === '' ? '' : tempProfile.waist}
-                          onChange={e => {
-                            const v = e.target.value;
-                            setTempProfile({ ...tempProfile, waist: v === '' ? '' : parseInt(v, 10) });
-                          }}
-                          className="w-full bg-slate-950 border border-slate-700 text-white rounded-xl p-2.5 text-xs font-bold"
-                        />
-                      </div>
-                    </div>
+                  <div className="text-center space-y-2">
+                    <h4 className="text-base font-serif font-bold text-charcoal">All Set for {tempProfile.name}!</h4>
+                    <p className="text-xs text-mutedMauve">Your custom metabolic macros & hormonal strength plan are calibrated.</p>
                   </div>
                 )}
 
-                {onboardingStep === 4 && (
-                  <div className="space-y-3">
-                    <div>
-                      <h4 className="text-sm font-black text-white">Your Primary Training Goal</h4>
-                      <p className="text-[11px] text-slate-400">Sets your progressive overload pacing.</p>
-                    </div>
-                    <div className="space-y-2">
-                      {["Fat Loss & Insulin Reset", "Glute Hypertrophy & Waist Taper", "Metabolic Recomposition & Strength"].map(g => (
-                        <div
-                          key={g}
-                          onClick={() => { setTempProfile({ ...tempProfile, goal: g }); triggerHaptic(8); }}
-                          className={`p-3 rounded-2xl border text-xs font-bold cursor-pointer transition-all ${
-                            tempProfile.goal === g ? "card-active text-amber-400" : "bg-slate-950 border-slate-800 text-slate-300"
-                          }`}
-                        >
-                          {g}
-                        </div>
-                      ))}
-                    </div>
-                    <div className="pt-2">
-                      <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Experience Level</label>
-                      <div className="flex gap-2">
-                        {["Beginner", "Intermediate", "Advanced"].map(exp => (
-                          <button
-                            key={exp}
-                            onClick={() => {
-                              setTempProfile({ ...tempProfile, experience: exp });
-                              setDifficulty(exp.toLowerCase());
-                              triggerHaptic(8);
-                            }}
-                            className={`flex-1 py-2 rounded-xl text-[11px] font-bold capitalize border transition-all ${
-                              tempProfile.experience.toLowerCase() === exp.toLowerCase() ? "bg-rose-600 text-white border-rose-500" : "bg-slate-950 text-slate-400 border-slate-800"
-                            }`}
-                          >
-                            {exp}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {onboardingStep === 5 && (
-                  <div className="space-y-3.5 text-center">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-amber-500 to-rose-600 mx-auto flex items-center justify-center text-xl font-black text-white">
-                      ⚡
-                    </div>
-                    <div>
-                      <h4 className="text-base font-black text-white">Protocol Ready for {tempProfile.name}!</h4>
-                      <p className="text-xs text-slate-400 mt-1">Caloric target calibrated for {tempProfile.somatotype} body type.</p>
-                    </div>
-                    <div className="bg-slate-950 p-3.5 rounded-2xl border border-slate-800 space-y-2 text-xs text-left">
-                      <div className="flex justify-between border-b border-slate-900 pb-1.5">
-                        <span className="text-slate-400">Daily Caloric Target:</span>
-                        <span className="font-bold text-white">~{calcMetabolicTargets(tempProfile).calories} kcal / day</span>
-                      </div>
-                      <div className="flex justify-between border-b border-slate-900 pb-1.5">
-                        <span className="text-slate-400">Macro Distribution:</span>
-                        <span className="font-bold text-rose-400">{calcMetabolicTargets(tempProfile).pRatio}% P / {calcMetabolicTargets(tempProfile).cRatio}% C / {calcMetabolicTargets(tempProfile).fRatio}% F</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-slate-400">Hydration Target:</span>
-                        <span className="font-bold text-sky-400">3.0 Liters Daily</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex gap-2 pt-2 border-t border-slate-800">
-                  {onboardingStep > 1 && (
+                <div className="flex gap-2 pt-2 border-t border-blush-100">
+                  {onboardingStep < 3 ? (
                     <button
-                      onClick={() => { setOnboardingStep(prev => prev - 1); triggerHaptic(8); }}
-                      className="px-4 py-2.5 rounded-xl card-dark text-xs font-bold text-slate-300"
-                    >
-                      Back
-                    </button>
-                  )}
-                  {onboardingStep < 5 ? (
-                    <button
-                      onClick={() => { setOnboardingStep(prev => prev + 1); triggerHaptic(12); }}
-                      className="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black transition-all shadow-md"
+                      onClick={() => setOnboardingStep(prev => prev + 1)}
+                      className="flex-1 py-2.5 rounded-xl bg-blush-500 text-white text-xs font-bold"
                     >
                       Continue →
                     </button>
                   ) : (
                     <button
                       onClick={completeOnboarding}
-                      className="flex-1 py-3 rounded-xl bg-gradient-to-r from-rose-600 to-amber-600 text-white text-xs font-black transition-all shadow-lg"
+                      className="flex-1 py-3 rounded-xl bg-gradient-to-r from-blush-400 to-blush-500 text-white text-xs font-bold shadow-md"
                     >
-                      Save & Launch 🚀
+                      Launch metabolic60 ✨
                     </button>
                   )}
                 </div>
-
               </div>
             </div>
           )}
 
-          {/* RESET PROFILE CONFIRMATION MODAL */}
+          {/* RESET CONFIRMATION MODAL */}
           {showResetConfirmModal && (
-            <div className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 z-50">
-              <div className="card-dark rounded-3xl p-5 max-w-sm w-full space-y-4 border-red-500/50 shadow-2xl text-center">
-                <div className="w-12 h-12 rounded-full bg-red-950/80 text-red-400 flex items-center justify-center mx-auto text-xl border border-red-800">
-                  ⚠️
-                </div>
-                <div>
-                  <h3 className="text-base font-black text-white">Reset Profile & Data?</h3>
-                  <p className="text-xs text-slate-400 mt-1">
-                    This will wipe all custom weights, completed workout histories, and profile questionnaire entries.
-                  </p>
-                </div>
-                <div className="flex gap-2 pt-2 border-t border-slate-800">
-                  <button
-                    onClick={() => setShowResetConfirmModal(false)}
-                    className="flex-1 py-2.5 rounded-xl card-dark text-xs font-bold text-slate-300"
-                  >
+            <div className="fixed inset-0 bg-charcoal/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+              <div className="card-light rounded-3xl p-5 max-w-sm w-full space-y-4 border-rose-300 shadow-2xl text-center">
+                <h3 className="text-base font-serif font-bold text-charcoal">Reset All Lifestyle Data?</h3>
+                <p className="text-xs text-mutedMauve">This will clear your local workout records and restart fresh.</p>
+                <div className="flex gap-2 pt-2 border-t border-blush-100">
+                  <button onClick={() => setShowResetConfirmModal(false)} className="flex-1 py-2 rounded-xl bg-blush-50 text-xs font-bold text-charcoal">
                     Cancel
                   </button>
-                  <button
-                    onClick={executeFullReset}
-                    className="flex-1 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-black transition-all shadow-lg shadow-red-950"
-                  >
-                    Yes, Reset
+                  <button onClick={executeFullReset} className="flex-1 py-2 rounded-xl bg-rose-500 text-white text-xs font-bold">
+                    Reset
                   </button>
                 </div>
               </div>
             </div>
           )}
 
-          {/* BOTTOM DOCK (4 CLEAN BUTTONS) */}
-          <nav className="fixed bottom-0 left-0 right-0 bg-[#070a12]/95 backdrop-blur border-t border-slate-800 px-4 py-2.5 flex justify-around items-center z-40">
+          {/* BOTTOM NAVIGATION DOCK */}
+          <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur border-t border-blush-200 px-4 py-2.5 flex justify-around items-center z-40 shadow-sm">
             <button
               onClick={() => { setTab("train"); triggerHaptic(10); }}
-              className={`flex flex-col items-center gap-0.5 text-xs font-bold transition-all ${
-                tab === "train" ? "text-rose-500" : "text-slate-400"
+              className={`flex flex-col items-center gap-0.5 text-xs font-medium transition-all ${
+                tab === "train" ? "text-blush-600 font-bold" : "text-mutedMauve"
               }`}
             >
-              <span className="text-base">🏋️</span>
+              <span className="text-base">🌸</span>
               <span className="text-[10px]">Train</span>
             </button>
             <button
               onClick={() => { setTab("fuel"); triggerHaptic(10); }}
-              className={`flex flex-col items-center gap-0.5 text-xs font-bold transition-all ${
-                tab === "fuel" ? "text-rose-500" : "text-slate-400"
+              className={`flex flex-col items-center gap-0.5 text-xs font-medium transition-all ${
+                tab === "fuel" ? "text-blush-600 font-bold" : "text-mutedMauve"
               }`}
             >
               <span className="text-base">🥗</span>
@@ -1934,8 +1470,8 @@
             </button>
             <button
               onClick={() => { setTab("progress"); triggerHaptic(10); }}
-              className={`flex flex-col items-center gap-0.5 text-xs font-bold transition-all ${
-                tab === "progress" ? "text-rose-500" : "text-slate-400"
+              className={`flex flex-col items-center gap-0.5 text-xs font-medium transition-all ${
+                tab === "progress" ? "text-blush-600 font-bold" : "text-mutedMauve"
               }`}
             >
               <span className="text-base">🗓️</span>
@@ -1943,11 +1479,11 @@
             </button>
             <button
               onClick={() => { setTab("profile"); triggerHaptic(10); }}
-              className={`flex flex-col items-center gap-0.5 text-xs font-bold transition-all ${
-                tab === "profile" ? "text-rose-500" : "text-slate-400"
+              className={`flex flex-col items-center gap-0.5 text-xs font-medium transition-all ${
+                tab === "profile" ? "text-blush-600 font-bold" : "text-mutedMauve"
               }`}
             >
-              <span className="text-base">👤</span>
+              <span className="text-base">✨</span>
               <span className="text-[10px]">Profile</span>
             </button>
           </nav>
