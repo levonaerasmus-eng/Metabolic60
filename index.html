@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>FemMetabolic Pro • 3D Workouts & Endomorph Meal Suite</title>
+  <title>FemMetabolic Pro • SA Edition & 3D Suite</title>
   
-  <!-- On-Screen Debugger for Mobile -->
+  <!-- Global Error Logger -->
   <script>
     window.onerror = function(msg, url, line) {
       var errDiv = document.getElementById('debug-error');
@@ -57,7 +57,7 @@
   <div id="root">
     <div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#94a3b8;font-family:sans-serif;">
       <div style="width:36px;height:36px;border:3px solid #1e293b;border-top-color:#f43f5e;border-radius:50%;animation:spin 1s linear infinite;margin-bottom:12px;"></div>
-      <p style="font-size:13px;font-weight:600;">Loading 3D Biomechanics & Nutrition...</p>
+      <p style="font-size:13px;font-weight:600;">Loading FemMetabolic Pro...</p>
       <style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
     </div>
   </div>
@@ -65,7 +65,7 @@
   <script type="text/babel">
     const { useState, useEffect, useRef } = React;
 
-    // --- Safe LocalStorage Utilities ---
+    // --- Safe Storage Utilities ---
     const safeGetJSON = (key, fallback) => {
       try {
         const item = localStorage.getItem(key);
@@ -85,7 +85,7 @@
       }
     };
 
-    // --- Audio Synthesizer & Speech Utilities ---
+    // --- Audio Synthesizer & Speech ---
     const playTone = (freq, type, duration) => {
       try {
         const frequency = freq || 440;
@@ -117,15 +117,15 @@
       window.speechSynthesis.speak(u);
     };
 
-    // --- Cycle Phasing Data ---
+    // --- Menstrual Phasing Master Data ---
     const CYCLE_MODES = {
-      menstrual: { name: "Menstrual Phase", tag: "Deload & Mobility", color: "text-sky-400 border-sky-500/40 bg-sky-950/60", modifier: 0.8, carbTip: "Focus on warm anti-inflammatory meals, iron-rich greens, and hydration." },
-      follicular: { name: "Follicular Phase", tag: "Peak Strength & Power", color: "text-rose-400 border-rose-500/40 bg-rose-950/60", modifier: 1.0, carbTip: "High insulin sensitivity: place complex carbs around your workouts." },
-      ovulatory: { name: "Ovulatory Phase", tag: "Smash Personal Records", color: "text-fuchsia-400 border-fuchsia-500/40 bg-fuchsia-950/60", modifier: 1.05, carbTip: "Estrogen peak provides peak strength. Try progressive weight jumps." },
-      luteal: { name: "Luteal Phase", tag: "Recovery & Steady Tempo", color: "text-amber-400 border-amber-500/40 bg-amber-950/60", modifier: 0.9, carbTip: "Elevated core temp: prioritize magnesium, healthy fats, and 3L+ hydration." }
+      menstrual: { name: "Menstrual Phase", tag: "Deload & Mobility", color: "text-sky-400 border-sky-500/40 bg-sky-950/60", modifier: 0.8, carbTip: "Focus on warm rooibos, iron-rich morogo/spinach, and gentle hydration." },
+      follicular: { name: "Follicular Phase", tag: "Peak Strength & Overload", color: "text-rose-400 border-rose-500/40 bg-rose-950/60", modifier: 1.0, carbTip: "High insulin sensitivity: place sweet potatoes (*patats*) & oats around lifting." },
+      ovulatory: { name: "Ovulatory Phase", tag: "Smash Personal Records", color: "text-fuchsia-400 border-fuchsia-500/40 bg-fuchsia-950/60", modifier: 1.05, carbTip: "Estrogen peak provides maximum energy. Try progressive load increases." },
+      luteal: { name: "Luteal Phase", tag: "Recovery & Steady Tempo", color: "text-amber-400 border-amber-500/40 bg-amber-950/60", modifier: 0.9, carbTip: "Higher core body temp: prioritize magnesium, pumpkin seeds, and 3L+ hydration." }
     };
 
-    // --- Master Exercise Database (3 Tiers) ---
+    // --- Workouts Database (Beginner, Intermediate, Advanced) ---
     const MASTER_EXERCISE_DATA = {
       beginner: {
         A: [
@@ -205,194 +205,215 @@
       { name: "Banded Clamshells / Squat Hold", dur: 30, cue: "Prime gluteus medius for stability before lifting loads." }
     ];
 
-    // --- Master Meal Plan & Recipe Database ---
-    const MEAL_PLAN_DAYS = [
+    // --- South African Budget-Friendly Meal Plan & Recipes ---
+    const SA_MEAL_PLAN_DAYS = [
       {
         day: "Monday",
         type: "Workout A (Post-Workout Carb Load)",
+        cost: "~R65 / day",
         target: "1,720 kcal • 150g P • 118g C • 55g F",
-        breakfast: "3-Egg Omelet (2 whole + 2 whites) w/ spinach & ½ cup oats + ½ cup blueberries + 1 scoop protein",
-        lunch: "160g Peri-Peri Grilled Chicken + 120g roasted sweet potatoes + large garden salad (1 tsp olive oil)",
-        snack: "1 cup 0% Greek Yogurt + 1 tbsp chia seeds + cinnamon",
-        dinner: "150g Lean Ground Beef (90/10) with zucchini noodles, tomato basil marinara & ¼ avocado"
+        breakfast: "3-Egg Morogo Scramble (2 whole + 2 whites, Swiss chard/spinach, diced tomato) + ½ cup cooked Jungle Oats w/ cinnamon & 1 scoop protein",
+        lunch: "160g Flame-Grilled Peri-Peri Chicken Breast + 120g roasted sweet potatoes (*patats*) + steamed green beans",
+        snack: "1 cup Lactose-Free/Greek Yogurt + 1 tbsp roasted sunflower seeds + dash of cinnamon",
+        dinner: "150g Lean Beef Mince cooked with mild chakalaka & baby marrows over steamed cabbage ribbons"
       },
       {
         day: "Tuesday",
         type: "Active Recovery (Low Carb / Healthy Fats)",
+        cost: "~R52 / day",
         target: "1,640 kcal • 144g P • 74g C • 62g F",
-        breakfast: "2 Glute-Fuel Egg Muffin Cups + ½ sliced avocado + green tea",
-        lunch: "Tuna Salad Bowl: 1 can tuna in spring water, light mayo, celery over baby greens & steamed green beans",
-        snack: "1 boiled egg + 15 raw almonds + sliced cucumber with sea salt",
-        dinner: "180g Lemon-Herb Baked White Fish (Hake) + roasted cauliflower & asparagus with 1 tbsp olive oil"
+        breakfast: "2 Savory Egg Cups with diced peppers & spinach + ¼ sliced avocado + black rooibos tea",
+        lunch: "Tinned Pilchard Protein Bowl (½ tin pilchards in tomato/chilli sauce mashed w/ lemon) over shredded lettuce & gem squash halves",
+        snack: "1 boiled egg + 20g roasted pumpkin seeds + salted cucumber slices",
+        dinner: "180g Pan-Seared Cape Hake with garlic, lemon & parsley + roasted butternut cubes (100g) + steamed broccoli"
       },
       {
         day: "Wednesday",
         type: "Workout B (Targeted Glycogen Load)",
+        cost: "~R68 / day",
         target: "1,730 kcal • 152g P • 120g C • 52g F",
-        breakfast: "Chocolate Berry Post-Workout Smoothie Bowl (Protein, berries, banana, almond milk & chia)",
-        lunch: "140g Shredded Slow-Cooker Beef over ½ cup quinoa & steamed lemon broccoli",
-        snack: "½ cup low-fat cottage cheese + ½ sliced apple with cinnamon",
-        dinner: "160g Pan-Seared Chicken Breast + sautéed spinach in coconut oil + 100g roasted butternut"
+        breakfast: "High-Protein Rooibos Berry Smoothie (Rooibos tea base, 1 scoop protein, frozen berries, ½ banana, chia seeds)",
+        lunch: "Shredded Slow-Cooker Beef Potjie (140g lean beef, carrots, green beans) over ½ cup brown rice or cooked samp & beans",
+        snack: "½ cup low-fat cottage cheese (or 1 tin tuna in water) + sliced apple with cinnamon",
+        dinner: "160g Lemon-Herb Chicken Breast + roasted baby marrows, red onion & green pepper tossed in 1 tsp olive oil"
       },
       {
         day: "Thursday",
         type: "Active Rest & Mobility",
+        cost: "~R55 / day",
         target: "1,650 kcal • 148g P • 80g C • 60g F",
-        breakfast: "3 Scrambled Eggs with chopped bell peppers, tomatoes & 30g feta",
-        lunch: "Chicken Caesar Lettuce Wraps: 150g grilled chicken, romaine leaves, 1 tbsp parmesan, light Caesar",
-        snack: "1 scoop Whey Protein in water + 1 tbsp peanut butter",
-        dinner: "150g Grilled Salmon or Trout + large tray of roasted Mediterranean vegetables (zucchini, peppers, red onion)"
+        breakfast: "3 Scrambled Eggs with diced tomatoes, onions & fresh morogo + rooibos tea",
+        lunch: "Tinned Tuna & Chickpea Salad: 1 tin tuna, ¼ cup rinsed chickpeas, celery, red onion, 1 tsp cold-pressed canola oil & lemon",
+        snack: "1 scoop Plant/Whey Protein in water + 1 tbsp sugar-free peanut butter (or sunflower butter)",
+        dinner: "160g Braaied/Pan-Seared Ostrich Steak (or extra-lean beef fillet) + roasted gem squash filled with sautéed spinach"
       },
       {
         day: "Friday",
         type: "Workout C (Metabolic Depletion)",
+        cost: "~R62 / day",
         target: "1,740 kcal • 154g P • 122g C • 54g F",
-        breakfast: "Overnight Protein Oats (⅓ cup rolled oats, 1 scoop protein, 1 tbsp flaxseed) + ¼ cup raspberries",
-        lunch: "160g Peri-Peri Grilled Chicken + ½ cup brown basmati rice + grilled zucchini",
-        snack: "1 cup plain Greek yogurt + 10 raw walnuts",
-        dinner: "Slow-Cooker Lean Beef & Root Veggie Stew (Carrots, onions, baby potatoes & bone broth)"
+        breakfast: "Warm Spiced Jungle Protein Oats (⅓ cup oats, 1 scoop protein, 1 tbsp ground flaxseed, nutmeg)",
+        lunch: "160g Peri-Peri Chicken Breast strips + 120g mashed sweet potato + steamed green beans",
+        snack: "1 cup plain yogurt + 10 raw almonds (or pumpkin seeds)",
+        dinner: "Cape Malay Spiced Mince Bowl: 150g lean mince cooked with turmeric, cumin & diced peppers over cauliflower mash"
       },
       {
         day: "Saturday",
-        type: "Zone 2 Cardio / Low Impact",
+        type: "Zone 2 Cardio Day",
+        cost: "~R58 / day",
         target: "1,670 kcal • 146g P • 92g C • 58g F",
-        breakfast: "2 Poached Eggs on 1 slice toasted 100% wholewheat/rye + 50g smoked salmon or turkey bacon",
-        lunch: "Mediterranean Chopped Salad: 150g chicken breast, cucumbers, cherry tomatoes, 6 olives, 30g feta",
-        snack: "2 Glute-Fuel Egg Muffin Cups (Batch prepped)",
-        dinner: "180g Baked White Fish Fillet with garlic butter + 150g roasted green beans & cherry tomatoes"
+        breakfast: "2 Poached Eggs on 1 slice toasted 100% Rye Bread + sliced tomato & cucumber",
+        lunch: "Chopped Chicken & Avo Salad: 150g grilled chicken, shredded cabbage, baby spinach, ¼ avocado, lemon vinaigrette",
+        snack: "2 Pre-made Egg & Spinach Muffins (Batch prepped)",
+        dinner: "180g Baked Cape Hake or Snoek with garlic, tomato slices & oregano + roasted cauliflower florets"
       },
       {
         day: "Sunday",
-        type: "Rest & Batch Meal Prep Day",
+        type: "Rest & Batch Prep Day",
+        cost: "~R50 / day",
         target: "1,660 kcal • 150g P • 86g C • 59g F",
-        breakfast: "Sunday Scramble: 2 whole eggs, 2 whites, 50g diced lean ham/chicken, mushrooms & baby spinach",
-        lunch: "Leftover Slow-Cooker Beef Stew or Grilled Chicken Salad Bowl",
+        breakfast: "Sunday Protein Scramble: 2 whole eggs, 2 whites, mushrooms, diced onion & morogo/spinach",
+        lunch: "Leftover Slow-Cooker Beef Potjie with steamed cabbage ribbons",
         snack: "1 cup warm bone broth + 1 boiled egg",
-        dinner: "150g Pan-Grilled Lean Sirloin Steak with garlic butter mushrooms & large rocket salad"
+        dinner: "160g Grilled Chicken Breast + roasted butternut & baby marrow medley"
       }
     ];
 
-    const MASTER_RECIPES = [
+    const SA_RECIPES = [
       {
-        id: "rec_1",
-        title: "Flame-Spiced Peri-Peri Chicken Bowls",
-        servings: "4 Servings",
-        macros: "420 kcal • 44g P • 32g C • 11g F",
+        id: "sa_rec_1",
+        title: "Flame-Spiced Peri-Peri Chicken & Patats",
+        servings: "4 Servings (Budget ~R22 / portion)",
+        macros: "410 kcal • 44g P • 30g C • 10g F",
         imgUrl: "https://images.unsplash.com/photo-1532550907401-a500c9a57435?auto=format&fit=crop&w=600&q=80",
         ingredients: [
-          "700g skinless chicken breasts (cut into cutlets)",
-          "2 tbsp peri-peri marinade (garlic, lemon, chili, oregano, 1 tsp olive oil)",
-          "500g sweet potatoes (cubed into 1cm blocks)",
-          "400g fresh green beans (trimmed)"
+          "700g skinless chicken breast fillets",
+          "2 tbsp local Peri-Peri seasoning (garlic, lemon, crushed birds-eye chili, oregano, 1 tsp olive oil)",
+          "500g sweet potatoes (*patats*, cubed)",
+          "400g fresh green beans"
         ],
         steps: [
-          "Preheat oven to 200°C. Toss sweet potatoes with salt, paprika & 1 tsp olive oil. Roast for 25 mins.",
-          "Coat chicken in peri-peri marinade. Heat skillet on high; sear chicken 4–5 mins per side until charred and cooked.",
-          "Steam green beans for 4 mins until bright green and crisp.",
-          "Portion evenly into 4 meal-prep containers."
+          "Preheat oven to 200°C. Toss sweet potato cubes with paprika and 1 tsp oil. Roast for 25 mins.",
+          "Coat chicken in peri-peri spice. Sear in a hot skillet/grill pan for 4–5 mins per side until charred.",
+          "Steam green beans for 4 mins until crisp and vibrant green.",
+          "Divide evenly across 4 meal-prep containers."
         ]
       },
       {
-        id: "rec_2",
-        title: "Glute-Fuel Egg & Turkey Muffin Cups",
-        servings: "6 Cups (3 Servings)",
-        macros: "210 kcal per 2 muffins • 24g P • 4g C • 11g F",
-        imgUrl: "https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=600&q=80",
-        ingredients: [
-          "5 whole free-range eggs + 4 egg whites",
-          "100g cooked lean ground turkey or smoked turkey breast",
-          "1 cup baby spinach (finely chopped)",
-          "½ red bell pepper (diced) + 30g crumbled feta",
-          "Sea salt, black pepper & garlic powder"
-        ],
-        steps: [
-          "Preheat oven to 180°C. Grease a 6-cup muffin tin.",
-          "Whisk eggs, egg whites, garlic powder, salt, and pepper in a mixing bowl.",
-          "Distribute turkey, spinach, and bell pepper into the cups. Pour egg mix over toppings.",
-          "Top with crumbled feta. Bake 20–22 mins until set and golden. Store in fridge for up to 5 days."
-        ]
-      },
-      {
-        id: "rec_3",
-        title: "Slow-Cooker Lean Beef Stew",
-        servings: "4 Servings",
-        macros: "430 kcal • 42g P • 24g C • 15g F",
+        id: "sa_rec_2",
+        title: "Cape Malay Lean Mince & Veg Bowl",
+        servings: "4 Servings (Budget ~R24 / portion)",
+        macros: "400 kcal • 40g P • 14g C • 20g F",
         imgUrl: "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=600&q=80",
         ingredients: [
-          "700g lean stewing beef (trimmed of visible fat, cubed)",
-          "2 medium carrots & 1 onion (chopped)",
-          "200g baby potatoes or butternut squash cubes",
-          "2 cups low-sodium beef bone broth",
-          "2 tbsp tomato paste + 2 cloves minced garlic + fresh rosemary"
+          "650g extra-lean beef mince (or ostrich mince)",
+          "1 onion & 2 cloves garlic (chopped)",
+          "1 tbsp Cape Malay curry spice (turmeric, cumin, coriander)",
+          "3 baby marrows (diced) + 1 small green cabbage (shredded)"
         ],
         steps: [
-          "Season beef with salt and pepper; sear in a hot skillet for 3 mins to lock in rich flavor.",
-          "Transfer beef, carrots, onions, garlic, and butternut/potatoes into the slow cooker.",
-          "Whisk tomato paste into warm bone broth; pour over the meat and vegetables.",
-          "Cook on LOW for 7–8 hours or HIGH for 4 hours until beef is melt-in-your-mouth tender."
+          "Brown diced onions and garlic in a pot with 1 tsp oil.",
+          "Add mince and Cape Malay spices. Cook on medium heat for 8–10 mins until browned.",
+          "Stir in baby marrows and 2 tbsp water; simmer for 5 mins.",
+          "Serve over a large bed of lightly steamed cabbage ribbons."
         ]
       },
       {
-        id: "rec_4",
-        title: "Chocolate Berry Post-Workout Smoothie",
-        servings: "1 Serving",
-        macros: "390 kcal • 40g P • 38g C • 7g F",
-        imgUrl: "https://images.unsplash.com/photo-1590301157890-4810ed352733?auto=format&fit=crop&w=600&q=80",
+        id: "sa_rec_3",
+        title: "Pan-Seared Lemon Hake & Gem Squash",
+        servings: "2 Servings (Budget ~R20 / portion)",
+        macros: "380 kcal • 38g P • 16g C • 14g F",
+        imgUrl: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=600&q=80",
         ingredients: [
-          "1 scoop (30g) chocolate whey or plant protein powder",
-          "150g frozen mixed berries (blueberries, raspberries, strawberries)",
-          "½ small frozen banana",
-          "½ cup unsweetened almond milk + 1 tbsp chia seeds + 1 tbsp cocoa"
+          "360g frozen Cape Hake fillets (thawed)",
+          "2 whole gem squashes (halved & steamed)",
+          "1 tbsp olive oil or butter + fresh garlic, lemon juice & parsley",
+          "200g baby spinach / morogo"
         ],
         steps: [
-          "Add almond milk, protein powder, cocoa, frozen berries, and banana to a blender.",
-          "Blend on high for 45–60 seconds until thick and creamy.",
-          "Pour into a chilled bowl and top with chia seeds."
+          "Steam gem squash halves for 15 mins until soft; scoop out seeds.",
+          "Heat skillet with garlic and olive oil. Sear hake fillets for 3–4 mins per side.",
+          "Squeeze fresh lemon juice over the fish and toss spinach in the warm pan until wilted.",
+          "Plate hake alongside steamed gem squash and greens."
+        ]
+      },
+      {
+        id: "sa_rec_4",
+        title: "Rooibos Berry Post-Workout Shake",
+        servings: "1 Serving (Budget ~R14 / portion)",
+        macros: "370 kcal • 38g P • 36g C • 6g F",
+        imgUrl: "https://images.unsplash.com/photo-1590301157890-4810ed352733?auto=format&fit=crop&w=600&q=80",
+        ingredients: [
+          "1 cup strong brewed Rooibos tea (chilled)",
+          "1 scoop (30g) Whey or Plant protein powder",
+          "150g frozen mixed berries (blueberries/strawberries)",
+          "½ small banana + 1 tbsp chia seeds or ground flaxseed"
+        ],
+        steps: [
+          "Brew a strong cup of rooibos tea and let it chill in the fridge.",
+          "Pour rooibos into a blender with protein powder, frozen berries, banana, and chia seeds.",
+          "Blend on high for 45 seconds until smooth and creamy."
         ]
       }
     ];
 
-    const GROCERY_CATEGORIES = {
-      "Lean Proteins": [
-        "1.2 kg Skinless Chicken Breast",
-        "700g Lean Stewing Beef or Sirloin",
-        "400g White Fish Fillets (Hake / Cod)",
-        "200g Fresh Salmon Fillet or Trout",
-        "2 Dozen Free-Range Eggs",
-        "1 Carton Liquid Egg Whites (500ml)",
-        "2 Tins Chunk Tuna in spring water"
+    const SA_GROCERY_CATEGORIES = {
+      "High-Yield Proteins": [
+        "2 kg Skinless Chicken Breast (Bulk Pack)",
+        "1 kg Extra-Lean Beef Mince or Ostrich Mince",
+        "800g Frozen Cape Hake Fillets (I&J or Sea Harvest)",
+        "30-Tray Large Free-Range Eggs",
+        "3 Tins (400g) Lucky Star Pilchards in Tomato/Chilli",
+        "2 Tins Chunk Tuna in Spring Water"
       ],
-      "Dairy & Alternatives": [
-        "1 kg Tub Plain 0% Greek Yogurt",
+      "Local Produce (Checkers / Food Lover's)": [
+        "1 Large Bag Swiss Chard / Morogo",
+        "1 Large Green Cabbage (budget volume fiber)",
+        "1 kg Sweet Potatoes (*Patats*)",
+        "1 Medium Butternut Squash",
+        "4 Gem Squashes",
+        "500g Baby Marrows & 500g Green Beans",
+        "1 kg Carrots & 1 kg Brown Onions",
+        "4 Local Avocados & Fresh Lemons"
+      ],
+      "Pantry & Low-Cost Carbs": [
+        "1 kg Jungle Rolled Oats",
+        "1 kg Brown Basmati Rice or Samp & Beans",
+        "1 Box Tagless Rooibos Tea (100s)",
+        "250g Roasted Sunflower Seeds or Pumpkin Seeds",
+        "Cold-Pressed Canola Oil or Olive Oil",
+        "1 Jar Mild Chakalaka (Low Sugar)",
+        "Peri-Peri, Cape Malay Curry, Cumin, Smoked Paprika & Sea Salt"
+      ],
+      "Dairy / Dairy-Free": [
+        "1 kg Tub Plain 0% Greek Yogurt (or Soy Yogurt)",
         "250g Low-Fat Cottage Cheese",
-        "100g Feta Cheese",
-        "1 Liter Unsweetened Almond Milk"
-      ],
-      "Complex Carbs & Tubers": [
-        "500g Sweet Potatoes",
-        "500g Rolled Oats",
-        "250g Quinoa or Brown Basmati Rice",
-        "1 Loaf 100% Wholewheat or Seeded Rye Bread"
-      ],
-      "Fresh Produce": [
-        "2 Bags Baby Spinach & Mixed Greens",
-        "1 Head Romaine Lettuce",
-        "500g Fresh Green Beans",
-        "1 Head Broccoli & 1 Head Cauliflower",
-        "1 Small Butternut Squash",
-        "3 Red Bell Peppers, 2 Cucumbers, 250g Cherry Tomatoes",
-        "Carrots, Brown Onions, Garlic & Lemons"
-      ],
-      "Antioxidants & Healthy Fats": [
-        "500g Frozen Mixed Berries",
-        "1 Punnet Fresh Blueberries",
-        "3 Bananas & 2 Green Apples",
-        "2 Ripe Avocados & 100g Raw Almonds",
-        "1 Bag Chia Seeds & Flaxseeds",
-        "Cold-Pressed Extra Virgin Olive Oil",
-        "1 Liter Low-Sodium Beef Bone Broth"
+        "1 Liter Unsweetened Soy or Almond Milk"
       ]
     };
+
+    const ALLERGEN_SWAP_GUIDE = [
+      {
+        allergen: "Dairy / Lactose Intolerance",
+        icon: "🥛",
+        solution: "Swap Greek yogurt for unsweetened Soy/Coconut yogurt + ½ scoop plant protein. Use water or chilled Rooibos tea as smoothie bases instead of cow's milk."
+      },
+      {
+        allergen: "Gluten / Celiac Sensitivity",
+        icon: "🌾",
+        solution: "Replace Jungle Oats with certified gluten-free oats, or swap entirely for roasted sweet potato cubes (*patats*), baked butternut, or brown basmati rice."
+      },
+      {
+        allergen: "Peanut / Tree Nut Allergy",
+        icon: "🥜",
+        solution: "Replace almonds, walnuts, and peanut butter with roasted sunflower seeds, pumpkin seeds (*pepitas*), or cold-pressed avocado oil."
+      },
+      {
+        allergen: "Seafood / Fish Allergy",
+        icon: "🐟",
+        solution: "Replace Cape Hake, pilchards, and tuna with equal gram weights (150g–180g) of skinless chicken breast fillets, turkey breast, or extra-lean ostrich mince."
+      }
+    ];
 
     // --- Interactive 3D Humanoid Body Visualizer ---
     function Interactive3DHumanoid({ activeMuscle, exerciseName }) {
@@ -436,17 +457,17 @@
         head.position.y = 2.1;
         bodyGroup.add(head);
 
-        // Chest / Upper Torso
+        // Chest
         const chest = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.55, 0.45), baseMat.clone());
         chest.position.y = 1.35;
         bodyGroup.add(chest);
 
-        // Core / Abs
+        // Core
         const core = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.55, 0.38), baseMat.clone());
         core.position.y = 0.85;
         bodyGroup.add(core);
 
-        // Lats / Upper Back
+        // Lats / Back
         const lats = new THREE.Mesh(new THREE.BoxGeometry(0.92, 0.55, 0.2), baseMat.clone());
         lats.position.set(0, 1.35, -0.15);
         bodyGroup.add(lats);
@@ -511,7 +532,6 @@
           hamstrings: [leftHam, rightHam]
         };
 
-        // Drag Handler
         let isDragging = false;
         let prevPos = { x: 0, y: 0 };
         const onStart = (e) => { isDragging = true; prevPos = { x: e.clientX || (e.touches && e.touches[0].clientX), y: e.clientY || (e.touches && e.touches[0].clientY) }; };
@@ -612,7 +632,7 @@
       const [sessionArchive, setSessionArchive] = useState(() => safeGetJSON('fm_session_archive', []));
 
       // Meal Plan Subtab & Checked Groceries State
-      const [mealSubTab, setMealSubTab] = useState('plan'); // 'plan', 'recipes', 'grocery', 'prep'
+      const [mealSubTab, setMealSubTab] = useState('plan'); // 'plan', 'recipes', 'grocery', 'swaps'
       const [checkedGroceries, setCheckedGroceries] = useState(() => safeGetJSON('fm_checked_groceries', {}));
 
       // Daily Dashboard & Body Measurements
@@ -984,7 +1004,7 @@
                 <h1 className="text-lg font-black text-white tracking-tight flex items-center gap-1.5">
                   <span className="text-rose-500">🌸</span> FemMetabolic Pro
                 </h1>
-                <p className="text-[10px] text-slate-400">3D Biomechanics & Nutrition Suite</p>
+                <p className="text-[10px] text-slate-400">SA Nutrition & 3D Biomechanics Suite</p>
               </div>
               <div className="flex items-center gap-2">
                 <button
@@ -1348,24 +1368,24 @@
               </>
             )}
 
-            {/* TAB 3: MEAL PLAN & RECIPES */}
+            {/* TAB 3: SOUTH AFRICAN MEAL PLAN & RECIPES */}
             {activeTab === 'nutrition' && (
               <div className="space-y-4">
                 
-                {/* Hero Header with Meal Prep Photo */}
+                {/* Hero Header */}
                 <div className="relative rounded-2xl overflow-hidden border border-slate-800 shadow-xl">
                   <img
                     src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80"
-                    alt="Endomorph Meal Prep"
+                    alt="South African Meal Prep"
                     className="w-full h-28 object-cover opacity-50 brightness-75"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent p-3.5 flex flex-col justify-between">
                     <span className="text-[10px] font-bold text-rose-400 uppercase tracking-widest bg-slate-950/80 px-2 py-0.5 rounded-full border border-rose-800/60 self-start">
-                      Endomorph 40P / 30C / 30F Blueprint
+                      SA Budget-Friendly Blueprint (~R50-R65/day)
                     </span>
                     <div>
                       <h2 className="text-base font-black text-white">Target: ~1,700 kcal Daily</h2>
-                      <p className="text-[11px] text-slate-300">High-Protein • Anti-Bloat • Targeted Carbs</p>
+                      <p className="text-[11px] text-slate-300">Local Staples • Anti-Bloat • 40P/30C/30F</p>
                     </div>
                   </div>
                 </div>
@@ -1375,17 +1395,18 @@
                   <button onClick={() => setMealSubTab('plan')} className={`py-1.5 rounded-lg transition-all ${mealSubTab === 'plan' ? 'bg-rose-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}>7-Day</button>
                   <button onClick={() => setMealSubTab('recipes')} className={`py-1.5 rounded-lg transition-all ${mealSubTab === 'recipes' ? 'bg-rose-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}>Recipes</button>
                   <button onClick={() => setMealSubTab('grocery')} className={`py-1.5 rounded-lg transition-all ${mealSubTab === 'grocery' ? 'bg-rose-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}>Grocery</button>
-                  <button onClick={() => setMealSubTab('prep')} className={`py-1.5 rounded-lg transition-all ${mealSubTab === 'prep' ? 'bg-rose-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}>90m Prep</button>
+                  <button onClick={() => setMealSubTab('swaps')} className={`py-1.5 rounded-lg transition-all ${mealSubTab === 'swaps' ? 'bg-rose-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}>Swaps</button>
                 </div>
 
                 {/* SUBTAB: 7-DAY MEAL PLAN */}
                 {mealSubTab === 'plan' && (
                   <div className="space-y-3">
-                    {MEAL_PLAN_DAYS.map((item, idx) => (
+                    {SA_MEAL_PLAN_DAYS.map((item, idx) => (
                       <div key={idx} className="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-md space-y-2.5">
                         <div className="flex justify-between items-center border-b border-slate-800/80 pb-2">
                           <div>
                             <span className="text-sm font-black text-white">{item.day}</span>
+                            <span className="text-[10px] text-emerald-400 font-bold ml-2 bg-emerald-950 px-1.5 py-0.5 rounded border border-emerald-800">{item.cost}</span>
                             <p className="text-[10px] text-rose-400 font-semibold">{item.type}</p>
                           </div>
                           <span className="text-[9px] font-mono font-bold bg-slate-950 text-slate-300 px-2 py-1 rounded-lg border border-slate-800">
@@ -1407,7 +1428,7 @@
                 {/* SUBTAB: 4 MASTER RECIPES WITH PHOTOS */}
                 {mealSubTab === 'recipes' && (
                   <div className="space-y-4">
-                    {MASTER_RECIPES.map((rec) => (
+                    {SA_RECIPES.map((rec) => (
                       <div key={rec.id} className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-lg space-y-3">
                         <div className="relative h-36 bg-slate-950">
                           <img src={rec.imgUrl} alt={rec.title} className="w-full h-full object-cover" />
@@ -1419,7 +1440,7 @@
                         <div className="p-4 pt-1 space-y-3">
                           <div className="flex justify-between items-center">
                             <h3 className="text-sm font-black text-white leading-tight">{rec.title}</h3>
-                            <span className="text-[10px] font-bold text-slate-400">{rec.servings}</span>
+                            <span className="text-[10px] font-bold text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded border border-emerald-800">{rec.servings}</span>
                           </div>
 
                           <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1.5">
@@ -1434,7 +1455,7 @@
                           </div>
 
                           <div className="space-y-1.5">
-                            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Preparation Steps:</p>
+                            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Method:</p>
                             <ol className="text-xs text-slate-300 space-y-1.5 list-decimal list-inside leading-relaxed">
                               {rec.steps.map((st, i) => (
                                 <li key={i} className="pl-1">{st}</li>
@@ -1447,13 +1468,13 @@
                   </div>
                 )}
 
-                {/* SUBTAB: INTERACTIVE GROCERY CHECKLIST */}
+                {/* SUBTAB: INTERACTIVE LOCAL GROCERY CHECKLIST */}
                 {mealSubTab === 'grocery' && (
                   <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl space-y-4">
                     <div className="flex justify-between items-center">
                       <div>
-                        <h3 className="text-sm font-bold text-white">Weekly Grocery Checklist</h3>
-                        <p className="text-[10px] text-slate-400">Tap items to mark as purchased</p>
+                        <h3 className="text-sm font-bold text-white">SA Pocket Grocery Checklist</h3>
+                        <p className="text-[10px] text-slate-400">Available at Checkers, Shoprite & Food Lover's</p>
                       </div>
                       <button
                         onClick={() => setCheckedGroceries({})}
@@ -1463,11 +1484,11 @@
                       </button>
                     </div>
 
-                    {Object.keys(GROCERY_CATEGORIES).map((catKey) => (
+                    {Object.keys(SA_GROCERY_CATEGORIES).map((catKey) => (
                       <div key={catKey} className="space-y-1.5">
                         <span className="text-xs font-bold text-rose-400 uppercase tracking-wider">{catKey}</span>
                         <div className="space-y-1">
-                          {GROCERY_CATEGORIES[catKey].map((item, i) => {
+                          {SA_GROCERY_CATEGORIES[catKey].map((item, i) => {
                             const isChecked = !!checkedGroceries[item];
                             return (
                               <div
@@ -1490,30 +1511,22 @@
                   </div>
                 )}
 
-                {/* SUBTAB: 90-MINUTE SUNDAY PREP WORKFLOW */}
-                {mealSubTab === 'prep' && (
-                  <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl space-y-3.5">
+                {/* SUBTAB: ALLERGEN & SENSITIVITY SWAP GUIDE */}
+                {mealSubTab === 'swaps' && (
+                  <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl space-y-4">
                     <div>
-                      <h3 className="text-sm font-bold text-white">90-Minute Batch Prep Timeline</h3>
-                      <p className="text-[10px] text-slate-400">Concurrent kitchen tasks for maximum efficiency</p>
+                      <h3 className="text-sm font-bold text-white">Allergen & Sensitivity Swaps</h3>
+                      <p className="text-[10px] text-slate-400">Direct substitutions that preserve 40P/30C/30F targets</p>
                     </div>
 
-                    <div className="space-y-2.5">
-                      {[
-                        { time: "00 – 10 min", title: "Preheat & Roast", desc: "Preheat oven to 200°C. Cube sweet potatoes, toss with 1 tsp olive oil + paprika, spread on baking sheet & roast for 25 mins." },
-                        { time: "10 – 25 min", title: "Slow Cooker & Grains", desc: "Place cubed beef, carrots, onions, bone broth & tomato paste in slow cooker on LOW (7 hrs). Cook quinoa/brown rice on stove." },
-                        { time: "25 – 45 min", title: "Bake Egg Muffins & Steam", desc: "Remove sweet potatoes. Lower oven to 180°C. Whisk eggs, fill muffin tin with turkey/spinach and bake 20 mins. Steam green beans for 4 mins." },
-                        { time: "45 – 70 min", title: "Grill Peri-Peri Chicken", desc: "Heat skillet on high. Sear chicken breasts 4–5 mins per side. Let rest on cutting board before slicing." },
-                        { time: "70 – 90 min", title: "Portion into Containers", desc: "Assemble 4 lunch boxes (chicken + sweet potato + green beans), 4 dinner containers, and breakfast egg cups. Seal and refrigerate." }
-                      ].map((step, idx) => (
-                        <div key={idx} className="bg-slate-950 p-3 rounded-xl border border-slate-800 flex gap-3">
-                          <span className="text-[10px] font-mono font-black text-rose-400 shrink-0 mt-0.5 bg-rose-950/60 px-1.5 py-0.5 rounded border border-rose-900/60 self-start">
-                            {step.time}
-                          </span>
-                          <div>
-                            <h4 className="text-xs font-bold text-white leading-tight">{step.title}</h4>
-                            <p className="text-[11px] text-slate-300 mt-1 leading-relaxed">{step.desc}</p>
+                    <div className="space-y-3">
+                      {ALLERGEN_SWAP_GUIDE.map((swap, idx) => (
+                        <div key={idx} className="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-1.5">
+                          <div className="flex items-center gap-2">
+                            <span className="text-base">{swap.icon}</span>
+                            <span className="text-xs font-bold text-rose-400">{swap.allergen}</span>
                           </div>
+                          <p className="text-xs text-slate-300 leading-relaxed">{swap.solution}</p>
                         </div>
                       ))}
                     </div>
@@ -1665,7 +1678,7 @@
               }`}
             >
               <span className="text-base">🥗</span>
-              <span>Meals</span>
+              <span>SA Meals</span>
             </button>
             <button
               onClick={() => setActiveTab('tempo')}
