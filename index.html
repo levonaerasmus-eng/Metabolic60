@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>FemMetabolic Pro • SA Edition & 3D Suite</title>
-  
+  <title>FemMetabolic Pro SA • 3D Biomechanics & Nutrition</title>
+
   <!-- Global Error Logger -->
   <script>
     window.onerror = function(msg, url, line) {
@@ -12,7 +12,7 @@
       if (!errDiv) {
         errDiv = document.createElement('div');
         errDiv.id = 'debug-error';
-        errDiv.style = 'position:fixed;top:0;left:0;right:0;background:#991b1b;color:#fff;padding:16px;z-index:99999;font-family:monospace;font-size:12px;word-break:break-all;';
+        errDiv.style = 'position:fixed;top:0;left:0;right:0;background:#991b1b;color:#fff;padding:14px;z-index:99999;font-family:monospace;font-size:11px;word-break:break-all;';
         document.body.appendChild(errDiv);
       }
       errDiv.innerHTML = '<strong>App Error:</strong> ' + msg + '<br><small>Line: ' + line + '</small>';
@@ -24,12 +24,11 @@
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
   <style>
     body {
-      background-color: #020617;
+      background-color: #030712;
       color: #f8fafc;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       -webkit-tap-highlight-color: transparent;
@@ -37,35 +36,26 @@
     }
     .timer-ring { transition: stroke-dashoffset 1s linear; transform: rotate(-90deg); transform-origin: 50% 50%; }
     .tempo-pulse { transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
-    .hero-glow { background: radial-gradient(circle at 50% 15%, rgba(244, 63, 94, 0.22) 0%, rgba(2, 6, 23, 0) 75%); }
+    .hero-glow { background: radial-gradient(circle at 50% 15%, rgba(244, 63, 94, 0.22) 0%, rgba(3, 7, 18, 0) 75%); }
     ::-webkit-scrollbar { width: 4px; }
-    ::-webkit-scrollbar-track { background: #020617; }
+    ::-webkit-scrollbar-track { background: #030712; }
     ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 2px; }
-    @keyframes pulse-ring {
-      0% { transform: scale(0.95); opacity: 0.8; }
-      50% { transform: scale(1.05); opacity: 0.3; }
-      100% { transform: scale(0.95); opacity: 0.8; }
+    @keyframes pulse-glow {
+      0% { filter: drop-shadow(0 0 4px rgba(245, 158, 11, 0.6)); }
+      50% { filter: drop-shadow(0 0 16px rgba(245, 158, 11, 0.95)); }
+      100% { filter: drop-shadow(0 0 4px rgba(245, 158, 11, 0.6)); }
     }
-    .mic-live { animation: pulse-ring 2s infinite ease-in-out; }
-    input[type="date"]::-webkit-calendar-picker-indicator {
-      filter: invert(1);
-      cursor: pointer;
-    }
+    .active-muscle-glow { animation: pulse-glow 2s infinite ease-in-out; }
+    input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
   </style>
 </head>
 <body class="hero-glow">
-  <div id="root">
-    <div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#94a3b8;font-family:sans-serif;">
-      <div style="width:36px;height:36px;border:3px solid #1e293b;border-top-color:#f43f5e;border-radius:50%;animation:spin 1s linear infinite;margin-bottom:12px;"></div>
-      <p style="font-size:13px;font-weight:600;">Loading FemMetabolic Pro...</p>
-      <style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
-    </div>
-  </div>
+  <div id="root"></div>
 
   <script type="text/babel">
     const { useState, useEffect, useRef } = React;
 
-    // --- Safe Storage Utilities ---
+    // --- Safe Storage Helpers ---
     const safeGetJSON = (key, fallback) => {
       try {
         const item = localStorage.getItem(key);
@@ -85,7 +75,7 @@
       }
     };
 
-    // --- Audio Synthesizer & Speech ---
+    // --- Audio & Voice Coach ---
     const playTone = (freq, type, duration) => {
       try {
         const frequency = freq || 440;
@@ -117,493 +107,405 @@
       window.speechSynthesis.speak(u);
     };
 
-    // --- Menstrual Phasing Master Data ---
+    // --- Menstrual Phase Configuration ---
     const CYCLE_MODES = {
-      menstrual: { name: "Menstrual Phase", tag: "Deload & Mobility", color: "text-sky-400 border-sky-500/40 bg-sky-950/60", modifier: 0.8, carbTip: "Focus on warm rooibos, iron-rich morogo/spinach, and gentle hydration." },
+      menstrual: { name: "Menstrual Phase", tag: "Deload & Mobility", color: "text-sky-400 border-sky-500/40 bg-sky-950/60", modifier: 0.8, carbTip: "Prioritize warm herbal tea, iron-rich greens, and gentle hydration." },
       follicular: { name: "Follicular Phase", tag: "Peak Strength & Overload", color: "text-rose-400 border-rose-500/40 bg-rose-950/60", modifier: 1.0, carbTip: "High insulin sensitivity: place sweet potatoes (*patats*) & oats around lifting." },
       ovulatory: { name: "Ovulatory Phase", tag: "Smash Personal Records", color: "text-fuchsia-400 border-fuchsia-500/40 bg-fuchsia-950/60", modifier: 1.05, carbTip: "Estrogen peak provides maximum energy. Try progressive load increases." },
-      luteal: { name: "Luteal Phase", tag: "Recovery & Steady Tempo", color: "text-amber-400 border-amber-500/40 bg-amber-950/60", modifier: 0.9, carbTip: "Higher core body temp: prioritize magnesium, pumpkin seeds, and 3L+ hydration." }
+      luteal: { name: "Luteal Phase", tag: "Recovery & Steady Tempo", color: "text-amber-400 border-amber-500/40 bg-amber-950/60", modifier: 0.9, carbTip: "Higher core temp: prioritize magnesium, healthy fats, and 3L+ hydration." }
     };
 
-    // --- Workouts Database (Beginner, Intermediate, Advanced) ---
+    // --- Master Exercise Database ---
     const MASTER_EXERCISE_DATA = {
       beginner: {
         A: [
-          { id: "b_a1", name: "Chair / Box Squats", target: "Glutes & Quads", primaryMuscle: "quads", defaultSets: 3, defaultReps: 10, defaultWeight: 0, defaultRest: 60, tempo: "3-0-1", icon: "🪑", gifUrl: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Sit back onto chair, lightly tap seat, drive through heels to stand." },
-          { id: "b_a2", name: "Incline Push-Ups (Counter)", target: "Chest & Shoulders", primaryMuscle: "chest", defaultSets: 3, defaultReps: 8, defaultWeight: 0, defaultRest: 60, tempo: "2-0-1", icon: "💪", gifUrl: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=600&q=80", cues: "Hands on sturdy elevated surface. Keep core locked without hip sag." },
-          { id: "b_a3", name: "Bodyweight Glute Bridges", target: "Glutes & Lower Back", primaryMuscle: "glutes", defaultSets: 3, defaultReps: 12, defaultWeight: 0, defaultRest: 45, tempo: "2-2-1", icon: "🍑", gifUrl: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80", cues: "Squeeze glutes hard at the top. Keep ribs drawn downward." },
-          { id: "b_a4", name: "Seated DB Overhead Press", target: "Shoulders", primaryMuscle: "shoulders", defaultSets: 3, defaultReps: 10, defaultWeight: 3.0, defaultRest: 60, tempo: "2-0-1", icon: "✨", gifUrl: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=600&q=80", cues: "Press overhead smoothly without arching lower back." },
-          { id: "b_a5", name: "Deadbugs (Bodyweight)", target: "Core Stability", primaryMuscle: "core", defaultSets: 3, defaultReps: 8, defaultWeight: 0, defaultRest: 45, tempo: "Slow", icon: "🛡️", gifUrl: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80", cues: "Press lower back firmly into the floor as opposite limbs extend." }
+          { id: "b_a1", name: "Chair / Box Squats", target: "Glutes & Quads", primaryMuscle: "quads", defaultSets: 3, defaultReps: 10, defaultWeight: 0, defaultRest: 60, tempo: "3-0-1", icon: "🪑", gifUrl: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Sit back onto chair, tap lightly, drive through heels to stand." },
+          { id: "b_a2", name: "Incline Push-Ups", target: "Chest & Shoulders", primaryMuscle: "chest", defaultSets: 3, defaultReps: 8, defaultWeight: 0, defaultRest: 60, tempo: "2-0-1", icon: "💪", gifUrl: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=600&q=80", cues: "Hands on counter. Keep core locked without hip sag." },
+          { id: "b_a3", name: "Bodyweight Glute Bridges", target: "Glutes & Erector Spinae", primaryMuscle: "glutes", defaultSets: 3, defaultReps: 12, defaultWeight: 0, defaultRest: 45, tempo: "2-2-1", icon: "🍑", gifUrl: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80", cues: "Squeeze glutes hard at the top. Keep ribs drawn downward." },
+          { id: "b_a4", name: "Seated DB Overhead Press", target: "Deltoids", primaryMuscle: "shoulders", defaultSets: 3, defaultReps: 10, defaultWeight: 3.0, defaultRest: 60, tempo: "2-0-1", icon: "✨", gifUrl: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=600&q=80", cues: "Press overhead smoothly without arching lower back." },
+          { id: "b_a5", name: "Deadbugs", target: "Core & Abdominals", primaryMuscle: "core", defaultSets: 3, defaultReps: 8, defaultWeight: 0, defaultRest: 45, tempo: "Slow", icon: "🛡️", gifUrl: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80", cues: "Press lower back firmly into the floor as limbs extend." }
         ],
         B: [
-          { id: "b_b1", name: "Supported DB Rows (Chair)", target: "Mid-Back & Lats", primaryMuscle: "lats", defaultSets: 3, defaultReps: 10, defaultWeight: 4.0, defaultRest: 60, tempo: "2-1-1", icon: "🚣", gifUrl: "https://images.unsplash.com/photo-1605296867304-46d5465a13f1?auto=format&fit=crop&w=600&q=80", cues: "Support upper body with one hand on a chair. Pull elbow to hip." },
-          { id: "b_b2", name: "Supported Split Squat", target: "Glutes & Quads", primaryMuscle: "glutes", defaultSets: 3, defaultReps: 8, defaultWeight: 0, defaultRest: 60, tempo: "2-0-1", icon: "🦵", gifUrl: "https://images.unsplash.com/photo-1434682881908-b43d0467b798?auto=format&fit=crop&w=600&q=80", cues: "Hold a wall or chair for balance. Drop back knee straight down." },
-          { id: "b_b3", name: "Side-Lying Clamshells", target: "Gluteus Medius", primaryMuscle: "glutes", defaultSets: 3, defaultReps: 12, defaultWeight: 0, defaultRest: 45, tempo: "2-1-1", icon: "🦋", gifUrl: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=600&q=80", cues: "Keep hips stacked. Open top knee without rotating pelvis backward." },
-          { id: "b_b4", name: "Standing DB Bicep Curls", target: "Arms", primaryMuscle: "lats", defaultSets: 3, defaultReps: 10, defaultWeight: 3.0, defaultRest: 45, tempo: "2-0-1", icon: "💪", gifUrl: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=600&q=80", cues: "Pin elbows to your sides. Squeeze biceps at the top." },
-          { id: "b_b5", name: "Bird-Dogs", target: "Posterior Core", primaryMuscle: "core", defaultSets: 3, defaultReps: 8, defaultWeight: 0, defaultRest: 45, tempo: "Slow", icon: "🛡️", gifUrl: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80", cues: "Reach arm and opposite leg straight out. Avoid arching back." }
+          { id: "b_b1", name: "Supported DB Rows", target: "Lats & Mid-Back", primaryMuscle: "lats", defaultSets: 3, defaultReps: 10, defaultWeight: 4.0, defaultRest: 60, tempo: "2-1-1", icon: "🚣", gifUrl: "https://images.unsplash.com/photo-1605296867304-46d5465a13f1?auto=format&fit=crop&w=600&q=80", cues: "Support with hand on bench. Pull elbow to hip pocket." },
+          { id: "b_b2", name: "Supported Split Squats", target: "Glutes & Quads", primaryMuscle: "glutes", defaultSets: 3, defaultReps: 8, defaultWeight: 0, defaultRest: 60, tempo: "2-0-1", icon: "🦵", gifUrl: "https://images.unsplash.com/photo-1434682881908-b43d0467b798?auto=format&fit=crop&w=600&q=80", cues: "Hold chair for balance. Drop back knee straight down." },
+          { id: "b_b3", name: "Side Clamshells", target: "Gluteus Medius", primaryMuscle: "glutes", defaultSets: 3, defaultReps: 12, defaultWeight: 0, defaultRest: 45, tempo: "2-1-1", icon: "🦋", gifUrl: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=600&q=80", cues: "Keep hips stacked. Open top knee with control." },
+          { id: "b_b4", name: "DB Bicep Curls", target: "Arms", primaryMuscle: "lats", defaultSets: 3, defaultReps: 10, defaultWeight: 3.0, defaultRest: 45, tempo: "2-0-1", icon: "💪", gifUrl: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=600&q=80", cues: "Pin elbows to your sides. Squeeze at the top." },
+          { id: "b_b5", name: "Bird-Dogs", target: "Erector Spinae & Core", primaryMuscle: "erectors", defaultSets: 3, defaultReps: 8, defaultWeight: 0, defaultRest: 45, tempo: "Slow", icon: "🛡️", gifUrl: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80", cues: "Reach arm and opposite leg straight out without arching back." }
         ],
         C: [
-          { id: "b_c1", name: "Low Step-Ups", target: "Glutes & Balance", primaryMuscle: "glutes", defaultSets: 3, defaultReps: 8, defaultWeight: 0, defaultRest: 60, tempo: "2-0-1", icon: "🪜", gifUrl: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Step onto a low step. Drive purely through the top foot." },
-          { id: "b_c2", name: "Light DB Romanian Deadlift", target: "Hamstrings", primaryMuscle: "hamstrings", defaultSets: 3, defaultReps: 10, defaultWeight: 4.0, defaultRest: 60, tempo: "3-0-1", icon: "🦵", gifUrl: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=600&q=80", cues: "Hinge at the hips. Soft bend in the knees." },
-          { id: "b_c3", name: "DB Floor Chest Flyes", target: "Chest", primaryMuscle: "chest", defaultSets: 3, defaultReps: 10, defaultWeight: 3.0, defaultRest: 60, tempo: "2-0-1", icon: "🦋", gifUrl: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=600&q=80", cues: "Lie on floor. Open arms in a wide hug motion." },
-          { id: "b_c4", name: "Prone Y-Raises", target: "Upper Back", primaryMuscle: "shoulders", defaultSets: 3, defaultReps: 12, defaultWeight: 0, defaultRest: 45, tempo: "2-1-1", icon: "🎯", gifUrl: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=600&q=80", cues: "Lie on stomach. Thumbs up, raise arms into a Y shape." },
-          { id: "b_c5", name: "Elevated Plank Hold", target: "Core Endurance", primaryMuscle: "core", defaultSets: 3, defaultReps: 20, defaultWeight: 0, defaultRest: 45, tempo: "Iso", icon: "⏱️", gifUrl: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80", cues: "Hands on bench or chair. Keep body in a straight line." }
+          { id: "b_c1", name: "Low Step-Ups", target: "Glutes & Hamstrings", primaryMuscle: "glutes", defaultSets: 3, defaultReps: 8, defaultWeight: 0, defaultRest: 60, tempo: "2-0-1", icon: "🪜", gifUrl: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Step up, driving entirely through the front heel." },
+          { id: "b_c2", name: "DB Romanian Deadlift", target: "Hamstrings", primaryMuscle: "hamstrings", defaultSets: 3, defaultReps: 10, defaultWeight: 4.0, defaultRest: 60, tempo: "3-0-1", icon: "🦵", gifUrl: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=600&q=80", cues: "Hinge hips back. Keep a soft bend in the knees." },
+          { id: "b_c3", name: "DB Floor Chest Flyes", target: "Chest", primaryMuscle: "chest", defaultSets: 3, defaultReps: 10, defaultWeight: 3.0, defaultRest: 60, tempo: "2-0-1", icon: "🦋", gifUrl: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=600&q=80", cues: "Lie flat on floor. Open arms in a wide hug motion." },
+          { id: "b_c4", name: "Prone Y-Raises", target: "Deltoids & Upper Back", primaryMuscle: "shoulders", defaultSets: 3, defaultReps: 12, defaultWeight: 0, defaultRest: 45, tempo: "2-1-1", icon: "🎯", gifUrl: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=600&q=80", cues: "Lie on stomach. Thumbs up, raise arms into a Y shape." },
+          { id: "b_c5", name: "Elevated Plank Hold", target: "Core", primaryMuscle: "core", defaultSets: 3, defaultReps: 20, defaultWeight: 0, defaultRest: 45, tempo: "Iso", icon: "⏱️", gifUrl: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80", cues: "Hands on bench. Keep body rigid from head to heels." }
         ]
       },
       intermediate: {
         A: [
-          { id: "i_a1", name: "DB Goblet Squats", target: "Glutes & Quads", primaryMuscle: "quads", defaultSets: 3, defaultReps: 12, defaultWeight: 7.5, defaultRest: 60, tempo: "3-0-1", icon: "🍑", gifUrl: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Drive through midfoot and heels. Keep chest tall." },
-          { id: "i_a2", name: "DB Floor Press", target: "Chest & Triceps", primaryMuscle: "chest", defaultSets: 3, defaultReps: 12, defaultWeight: 5.0, defaultRest: 60, tempo: "2-0-1", icon: "💪", gifUrl: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=600&q=80", cues: "Upper arms tap floor lightly at 45° angle." },
-          { id: "i_a3", name: "DB Romanian Deadlifts", target: "Hamstrings & Glutes", primaryMuscle: "hamstrings", defaultSets: 3, defaultReps: 12, defaultWeight: 7.5, defaultRest: 60, tempo: "3-1-1", icon: "🦵", gifUrl: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=600&q=80", cues: "Hinge hips back. Keep dumbbells skimming shins." },
-          { id: "i_a4", name: "Seated DB Overhead Press", target: "Shoulders", primaryMuscle: "shoulders", defaultSets: 3, defaultReps: 10, defaultWeight: 4.0, defaultRest: 60, tempo: "2-0-1", icon: "✨", gifUrl: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=600&q=80", cues: "Maintain vertical spine. Avoid lower back arch." },
-          { id: "i_a5", name: "DB Lateral Raises", target: "Side Delts", primaryMuscle: "shoulders", defaultSets: 3, defaultReps: 12, defaultWeight: 2.5, defaultRest: 45, tempo: "2-1-1", icon: "🦋", gifUrl: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=600&q=80", cues: "Lead with elbows with slight forward lean." }
+          { id: "i_a1", name: "Dumbbell Goblet Squats", target: "Quadriceps & Glutes", primaryMuscle: "quads", defaultSets: 3, defaultReps: 12, defaultWeight: 7.5, defaultRest: 60, tempo: "3-0-1", icon: "🍑", gifUrl: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Drive through midfoot and heels. Keep chest tall, brace core at bottom." },
+          { id: "i_a2", name: "Dumbbell Floor Press", target: "Chest & Triceps", primaryMuscle: "chest", defaultSets: 3, defaultReps: 12, defaultWeight: 5.0, defaultRest: 60, tempo: "2-0-1", icon: "💪", gifUrl: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=600&q=80", cues: "Upper arms tap floor lightly at 45° angle to protect shoulders." },
+          { id: "i_a3", name: "Dumbbell Romanian Deadlifts", target: "Hamstrings & Glutes", primaryMuscle: "hamstrings", defaultSets: 3, defaultReps: 12, defaultWeight: 7.5, defaultRest: 60, tempo: "3-1-1", icon: "🦵", gifUrl: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=600&q=80", cues: "Hinge hips back. Keep dumbbells skimming shins with flat spine." },
+          { id: "i_a4", name: "Seated DB Overhead Press", target: "Deltoids", primaryMuscle: "shoulders", defaultSets: 3, defaultReps: 10, defaultWeight: 4.0, defaultRest: 60, tempo: "2-0-1", icon: "✨", gifUrl: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=600&q=80", cues: "Maintain vertical spine. Avoid lower back arching." },
+          { id: "i_a5", name: "DB Lateral Raises", target: "Deltoids", primaryMuscle: "shoulders", defaultSets: 3, defaultReps: 12, defaultWeight: 2.5, defaultRest: 45, tempo: "2-1-1", icon: "🦋", gifUrl: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=600&q=80", cues: "Lead with elbows with slight forward torso lean." }
         ],
         B: [
-          { id: "i_b1", name: "Weighted Hip Thrust", target: "Glute Upper Shelf", primaryMuscle: "glutes", defaultSets: 3, defaultReps: 15, defaultWeight: 10.0, defaultRest: 60, tempo: "2-2-1", icon: "🍑", gifUrl: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80", cues: "Lock out glutes at top with ribs down." },
-          { id: "i_b2", name: "Single-Arm DB Row", target: "Mid-Back (Waist Taper)", primaryMuscle: "lats", defaultSets: 3, defaultReps: 10, defaultWeight: 6.0, defaultRest: 60, tempo: "2-1-1", icon: "🚣", gifUrl: "https://images.unsplash.com/photo-1605296867304-46d5465a13f1?auto=format&fit=crop&w=600&q=80", cues: "Pull elbow to hip without rotating torso." },
-          { id: "i_b3", name: "DB Reverse Lunges", target: "Glutes & Quads", primaryMuscle: "glutes", defaultSets: 3, defaultReps: 10, defaultWeight: 5.0, defaultRest: 60, tempo: "2-0-1", icon: "🦵", gifUrl: "https://images.unsplash.com/photo-1434682881908-b43d0467b798?auto=format&fit=crop&w=600&q=80", cues: "Deep step back with vertical front shin." },
-          { id: "i_b4", name: "Banded Face Pulls", target: "Rear Delts & Posture", primaryMuscle: "shoulders", defaultSets: 3, defaultReps: 15, defaultWeight: 0, defaultRest: 45, tempo: "2-2-1", icon: "🎯", gifUrl: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=600&q=80", cues: "Pull to eye level, rotate hands outward." },
-          { id: "i_b5", name: "Deadbugs (Pelvic Locked)", target: "Deep Core", primaryMuscle: "core", defaultSets: 3, defaultReps: 10, defaultWeight: 0, defaultRest: 45, tempo: "Slow", icon: "🛡️", gifUrl: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80", cues: "Flatten lower back into the mat." }
+          { id: "i_b1", name: "Weighted Hip Thrust", target: "Gluteus Maximus", primaryMuscle: "glutes", defaultSets: 3, defaultReps: 15, defaultWeight: 10.0, defaultRest: 60, tempo: "2-2-1", icon: "🍑", gifUrl: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80", cues: "Lock out glutes at top with ribs down and chin tucked." },
+          { id: "i_b2", name: "Single-Arm DB Row", target: "Lats & Waist Taper", primaryMuscle: "lats", defaultSets: 3, defaultReps: 10, defaultWeight: 6.0, defaultRest: 60, tempo: "2-1-1", icon: "🚣", gifUrl: "https://images.unsplash.com/photo-1605296867304-46d5465a13f1?auto=format&fit=crop&w=600&q=80", cues: "Pull elbow to hip pocket without rotating torso." },
+          { id: "i_b3", name: "DB Deficit Reverse Lunges", target: "Glutes & Quads", primaryMuscle: "glutes", defaultSets: 3, defaultReps: 10, defaultWeight: 5.0, defaultRest: 60, tempo: "2-0-1", icon: "🦵", gifUrl: "https://images.unsplash.com/photo-1434682881908-b43d0467b798?auto=format&fit=crop&w=600&q=80", cues: "Deep step back with vertical front shin for glute stretch." },
+          { id: "i_b4", name: "Banded Face Pulls", target: "Deltoids & Posture", primaryMuscle: "shoulders", defaultSets: 3, defaultReps: 15, defaultWeight: 0, defaultRest: 45, tempo: "2-2-1", icon: "🎯", gifUrl: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=600&q=80", cues: "Pull to eye level, rotating hands outward at contraction." },
+          { id: "i_b5", name: "Deadbugs (Pelvic Locked)", target: "Core & Abdominals", primaryMuscle: "core", defaultSets: 3, defaultReps: 10, defaultWeight: 0, defaultRest: 45, tempo: "Slow", icon: "🛡️", gifUrl: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80", cues: "Flatten lower back into the mat as opposite limbs extend." }
         ],
         C: [
-          { id: "i_c1", name: "DB Step-Ups", target: "Glute Power", primaryMuscle: "glutes", defaultSets: 3, defaultReps: 10, defaultWeight: 4.0, defaultRest: 60, tempo: "2-0-1", icon: "🪜", gifUrl: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Drive exclusively through the elevated heel." },
-          { id: "i_c2", name: "DB Thrusters", target: "Calorie Burn", primaryMuscle: "quads", defaultSets: 3, defaultReps: 10, defaultWeight: 4.0, defaultRest: 60, tempo: "1-0-1", icon: "⚡", gifUrl: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=600&q=80", cues: "Use leg momentum to press dumbbells overhead." },
-          { id: "i_c3", name: "DB Renegade Rows", target: "Anti-Rotation Core", primaryMuscle: "core", defaultSets: 3, defaultReps: 8, defaultWeight: 5.0, defaultRest: 60, tempo: "2-0-1", icon: "🔥", gifUrl: "https://images.unsplash.com/photo-1605296867304-46d5465a13f1?auto=format&fit=crop&w=600&q=80", cues: "Widen feet to keep hips square." },
-          { id: "i_c4", name: "DB Sumo Squats", target: "Inner Thighs & Glutes", primaryMuscle: "quads", defaultSets: 3, defaultReps: 12, defaultWeight: 8.0, defaultRest: 60, tempo: "3-0-1", icon: "🧘‍♀️", gifUrl: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Wide stance, push knees out over toes." },
-          { id: "i_c5", name: "Plank Shoulder Taps", target: "Core Endurance", primaryMuscle: "core", defaultSets: 3, defaultReps: 30, defaultWeight: 0, defaultRest: 45, tempo: "Iso", icon: "⏱️", gifUrl: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80", cues: "Tap shoulders without shifting hips." }
+          { id: "i_c1", name: "DB Step-Ups", target: "Gluteus Maximus", primaryMuscle: "glutes", defaultSets: 3, defaultReps: 10, defaultWeight: 4.0, defaultRest: 60, tempo: "2-0-1", icon: "🪜", gifUrl: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Drive exclusively through the elevated heel." },
+          { id: "i_c2", name: "Dumbbell Thrusters", target: "Quadriceps & Deltoids", primaryMuscle: "quads", defaultSets: 3, defaultReps: 10, defaultWeight: 4.0, defaultRest: 60, tempo: "1-0-1", icon: "⚡", gifUrl: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=600&q=80", cues: "Use upward leg momentum to press dumbbells overhead." },
+          { id: "i_c3", name: "DB Renegade Rows", target: "Core & Lats", primaryMuscle: "core", defaultSets: 3, defaultReps: 8, defaultWeight: 5.0, defaultRest: 60, tempo: "2-0-1", icon: "🔥", gifUrl: "https://images.unsplash.com/photo-1605296867304-46d5465a13f1?auto=format&fit=crop&w=600&q=80", cues: "Widen feet to keep hips motionless without twisting." },
+          { id: "i_c4", name: "DB Sumo Squats", target: "Inner Thigh & Glutes", primaryMuscle: "quads", defaultSets: 3, defaultReps: 12, defaultWeight: 8.0, defaultRest: 60, tempo: "3-0-1", icon: "🧘‍♀️", gifUrl: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Wide stance, push knees out over toes." },
+          { id: "i_c5", name: "Plank Shoulder Taps", target: "Core & Erector Spinae", primaryMuscle: "core", defaultSets: 3, defaultReps: 30, defaultWeight: 0, defaultRest: 45, tempo: "Iso", icon: "⏱️", gifUrl: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80", cues: "Tap opposite shoulders without shifting pelvis." }
         ]
       },
       advanced: {
         A: [
-          { id: "a_a1", name: "1.5-Rep DB Goblet Squats", target: "Quads & Glutes", primaryMuscle: "quads", defaultSets: 4, defaultReps: 12, defaultWeight: 10.0, defaultRest: 45, tempo: "3-1-1", icon: "⚡", gifUrl: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Squat down, come halfway up, go back down, then stand fully." },
-          { id: "a_a2", name: "Superset: DB RDL + Floor Press", target: "Posterior + Anterior", primaryMuscle: "glutes", defaultSets: 4, defaultReps: 12, defaultWeight: 9.0, defaultRest: 45, tempo: "2-0-1", icon: "🔥", gifUrl: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=600&q=80", cues: "Hinge into RDLs, then immediately perform floor presses." },
-          { id: "a_a3", name: "Bulgarian Split Squats", target: "Unilateral Glutes", primaryMuscle: "glutes", defaultSets: 4, defaultReps: 10, defaultWeight: 7.5, defaultRest: 45, tempo: "3-0-1", icon: "🦵", gifUrl: "https://images.unsplash.com/photo-1434682881908-b43d0467b798?auto=format&fit=crop&w=600&q=80", cues: "Back foot elevated on chair. Lean torso slightly forward." },
-          { id: "a_a4", name: "Seated DB Lateral Raises", target: "Side Delts", primaryMuscle: "shoulders", defaultSets: 4, defaultReps: 15, defaultWeight: 3.5, defaultRest: 30, tempo: "2-1-2", icon: "🦋", gifUrl: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=600&q=80", cues: "Pause at the top for 1 full second without body swing." },
-          { id: "a_a5", name: "Finisher: Fast Mountain Climbers", target: "EPOC Surge", primaryMuscle: "core", defaultSets: 4, defaultReps: 40, defaultWeight: 0, defaultRest: 30, tempo: "Fast", icon: "💨", gifUrl: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=600&q=80", cues: "Drive knees smoothly toward chest at maximum pace." }
+          { id: "a_a1", name: "1.5-Rep DB Goblet Squats", target: "Quadriceps & Glutes", primaryMuscle: "quads", defaultSets: 4, defaultReps: 12, defaultWeight: 10.0, defaultRest: 45, tempo: "3-1-1", icon: "⚡", gifUrl: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Squat deep, come halfway up, return to bottom, then stand." },
+          { id: "a_a2", name: "Superset: DB RDL + Floor Press", target: "Hamstrings & Chest", primaryMuscle: "hamstrings", defaultSets: 4, defaultReps: 12, defaultWeight: 9.0, defaultRest: 45, tempo: "2-0-1", icon: "🔥", gifUrl: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=600&q=80", cues: "Hinge through RDLs, then immediately perform floor presses." },
+          { id: "a_a3", name: "Bulgarian Split Squats", target: "Gluteus Maximus", primaryMuscle: "glutes", defaultSets: 4, defaultReps: 10, defaultWeight: 7.5, defaultRest: 45, tempo: "3-0-1", icon: "🦵", gifUrl: "https://images.unsplash.com/photo-1434682881908-b43d0467b798?auto=format&fit=crop&w=600&q=80", cues: "Rear foot elevated on bench. Lean torso forward for glute load." },
+          { id: "a_a4", name: "Strict Seated Lateral Raises", target: "Deltoids", primaryMuscle: "shoulders", defaultSets: 4, defaultReps: 15, defaultWeight: 3.5, defaultRest: 30, tempo: "2-1-2", icon: "🦋", gifUrl: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=600&q=80", cues: "Pause 1 second at parallel without body swing." },
+          { id: "a_a5", name: "Fast Mountain Climbers", target: "Core & Abdominals", primaryMuscle: "core", defaultSets: 4, defaultReps: 40, defaultWeight: 0, defaultRest: 30, tempo: "Fast", icon: "💨", gifUrl: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=600&q=80", cues: "Drive knees toward chest at high tempo." }
         ],
         B: [
-          { id: "a_b1", name: "Single-Leg DB Hip Thrust", target: "Glute Isolation", primaryMuscle: "glutes", defaultSets: 4, defaultReps: 12, defaultWeight: 6.0, defaultRest: 45, tempo: "2-2-1", icon: "🍑", gifUrl: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80", cues: "One foot grounded, lock out glute at top with zero hip twist." },
-          { id: "a_b2", name: "DB Renegade Row to Push-Up", target: "Upper Body & Core", primaryMuscle: "core", defaultSets: 4, defaultReps: 8, defaultWeight: 6.0, defaultRest: 45, tempo: "Controlled", icon: "🛡️", gifUrl: "https://images.unsplash.com/photo-1605296867304-46d5465a13f1?auto=format&fit=crop&w=600&q=80", cues: "Row right, row left, execute full push-up." },
-          { id: "a_b3", name: "DB Curtsy Lunges", target: "Gluteus Medius", primaryMuscle: "glutes", defaultSets: 4, defaultReps: 12, defaultWeight: 6.0, defaultRest: 45, tempo: "2-0-1", icon: "🩰", gifUrl: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Step diagonally behind front leg to isolate upper outer glute." },
-          { id: "a_b4", name: "DB Overhead Press to Lateral", target: "Shoulder Burnout", primaryMuscle: "shoulders", defaultSets: 4, defaultReps: 10, defaultWeight: 4.0, defaultRest: 30, tempo: "2-0-1", icon: "🎯", gifUrl: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=600&q=80", cues: "Continuous compound combo without dropping dumbbells." },
-          { id: "a_b5", name: "Weighted Deadbugs", target: "Transverse Abs", primaryMuscle: "core", defaultSets: 4, defaultReps: 15, defaultWeight: 2.5, defaultRest: 30, tempo: "Slow", icon: "🛡️", gifUrl: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80", cues: "Hold dumbbells directly above chest. Move limbs with precision." }
+          { id: "a_b1", name: "Single-Leg DB Hip Thrust", target: "Gluteus Maximus", primaryMuscle: "glutes", defaultSets: 4, defaultReps: 12, defaultWeight: 6.0, defaultRest: 45, tempo: "2-2-1", icon: "🍑", gifUrl: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80", cues: "One foot grounded, lock out glute at top with level hips." },
+          { id: "a_b2", name: "DB Renegade Row to Push-Up", target: "Core & Chest", primaryMuscle: "core", defaultSets: 4, defaultReps: 8, defaultWeight: 6.0, defaultRest: 45, tempo: "Controlled", icon: "🛡️", gifUrl: "https://images.unsplash.com/photo-1605296867304-46d5465a13f1?auto=format&fit=crop&w=600&q=80", cues: "Row right, row left, then execute full push-up." },
+          { id: "a_b3", name: "DB Curtsy Lunges", target: "Gluteus Medius", primaryMuscle: "glutes", defaultSets: 4, defaultReps: 12, defaultWeight: 6.0, defaultRest: 45, tempo: "2-0-1", icon: "🩰", gifUrl: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Step diagonally behind front leg to isolate upper glute." },
+          { id: "a_b4", name: "DB Overhead Press to Lateral", target: "Deltoids", primaryMuscle: "shoulders", defaultSets: 4, defaultReps: 10, defaultWeight: 4.0, defaultRest: 30, tempo: "2-0-1", icon: "🎯", gifUrl: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=600&q=80", cues: "Continuous compound combination without dropping load." },
+          { id: "a_b5", name: "Weighted Deadbugs", target: "Core & Abdominals", primaryMuscle: "core", defaultSets: 4, defaultReps: 15, defaultWeight: 2.5, defaultRest: 30, tempo: "Slow", icon: "🛡️", gifUrl: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80", cues: "Hold dumbbells over chest. Move limbs with precision." }
         ],
         C: [
-          { id: "a_c1", name: "Complex: Clean to Squat to Press", target: "Full Body Depletion", primaryMuscle: "quads", defaultSets: 4, defaultReps: 10, defaultWeight: 6.0, defaultRest: 45, tempo: "Continuous", icon: "🌟", gifUrl: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=600&q=80", cues: "Hinge, catch at shoulders, squat deep, press overhead." },
-          { id: "a_c2", name: "DB Sumo Squat Pulses", target: "Inner Thigh & Glutes", primaryMuscle: "quads", defaultSets: 4, defaultReps: 15, defaultWeight: 10.0, defaultRest: 30, tempo: "Pulse", icon: "🧘‍♀️", gifUrl: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Stay in bottom half of squat throughout the entire set." },
-          { id: "a_c3", name: "DB Romanian Deadlift to Row", target: "Posterior Chain", primaryMuscle: "hamstrings", defaultSets: 4, defaultReps: 10, defaultWeight: 8.0, defaultRest: 45, tempo: "Controlled", icon: "🔥", gifUrl: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=600&q=80", cues: "Hinge to bottom of RDL, perform strict row, stand up." },
-          { id: "a_c4", name: "Push-Up to Renegade Row", target: "Upper Body & Core", primaryMuscle: "core", defaultSets: 4, defaultReps: 8, defaultWeight: 6.0, defaultRest: 45, tempo: "Controlled", icon: "💪", gifUrl: "https://images.unsplash.com/photo-1605296867304-46d5465a13f1?auto=format&fit=crop&w=600&q=80", cues: "Execute strict push-up on dumbbell handles, then row each arm." },
-          { id: "a_c5", name: "Finisher: DB Squat Jumps", target: "Type-II Muscle Fibers", primaryMuscle: "quads", defaultSets: 4, defaultReps: 20, defaultWeight: 3.0, defaultRest: 30, tempo: "Explosive", icon: "🚀", gifUrl: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=600&q=80", cues: "Explode straight up. Land with soft, absorbing knees." }
+          { id: "a_c1", name: "Clean to Squat to Press", target: "Quadriceps & Deltoids", primaryMuscle: "quads", defaultSets: 4, defaultReps: 10, defaultWeight: 6.0, defaultRest: 45, tempo: "Continuous", icon: "🌟", gifUrl: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=600&q=80", cues: "Hinge, catch at shoulders, squat deep, press overhead." },
+          { id: "a_c2", name: "DB Sumo Squat Pulses", target: "Quadriceps & Glutes", primaryMuscle: "quads", defaultSets: 4, defaultReps: 15, defaultWeight: 10.0, defaultRest: 30, tempo: "Pulse", icon: "🧘‍♀️", gifUrl: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Stay in bottom half of squat for constant tension." },
+          { id: "a_c3", name: "DB RDL to Bent Row", target: "Hamstrings & Lats", primaryMuscle: "hamstrings", defaultSets: 4, defaultReps: 10, defaultWeight: 8.0, defaultRest: 45, tempo: "Controlled", icon: "🔥", gifUrl: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=600&q=80", cues: "Hinge to bottom of deadlift, perform strict row, stand." },
+          { id: "a_c4", name: "Push-Up to Renegade Row", target: "Core & Chest", primaryMuscle: "core", defaultSets: 4, defaultReps: 8, defaultWeight: 6.0, defaultRest: 45, tempo: "Controlled", icon: "💪", gifUrl: "https://images.unsplash.com/photo-1605296867304-46d5465a13f1?auto=format&fit=crop&w=600&q=80", cues: "Execute push-up on dumbbell handles, then row each arm." },
+          { id: "a_c5", name: "DB Squat Jumps", target: "Quadriceps", primaryMuscle: "quads", defaultSets: 4, defaultReps: 20, defaultWeight: 3.0, defaultRest: 30, tempo: "Explosive", icon: "🚀", gifUrl: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=600&q=80", cues: "Explode up. Land with soft, absorbing knees." }
         ]
       }
     };
 
-    const WARMUP_ROUTINE = [
-      { name: "360° Diaphragmatic Breaths", dur: 45, cue: "Inhale deep into belly & ribs, exhale fully drawing pelvic floor up." },
-      { name: "Glute Bridges w/ 2s Squeeze", dur: 60, cue: "Drive through heels, lock glutes at top, keep ribs clamped down." },
-      { name: "Cat-Cow & Thoracic Rotations", dur: 45, cue: "Open upper back and mobilize hips with smooth fluid breath." },
-      { name: "Banded Clamshells / Squat Hold", dur: 30, cue: "Prime gluteus medius for stability before lifting loads." }
-    ];
-
-    // --- South African Budget-Friendly Meal Plan & Recipes ---
+    // --- South African Meal Plan (Checkers & Woolies) ---
     const SA_MEAL_PLAN_DAYS = [
       {
         day: "Monday",
         type: "Workout A (Post-Workout Carb Load)",
-        cost: "~R65 / day",
+        cost: "ZAR 65",
         target: "1,720 kcal • 150g P • 118g C • 55g F",
-        breakfast: "3-Egg Morogo Scramble (2 whole + 2 whites, Swiss chard/spinach, diced tomato) + ½ cup cooked Jungle Oats w/ cinnamon & 1 scoop protein",
-        lunch: "160g Flame-Grilled Peri-Peri Chicken Breast + 120g roasted sweet potatoes (*patats*) + steamed green beans",
-        snack: "1 cup Lactose-Free/Greek Yogurt + 1 tbsp roasted sunflower seeds + dash of cinnamon",
-        dinner: "150g Lean Beef Mince cooked with mild chakalaka & baby marrows over steamed cabbage ribbons"
+        breakfast: "Classic Protein Oats w/ Woolies Berries (1 cup Jungle Oats, 1 scoop protein, fresh blueberries & raspberries)",
+        lunch: "Checkers Skinless Chicken Breast (160g) w/ Roasted Patats & Green Beans (120g sweet potatoes, 1 tsp olive oil)",
+        snack: "1 cup 0% Greek Yogurt + 1 tbsp chia seeds",
+        dinner: "Lean Beef Mince Bolognese (150g, 90/10) over Zucchini Noodles with tomato basil marinara & ¼ avocado"
       },
       {
         day: "Tuesday",
-        type: "Active Recovery (Low Carb / Healthy Fats)",
-        cost: "~R52 / day",
+        type: "Active Recovery (Healthy Fats Focus)",
+        cost: "ZAR 55",
         target: "1,640 kcal • 144g P • 74g C • 62g F",
-        breakfast: "2 Savory Egg Cups with diced peppers & spinach + ¼ sliced avocado + black rooibos tea",
-        lunch: "Tinned Pilchard Protein Bowl (½ tin pilchards in tomato/chilli sauce mashed w/ lemon) over shredded lettuce & gem squash halves",
-        snack: "1 boiled egg + 20g roasted pumpkin seeds + salted cucumber slices",
-        dinner: "180g Pan-Seared Cape Hake with garlic, lemon & parsley + roasted butternut cubes (100g) + steamed broccoli"
+        breakfast: "2 Savory Egg Muffin Cups with diced peppers & spinach + ½ sliced avocado",
+        lunch: "Lucky Star Pilchard Protein Bowl (½ 400g tin in tomato sauce) over shredded lettuce & gem squash",
+        snack: "1 hard-boiled egg + 15 raw almonds + salted cucumber slices",
+        dinner: "Lemon-Herb Baked Cape Hake Fillet (180g) + roasted cauliflower & asparagus with 1 tbsp olive oil"
       },
       {
         day: "Wednesday",
         type: "Workout B (Targeted Glycogen Load)",
-        cost: "~R68 / day",
+        cost: "ZAR 68",
         target: "1,730 kcal • 152g P • 120g C • 52g F",
-        breakfast: "High-Protein Rooibos Berry Smoothie (Rooibos tea base, 1 scoop protein, frozen berries, ½ banana, chia seeds)",
-        lunch: "Shredded Slow-Cooker Beef Potjie (140g lean beef, carrots, green beans) over ½ cup brown rice or cooked samp & beans",
-        snack: "½ cup low-fat cottage cheese (or 1 tin tuna in water) + sliced apple with cinnamon",
-        dinner: "160g Lemon-Herb Chicken Breast + roasted baby marrows, red onion & green pepper tossed in 1 tsp olive oil"
+        breakfast: "Rooibos Vanilla Protein Smoothie (Rooibos tea base, 1 scoop protein, frozen berries, ½ banana, chia)",
+        lunch: "Shredded Slow-Cooker Lean Beef (140g) over ½ cup brown basmati rice & steamed broccoli",
+        snack: "½ cup low-fat cottage cheese + ½ sliced green apple with cinnamon",
+        dinner: "Pan-Grilled Chicken Breast (160g) + sautéed Swiss chard in olive oil + 100g roasted butternut"
       },
       {
         day: "Thursday",
         type: "Active Rest & Mobility",
-        cost: "~R55 / day",
+        cost: "ZAR 58",
         target: "1,650 kcal • 148g P • 80g C • 60g F",
-        breakfast: "3 Scrambled Eggs with diced tomatoes, onions & fresh morogo + rooibos tea",
-        lunch: "Tinned Tuna & Chickpea Salad: 1 tin tuna, ¼ cup rinsed chickpeas, celery, red onion, 1 tsp cold-pressed canola oil & lemon",
-        snack: "1 scoop Plant/Whey Protein in water + 1 tbsp sugar-free peanut butter (or sunflower butter)",
-        dinner: "160g Braaied/Pan-Seared Ostrich Steak (or extra-lean beef fillet) + roasted gem squash filled with sautéed spinach"
+        breakfast: "3 Scrambled Eggs with tomatoes, onions & fresh spinach + 30g feta",
+        lunch: "Chicken Caesar Lettuce Wraps: 150g grilled chicken, romaine leaves, 1 tbsp parmesan, light Caesar",
+        snack: "1 tin Tuna in Spring Water + sliced cucumber with sea salt",
+        dinner: "Grilled Ostrich Steak (160g) + large Mediterranean roasted vegetable medley (zucchini, peppers, red onion)"
       },
       {
         day: "Friday",
         type: "Workout C (Metabolic Depletion)",
-        cost: "~R62 / day",
+        cost: "ZAR 62",
         target: "1,740 kcal • 154g P • 122g C • 54g F",
-        breakfast: "Warm Spiced Jungle Protein Oats (⅓ cup oats, 1 scoop protein, 1 tbsp ground flaxseed, nutmeg)",
-        lunch: "160g Peri-Peri Chicken Breast strips + 120g mashed sweet potato + steamed green beans",
-        snack: "1 cup plain yogurt + 10 raw almonds (or pumpkin seeds)",
-        dinner: "Cape Malay Spiced Mince Bowl: 150g lean mince cooked with turmeric, cumin & diced peppers over cauliflower mash"
+        breakfast: "Warm Spiced Jungle Protein Oats (⅓ cup oats, 1 scoop protein, flaxseed, nutmeg) + fresh berries",
+        lunch: "Checkers Chicken Breast Strips (160g) + 120g mashed sweet potato + steamed green beans",
+        snack: "1 cup plain Greek yogurt + 10 raw walnuts",
+        dinner: "Lean Mince Savory Bowl: 150g lean mince cooked with cumin & diced peppers over cauliflower mash"
       },
       {
         day: "Saturday",
         type: "Zone 2 Cardio Day",
-        cost: "~R58 / day",
+        cost: "ZAR 58",
         target: "1,670 kcal • 146g P • 92g C • 58g F",
-        breakfast: "2 Poached Eggs on 1 slice toasted 100% Rye Bread + sliced tomato & cucumber",
-        lunch: "Chopped Chicken & Avo Salad: 150g grilled chicken, shredded cabbage, baby spinach, ¼ avocado, lemon vinaigrette",
+        breakfast: "2 Poached Eggs on 1 slice toasted 100% rye bread + sliced tomato and cucumber",
+        lunch: "Mediterranean Chopped Salad: 150g grilled chicken, cucumber, cherry tomatoes, Kalamata olives, 30g feta",
         snack: "2 Pre-made Egg & Spinach Muffins (Batch prepped)",
-        dinner: "180g Baked Cape Hake or Snoek with garlic, tomato slices & oregano + roasted cauliflower florets"
+        dinner: "Baked Cape Hake (180g) with garlic butter and parsley + roasted green beans & cherry tomatoes"
       },
       {
         day: "Sunday",
-        type: "Rest & Batch Prep Day",
-        cost: "~R50 / day",
+        type: "Rest & Meal Prep Day",
+        cost: "ZAR 52",
         target: "1,660 kcal • 150g P • 86g C • 59g F",
-        breakfast: "Sunday Protein Scramble: 2 whole eggs, 2 whites, mushrooms, diced onion & morogo/spinach",
-        lunch: "Leftover Slow-Cooker Beef Potjie with steamed cabbage ribbons",
+        breakfast: "Sunday Protein Scramble: 2 whole eggs, 2 whites, mushrooms, onions & Swiss chard",
+        lunch: "Leftover Lean Beef Potjie with steamed cabbage ribbons",
         snack: "1 cup warm bone broth + 1 boiled egg",
-        dinner: "160g Grilled Chicken Breast + roasted butternut & baby marrow medley"
+        dinner: "Grilled Lean Beef or Ostrich Mince Patties (150g) with garlic-basted mushrooms & rocket salad"
       }
     ];
 
-    const SA_RECIPES = [
-      {
-        id: "sa_rec_1",
-        title: "Flame-Spiced Peri-Peri Chicken & Patats",
-        servings: "4 Servings (Budget ~R22 / portion)",
-        macros: "410 kcal • 44g P • 30g C • 10g F",
-        imgUrl: "https://images.unsplash.com/photo-1532550907401-a500c9a57435?auto=format&fit=crop&w=600&q=80",
-        ingredients: [
-          "700g skinless chicken breast fillets",
-          "2 tbsp local Peri-Peri seasoning (garlic, lemon, crushed birds-eye chili, oregano, 1 tsp olive oil)",
-          "500g sweet potatoes (*patats*, cubed)",
-          "400g fresh green beans"
-        ],
-        steps: [
-          "Preheat oven to 200°C. Toss sweet potato cubes with paprika and 1 tsp oil. Roast for 25 mins.",
-          "Coat chicken in peri-peri spice. Sear in a hot skillet/grill pan for 4–5 mins per side until charred.",
-          "Steam green beans for 4 mins until crisp and vibrant green.",
-          "Divide evenly across 4 meal-prep containers."
-        ]
-      },
-      {
-        id: "sa_rec_2",
-        title: "Cape Malay Lean Mince & Veg Bowl",
-        servings: "4 Servings (Budget ~R24 / portion)",
-        macros: "400 kcal • 40g P • 14g C • 20g F",
-        imgUrl: "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=600&q=80",
-        ingredients: [
-          "650g extra-lean beef mince (or ostrich mince)",
-          "1 onion & 2 cloves garlic (chopped)",
-          "1 tbsp Cape Malay curry spice (turmeric, cumin, coriander)",
-          "3 baby marrows (diced) + 1 small green cabbage (shredded)"
-        ],
-        steps: [
-          "Brown diced onions and garlic in a pot with 1 tsp oil.",
-          "Add mince and Cape Malay spices. Cook on medium heat for 8–10 mins until browned.",
-          "Stir in baby marrows and 2 tbsp water; simmer for 5 mins.",
-          "Serve over a large bed of lightly steamed cabbage ribbons."
-        ]
-      },
-      {
-        id: "sa_rec_3",
-        title: "Pan-Seared Lemon Hake & Gem Squash",
-        servings: "2 Servings (Budget ~R20 / portion)",
-        macros: "380 kcal • 38g P • 16g C • 14g F",
-        imgUrl: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=600&q=80",
-        ingredients: [
-          "360g frozen Cape Hake fillets (thawed)",
-          "2 whole gem squashes (halved & steamed)",
-          "1 tbsp olive oil or butter + fresh garlic, lemon juice & parsley",
-          "200g baby spinach / morogo"
-        ],
-        steps: [
-          "Steam gem squash halves for 15 mins until soft; scoop out seeds.",
-          "Heat skillet with garlic and olive oil. Sear hake fillets for 3–4 mins per side.",
-          "Squeeze fresh lemon juice over the fish and toss spinach in the warm pan until wilted.",
-          "Plate hake alongside steamed gem squash and greens."
-        ]
-      },
-      {
-        id: "sa_rec_4",
-        title: "Rooibos Berry Post-Workout Shake",
-        servings: "1 Serving (Budget ~R14 / portion)",
-        macros: "370 kcal • 38g P • 36g C • 6g F",
-        imgUrl: "https://images.unsplash.com/photo-1590301157890-4810ed352733?auto=format&fit=crop&w=600&q=80",
-        ingredients: [
-          "1 cup strong brewed Rooibos tea (chilled)",
-          "1 scoop (30g) Whey or Plant protein powder",
-          "150g frozen mixed berries (blueberries/strawberries)",
-          "½ small banana + 1 tbsp chia seeds or ground flaxseed"
-        ],
-        steps: [
-          "Brew a strong cup of rooibos tea and let it chill in the fridge.",
-          "Pour rooibos into a blender with protein powder, frozen berries, banana, and chia seeds.",
-          "Blend on high for 45 seconds until smooth and creamy."
-        ]
-      }
-    ];
-
-    const SA_GROCERY_CATEGORIES = {
-      "High-Yield Proteins": [
-        "2 kg Skinless Chicken Breast (Bulk Pack)",
-        "1 kg Extra-Lean Beef Mince or Ostrich Mince",
-        "800g Frozen Cape Hake Fillets (I&J or Sea Harvest)",
-        "30-Tray Large Free-Range Eggs",
-        "3 Tins (400g) Lucky Star Pilchards in Tomato/Chilli",
-        "2 Tins Chunk Tuna in Spring Water"
+    // --- South African Supermarket Substitutions Matrix ---
+    const SA_SUBSTITUTIONS = {
+      "Lean Proteins": [
+        "Chicken breast (skinless fillets)",
+        "Turkey breast mince",
+        "White fish (Cape Hake, Kingklip, Snoek)",
+        "Extra-lean Beef mince (90/10)",
+        "Lean Ostrich mince / steaks",
+        "Tinned Tuna in spring water",
+        "Free-range Eggs & Liquid egg whites",
+        "Whey / Plant protein powder",
+        "Extra-firm Tofu"
       ],
-      "Local Produce (Checkers / Food Lover's)": [
-        "1 Large Bag Swiss Chard / Morogo",
-        "1 Large Green Cabbage (budget volume fiber)",
-        "1 kg Sweet Potatoes (*Patats*)",
-        "1 Medium Butternut Squash",
-        "4 Gem Squashes",
-        "500g Baby Marrows & 500g Green Beans",
-        "1 kg Carrots & 1 kg Brown Onions",
-        "4 Local Avocados & Fresh Lemons"
+      "Workout Carbs": [
+        "Sweet Potato (*patats*)",
+        "Butternut squash",
+        "Quinoa",
+        "Brown Basmati Rice",
+        "Rolled Oats (*Jungle Oats*)",
+        "Samp & Beans (controlled portions)",
+        "100% Seeded Rye Bread"
       ],
-      "Pantry & Low-Cost Carbs": [
-        "1 kg Jungle Rolled Oats",
-        "1 kg Brown Basmati Rice or Samp & Beans",
-        "1 Box Tagless Rooibos Tea (100s)",
-        "250g Roasted Sunflower Seeds or Pumpkin Seeds",
-        "Cold-Pressed Canola Oil or Olive Oil",
-        "1 Jar Mild Chakalaka (Low Sugar)",
-        "Peri-Peri, Cape Malay Curry, Cumin, Smoked Paprika & Sea Salt"
+      "Fibrous Veg": [
+        "Swiss Chard / Morogo",
+        "Green Cabbage (budget volume)",
+        "Baby Marrows (Zucchini)",
+        "Green Beans",
+        "Gem Squash",
+        "Broccoli & Cauliflower",
+        "Salad Greens & Cucumber"
       ],
-      "Dairy / Dairy-Free": [
-        "1 kg Tub Plain 0% Greek Yogurt (or Soy Yogurt)",
-        "250g Low-Fat Cottage Cheese",
-        "1 Liter Unsweetened Soy or Almond Milk"
+      "Healthy Fats": [
+        "Local Avocados (in season)",
+        "Sunflower Seeds & Pumpkin Seeds (*pepitas*)",
+        "Cold-Pressed Canola or Olive Oil",
+        "100% Sugar-Free Peanut Butter",
+        "Raw Almonds & Walnuts",
+        "Chia Seeds & Flaxseeds"
       ]
     };
 
-    const ALLERGEN_SWAP_GUIDE = [
-      {
-        allergen: "Dairy / Lactose Intolerance",
-        icon: "🥛",
-        solution: "Swap Greek yogurt for unsweetened Soy/Coconut yogurt + ½ scoop plant protein. Use water or chilled Rooibos tea as smoothie bases instead of cow's milk."
-      },
-      {
-        allergen: "Gluten / Celiac Sensitivity",
-        icon: "🌾",
-        solution: "Replace Jungle Oats with certified gluten-free oats, or swap entirely for roasted sweet potato cubes (*patats*), baked butternut, or brown basmati rice."
-      },
-      {
-        allergen: "Peanut / Tree Nut Allergy",
-        icon: "🥜",
-        solution: "Replace almonds, walnuts, and peanut butter with roasted sunflower seeds, pumpkin seeds (*pepitas*), or cold-pressed avocado oil."
-      },
-      {
-        allergen: "Seafood / Fish Allergy",
-        icon: "🐟",
-        solution: "Replace Cape Hake, pilchards, and tuna with equal gram weights (150g–180g) of skinless chicken breast fillets, turkey breast, or extra-lean ostrich mince."
-      }
-    ];
+    // --- Realistic Anatomical Female Muscle Heatmap Component ---
+    function AnatomicalFemaleHeatmap({ activeMuscle, exerciseName }) {
+      const isTarget = (m) => activeMuscle === m;
 
-    // --- Interactive 3D Humanoid Body Visualizer ---
-    function Interactive3DHumanoid({ activeMuscle, exerciseName }) {
-      const mountRef = useRef(null);
-      const muscleMeshesRef = useRef({});
-
-      useEffect(() => {
-        const container = mountRef.current;
-        if (!container) return;
-
-        const w = container.clientWidth || 340;
-        const h = container.clientHeight || 230;
-
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 1000);
-        camera.position.set(0, 0, 7.2);
-
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        renderer.setSize(w, h);
-        renderer.setPixelRatio(window.devicePixelRatio || 1);
-        container.innerHTML = '';
-        container.appendChild(renderer.domElement);
-
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
-        scene.add(ambientLight);
-
-        const frontLight = new THREE.PointLight(0xf43f5e, 2.2, 30);
-        frontLight.position.set(2, 4, 4);
-        scene.add(frontLight);
-
-        const backLight = new THREE.PointLight(0x38bdf8, 1.8, 30);
-        backLight.position.set(-2, -3, -4);
-        scene.add(backLight);
-
-        const bodyGroup = new THREE.Group();
-        const baseMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.5, metalness: 0.3 });
-        const glowMat = new THREE.MeshStandardMaterial({ color: 0xf43f5e, roughness: 0.2, metalness: 0.6, emissive: 0x9f1239, emissiveIntensity: 0.9 });
-
-        // Head
-        const head = new THREE.Mesh(new THREE.SphereGeometry(0.38, 24, 24), baseMat);
-        head.position.y = 2.1;
-        bodyGroup.add(head);
-
-        // Chest
-        const chest = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.55, 0.45), baseMat.clone());
-        chest.position.y = 1.35;
-        bodyGroup.add(chest);
-
-        // Core
-        const core = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.55, 0.38), baseMat.clone());
-        core.position.y = 0.85;
-        bodyGroup.add(core);
-
-        // Lats / Back
-        const lats = new THREE.Mesh(new THREE.BoxGeometry(0.92, 0.55, 0.2), baseMat.clone());
-        lats.position.set(0, 1.35, -0.15);
-        bodyGroup.add(lats);
-
-        // Shoulders
-        const leftShoulder = new THREE.Mesh(new THREE.SphereGeometry(0.24, 16, 16), baseMat.clone());
-        leftShoulder.position.set(-0.62, 1.45, 0);
-        bodyGroup.add(leftShoulder);
-
-        const rightShoulder = new THREE.Mesh(new THREE.SphereGeometry(0.24, 16, 16), baseMat.clone());
-        rightShoulder.position.set(0.62, 1.45, 0);
-        bodyGroup.add(rightShoulder);
-
-        // Glutes
-        const glutes = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.45, 0.48), baseMat.clone());
-        glutes.position.set(0, 0.4, -0.05);
-        bodyGroup.add(glutes);
-
-        // Quads
-        const leftQuad = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.16, 1.1, 16), baseMat.clone());
-        leftQuad.position.set(-0.25, -0.35, 0.05);
-        bodyGroup.add(leftQuad);
-
-        const rightQuad = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.16, 1.1, 16), baseMat.clone());
-        rightQuad.position.set(0.25, -0.35, 0.05);
-        bodyGroup.add(rightQuad);
-
-        // Hamstrings
-        const leftHam = new THREE.Mesh(new THREE.CylinderGeometry(0.19, 0.15, 1.1, 16), baseMat.clone());
-        leftHam.position.set(-0.25, -0.35, -0.06);
-        bodyGroup.add(leftHam);
-
-        const rightHam = new THREE.Mesh(new THREE.CylinderGeometry(0.19, 0.15, 1.1, 16), baseMat.clone());
-        rightHam.position.set(0.25, -0.35, -0.06);
-        bodyGroup.add(rightHam);
-
-        // Calves
-        const leftCalf = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.11, 1.0, 16), baseMat);
-        leftCalf.position.set(-0.25, -1.35, 0);
-        bodyGroup.add(leftCalf);
-
-        const rightCalf = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.11, 1.0, 16), baseMat);
-        rightCalf.position.set(0.25, -1.35, 0);
-        bodyGroup.add(rightCalf);
-
-        // Orbital Ring
-        const ringGeo = new THREE.TorusGeometry(2.3, 0.03, 16, 80);
-        const ringMat = new THREE.MeshBasicMaterial({ color: 0xf43f5e, transparent: true, opacity: 0.65 });
-        const ringMesh = new THREE.Mesh(ringGeo, ringMat);
-        ringMesh.rotation.x = Math.PI / 3;
-        bodyGroup.add(ringMesh);
-
-        scene.add(bodyGroup);
-
-        muscleMeshesRef.current = {
-          chest: [chest],
-          core: [core],
-          shoulders: [leftShoulder, rightShoulder],
-          lats: [lats],
-          glutes: [glutes],
-          quads: [leftQuad, rightQuad],
-          hamstrings: [leftHam, rightHam]
-        };
-
-        let isDragging = false;
-        let prevPos = { x: 0, y: 0 };
-        const onStart = (e) => { isDragging = true; prevPos = { x: e.clientX || (e.touches && e.touches[0].clientX), y: e.clientY || (e.touches && e.touches[0].clientY) }; };
-        const onMove = (e) => {
-          if (!isDragging) return;
-          const clientX = e.clientX || (e.touches && e.touches[0].clientX);
-          const clientY = e.clientY || (e.touches && e.touches[0].clientY);
-          bodyGroup.rotation.y += (clientX - prevPos.x) * 0.012;
-          bodyGroup.rotation.x += (clientY - prevPos.y) * 0.008;
-          prevPos = { x: clientX, y: clientY };
-        };
-        const onEnd = () => { isDragging = false; };
-        container.addEventListener('mousedown', onStart);
-        container.addEventListener('mousemove', onMove);
-        window.addEventListener('mouseup', onEnd);
-        container.addEventListener('touchstart', onStart);
-        container.addEventListener('touchmove', onMove);
-        window.addEventListener('touchend', onEnd);
-
-        let reqId;
-        const animate = () => {
-          reqId = requestAnimationFrame(animate);
-          if (!isDragging) bodyGroup.rotation.y += 0.008;
-          ringMesh.rotation.z += 0.015;
-          renderer.render(scene, camera);
-        };
-        animate();
-
-        return () => {
-          cancelAnimationFrame(reqId);
-          container.innerHTML = '';
-        };
-      }, []);
-
-      useEffect(() => {
-        const groups = muscleMeshesRef.current;
-        if (!groups) return;
-        const baseMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.5, metalness: 0.3 });
-        const glowMat = new THREE.MeshStandardMaterial({ color: 0xf43f5e, roughness: 0.2, metalness: 0.6, emissive: 0x9f1239, emissiveIntensity: 0.9 });
-
-        Object.keys(groups).forEach(key => {
-          const meshes = groups[key];
-          if (meshes) {
-            const isTarget = key === activeMuscle;
-            meshes.forEach(m => { m.material = isTarget ? glowMat : baseMat; });
-          }
-        });
-      }, [activeMuscle]);
+      // Muscle highlight colors
+      const glowAmber = "#f59e0b";
+      const glowAmberLight = "#fde68a";
+      const baseMuscle = "#991b1b";
+      const baseHighlight = "#dc2626";
+      const baseFascia = "#cbd5e1";
 
       return (
-        <div className="relative w-full h-56 bg-slate-950/90 rounded-2xl border border-slate-800 overflow-hidden shadow-2xl">
-          <div ref={mountRef} className="w-full h-full cursor-grab active:cursor-grabbing" />
-          <div className="absolute top-3 left-3 bg-slate-900/80 backdrop-blur px-3 py-1.5 rounded-xl border border-slate-700/60 shadow-lg flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse"></span>
+        <div className="relative w-full bg-slate-950/95 rounded-3xl border border-slate-800 p-4 overflow-hidden shadow-2xl">
+          {/* Header Strip */}
+          <div className="flex justify-between items-center mb-3">
             <div>
-              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-tight">3D Muscle Target</p>
-              <p className="text-xs font-black text-rose-400 capitalize">{activeMuscle || "Full Body"}</p>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Active Biomechanics</p>
+              <h3 className="text-sm font-black text-white capitalize">{exerciseName || "Exercise"}</h3>
+            </div>
+            <div className="flex items-center gap-1.5 bg-slate-900 px-2.5 py-1 rounded-full border border-slate-800">
+              <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+              <span className="text-[10px] font-bold text-amber-400 capitalize">{activeMuscle} Focus</span>
             </div>
           </div>
-          <div className="absolute bottom-2.5 left-3 text-[10px] text-slate-300 font-semibold bg-slate-900/70 backdrop-blur px-2.5 py-1 rounded-lg border border-slate-800">
-            Active: <span className="text-rose-300">{exerciseName || "Exercise"}</span>
-          </div>
-          <div className="absolute bottom-2.5 right-3 text-[9px] text-slate-500 font-medium">
-            Drag 360° to rotate
+
+          {/* Main Visual Arena */}
+          <div className="relative w-full h-80 flex items-center justify-center">
+            
+            {/* Exercise Inset Pip Box (Top Left) */}
+            <div className="absolute top-0 left-0 w-28 bg-slate-900/90 backdrop-blur-md rounded-2xl border border-slate-800 p-2 z-20 shadow-xl">
+              <p className="text-[8px] font-bold text-slate-400 uppercase">Movement</p>
+              <p className="text-[9px] font-black text-slate-200 truncate">{exerciseName}</p>
+              
+              {/* Exercise Silhouette Icon */}
+              <div className="h-16 flex items-center justify-center my-1">
+                <svg viewBox="0 0 100 100" className="w-12 h-12">
+                  <circle cx="50" cy="20" r="10" fill="#cbd5e1" />
+                  <path d="M 40 32 L 60 32 L 55 58 L 45 58 Z" fill="#94a3b8" />
+                  <path d="M 45 58 L 30 75 L 35 90" stroke="#f59e0b" strokeWidth="6" strokeLinecap="round" fill="none" />
+                  <path d="M 55 58 L 70 75 L 65 90" stroke="#f59e0b" strokeWidth="6" strokeLinecap="round" fill="none" />
+                  <rect x="42" y="38" width="16" height="12" rx="3" fill="#f43f5e" />
+                </svg>
+              </div>
+
+              {/* Warm to High Heat Scale */}
+              <div className="mt-1">
+                <div className="h-1.5 w-full rounded-full bg-gradient-to-r from-emerald-500 via-amber-400 to-amber-600"></div>
+                <div className="flex justify-between text-[7px] text-slate-400 font-bold mt-0.5">
+                  <span>Warm</span>
+                  <span>High</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Central Anatomical Striated Figure (SVG Rendering) */}
+            <svg viewBox="0 0 400 450" className="w-full h-full max-h-80 drop-shadow-2xl">
+              <defs>
+                <radialGradient id="gluteGlow" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stopColor="#fbbf24" stopOpacity="1" />
+                  <stop offset="60%" stopColor="#f59e0b" stopOpacity="0.8" />
+                  <stop offset="100%" stopColor="#d97706" stopOpacity="0" />
+                </radialGradient>
+                <radialGradient id="quadGlow" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stopColor="#fbbf24" stopOpacity="1" />
+                  <stop offset="70%" stopColor="#f59e0b" stopOpacity="0.75" />
+                  <stop offset="100%" stopColor="#d97706" stopOpacity="0" />
+                </radialGradient>
+                <radialGradient id="shoulderGlow" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stopColor="#fbbf24" stopOpacity="1" />
+                  <stop offset="80%" stopColor="#f59e0b" stopOpacity="0" />
+                </radialGradient>
+              </defs>
+
+              {/* Head & Cranium Striations */}
+              <g id="head" opacity="0.9">
+                <ellipse cx="230" cy="55" rx="26" ry="32" fill="#b91c1c" />
+                <path d="M 215 45 Q 230 38 245 45 Q 248 60 238 75 Q 220 75 215 45 Z" fill="#ef4444" opacity="0.6" />
+                <ellipse cx="230" cy="55" rx="14" ry="18" fill="#fca5a5" opacity="0.4" />
+                <path d="M 226 87 L 234 87 L 236 102 L 224 102 Z" fill="#991b1b" />
+              </g>
+
+              {/* Deltoids / Shoulders */}
+              <g id="deltoids" className={isTarget('shoulders') ? 'active-muscle-glow' : ''}>
+                <path d="M 205 105 Q 185 115 190 145 Q 210 135 218 115 Z" fill={isTarget('shoulders') ? "url(#shoulderGlow)" : "#b91c1c"} />
+                <path d="M 242 105 Q 262 115 258 145 Q 238 135 230 115 Z" fill={isTarget('shoulders') ? "url(#shoulderGlow)" : "#991b1b"} />
+                {isTarget('shoulders') && (
+                  <circle cx="250" cy="125" r="18" fill="url(#shoulderGlow)" opacity="0.9" />
+                )}
+              </g>
+
+              {/* Torso, Pectorals & Rib Striations */}
+              <g id="torso">
+                <path d="M 205 105 L 245 105 L 250 170 L 200 170 Z" fill="#7f1d1d" />
+                <ellipse cx="218" cy="130" rx="14" ry="12" fill="#ca8a04" opacity="0.85" />
+                <ellipse cx="238" cy="130" rx="14" ry="12" fill="#ca8a04" opacity="0.85" />
+              </g>
+
+              {/* Erector Spinae / Back Musculature */}
+              <g id="erector_spinae" className={isTarget('erectors') || isTarget('lats') ? 'active-muscle-glow' : ''}>
+                <path d="M 246 115 Q 260 145 252 195 Q 238 190 236 140 Z" fill={isTarget('erectors') || isTarget('lats') ? glowAmber : "#991b1b"} />
+                {/* Latissimus Striations */}
+                <path d="M 248 130 L 235 145 M 252 145 L 236 160 M 250 160 L 238 175" stroke="#ffffff" strokeWidth="1.2" opacity="0.5" />
+              </g>
+
+              {/* Core / Rectus & Obliques */}
+              <g id="core" className={isTarget('core') ? 'active-muscle-glow' : ''}>
+                <path d="M 205 155 Q 225 150 242 155 L 238 215 L 210 215 Z" fill={isTarget('core') ? glowAmber : "#b91c1c"} />
+                {/* Abdominal 6-pack segmentation */}
+                <rect x="214" y="160" width="8" height="10" rx="2" fill="#fca5a5" opacity="0.6" />
+                <rect x="226" y="160" width="8" height="10" rx="2" fill="#fca5a5" opacity="0.6" />
+                <rect x="214" y="174" width="8" height="10" rx="2" fill="#fca5a5" opacity="0.6" />
+                <rect x="226" y="174" width="8" height="10" rx="2" fill="#fca5a5" opacity="0.6" />
+                <rect x="215" y="188" width="7" height="10" rx="2" fill="#fca5a5" opacity="0.6" />
+                <rect x="225" y="188" width="7" height="10" rx="2" fill="#fca5a5" opacity="0.6" />
+              </g>
+
+              {/* Gluteus Maximus (Kneeling Profile) */}
+              <g id="gluteus_maximus" className={isTarget('glutes') ? 'active-muscle-glow' : ''}>
+                <ellipse cx="258" cy="235" rx="34" ry="28" fill={isTarget('glutes') ? "url(#gluteGlow)" : "#b91c1c"} />
+                <path d="M 235 215 Q 285 210 288 245 Q 280 275 240 265 Z" fill={isTarget('glutes') ? "url(#gluteGlow)" : "#dc2626"} opacity="0.95" />
+                {/* Striation Fibers */}
+                <path d="M 245 225 Q 270 230 280 245 M 245 238 Q 268 245 275 260" stroke="#fef08a" strokeWidth="1.5" opacity="0.7" />
+              </g>
+
+              {/* Hamstrings (Posterior Thigh) */}
+              <g id="hamstrings" className={isTarget('hamstrings') ? 'active-muscle-glow' : ''}>
+                <path d="M 265 248 Q 288 280 262 315 L 245 295 Z" fill={isTarget('hamstrings') ? glowAmber : "#991b1b"} />
+              </g>
+
+              {/* Quadriceps Femoris (Anterior & Lateral Thigh) */}
+              <g id="quadriceps_femoris" className={isTarget('quads') ? 'active-muscle-glow' : ''}>
+                <path d="M 225 220 Q 255 245 240 320 Q 195 305 210 240 Z" fill={isTarget('quads') ? "url(#quadGlow)" : "#b91c1c"} />
+                <path d="M 220 235 Q 248 260 232 315 L 210 285 Z" fill={isTarget('quads') ? glowAmber : "#dc2626"} opacity="0.9" />
+                {/* Vastus lateralis striations */}
+                <path d="M 222 245 Q 240 275 230 310 M 215 255 Q 230 285 224 312" stroke="#fef3c7" strokeWidth="1.6" opacity="0.7" />
+              </g>
+
+              {/* Lower Legs / Kneeling Calves & Feet */}
+              <g id="lower_legs">
+                <path d="M 235 320 Q 295 340 315 365 L 260 375 L 210 330 Z" fill="#7f1d1d" />
+                <path d="M 210 325 Q 265 345 320 370 L 290 385 L 205 340 Z" fill="#991b1b" />
+                <path d="M 310 365 Q 330 375 335 385 L 285 390 Z" fill="#cbd5e1" opacity="0.8" />
+              </g>
+
+              {/* Arms & Hands (Kneeling Support) */}
+              <g id="arms">
+                <path d="M 260 135 Q 285 190 280 250 L 270 250 L 250 145 Z" fill="#991b1b" />
+                <path d="M 280 250 Q 285 270 270 285 L 260 275 Z" fill="#cbd5e1" opacity="0.8" />
+              </g>
+
+              {/* --- Labeled Callout Annotations & Leader Lines --- */}
+              {/* Deltoids */}
+              <g id="label_deltoids">
+                <line x1="255" y1="125" x2="310" y2="105" stroke="#94a3b8" strokeWidth="1.2" />
+                <circle cx="255" cy="125" r="2.5" fill="#f59e0b" />
+                <text x="316" y="108" fill="#e2e8f0" fontSize="11" fontWeight="bold" fontFamily="sans-serif">Deltoids</text>
+              </g>
+
+              {/* Erector Spinae */}
+              <g id="label_erector">
+                <line x1="250" y1="165" x2="310" y2="148" stroke="#94a3b8" strokeWidth="1.2" />
+                <circle cx="250" cy="165" r="2.5" fill="#f59e0b" />
+                <text x="316" y="151" fill="#e2e8f0" fontSize="11" fontWeight="bold" fontFamily="sans-serif">Erector Spinae</text>
+              </g>
+
+              {/* Gluteus Maximus */}
+              <g id="label_gluteus">
+                <line x1="270" y1="230" x2="315" y2="190" stroke="#f59e0b" strokeWidth="1.5" />
+                <circle cx="270" cy="230" r="3.5" fill="#f59e0b" />
+                <text x="320" y="190" fill="#fde68a" fontSize="12" fontWeight="900" fontFamily="sans-serif">Gluteus</text>
+                <text x="320" y="202" fill="#fde68a" fontSize="12" fontWeight="900" fontFamily="sans-serif">Maximus</text>
+              </g>
+
+              {/* Hamstrings */}
+              <g id="label_hamstrings">
+                <line x1="262" y1="285" x2="310" y2="285" stroke="#94a3b8" strokeWidth="1.2" />
+                <circle cx="262" cy="285" r="2.5" fill="#f59e0b" />
+                <text x="316" y="288" fill="#e2e8f0" fontSize="11" fontWeight="bold" fontFamily="sans-serif">Hamstrings</text>
+              </g>
+
+              {/* Core */}
+              <g id="label_core">
+                <line x1="210" y1="175" x2="160" y2="175" stroke="#94a3b8" strokeWidth="1.2" />
+                <circle cx="210" cy="175" r="2.5" fill="#f59e0b" />
+                <text x="130" y="178" fill="#e2e8f0" fontSize="11" fontWeight="bold" fontFamily="sans-serif">Core</text>
+              </g>
+
+              {/* Quadriceps Femoris */}
+              <g id="label_quads">
+                <line x1="215" y1="280" x2="160" y2="330" stroke="#f59e0b" strokeWidth="1.5" />
+                <circle cx="215" cy="280" r="3.5" fill="#f59e0b" />
+                <text x="95" y="330" fill="#fde68a" fontSize="11" fontWeight="900" fontFamily="sans-serif">Quadriceps</text>
+                <text x="110" y="342" fill="#fde68a" fontSize="11" fontWeight="900" fontFamily="sans-serif">Femoris</text>
+              </g>
+            </svg>
           </div>
         </div>
       );
     }
 
-    // --- Main Application Engine ---
+    // --- Main Application Component ---
     function App() {
-      const [activeTab, setActiveTab] = useState('workout'); // 'dashboard', 'workout', 'nutrition', 'tempo', 'history'
+      const [activeTab, setActiveTab] = useState('workout'); // 'dashboard', 'workout', 'meals', 'tempo', 'history'
       const [difficulty, setDifficulty] = useState(() => safeGetString('fm_difficulty', 'intermediate'));
       const [activeDay, setActiveDay] = useState(() => safeGetString('fm_day', 'A'));
 
@@ -619,10 +521,8 @@
 
       // Voice & Audio
       const [voiceEnabled, setVoiceEnabled] = useState(() => safeGetString('fm_voice', 'true') !== 'false');
-      const [handsFreeListening, setHandsFreeListening] = useState(false);
-      const recognitionRef = useRef(null);
 
-      // Tailored workout state & Persistent History
+      // Workout Storage
       const [customSets, setCustomSets] = useState(() => safeGetJSON('fm_custom_sets', {}));
       const [customReps, setCustomReps] = useState(() => safeGetJSON('fm_custom_reps', {}));
       const [customRest, setCustomRest] = useState(() => safeGetJSON('fm_custom_rest', {}));
@@ -631,32 +531,22 @@
       const [streakHistory, setStreakHistory] = useState(() => safeGetJSON('fm_streak', []));
       const [sessionArchive, setSessionArchive] = useState(() => safeGetJSON('fm_session_archive', []));
 
-      // Meal Plan Subtab & Checked Groceries State
-      const [mealSubTab, setMealSubTab] = useState('plan'); // 'plan', 'recipes', 'grocery', 'swaps'
-      const [checkedGroceries, setCheckedGroceries] = useState(() => safeGetJSON('fm_checked_groceries', {}));
+      // Meals Subtab & Food Selection
+      const [mealDayIndex, setMealDayIndex] = useState(0);
 
-      // Daily Dashboard & Body Measurements
-      const [dailyLog, setDailyLog] = useState(() => safeGetJSON('fm_daily_log', { sleep: 8, stress: 4, soreness: 3 }));
-      const [bodyMetrics, setBodyMetrics] = useState(() => safeGetJSON('fm_body_metrics', { weight: 75.0, waist: 78, hips: 102, thigh: 58 }));
-      
+      // Active Exercise
       const [focusedExerciseId, setFocusedExerciseId] = useState('i_a1');
       const [selectedExercise, setSelectedExercise] = useState(null);
 
-      // Timers & Warmup
-      const [showWarmupPlayer, setShowWarmupPlayer] = useState(false);
-      const [warmupIndex, setWarmupIndex] = useState(0);
-      const [warmupTimer, setWarmupTimer] = useState(45);
-      const [warmupRunning, setWarmupRunning] = useState(false);
-
+      // Rest Timers
       const [timerSeconds, setTimerSeconds] = useState(60);
       const [targetTimerSec, setTargetTimerSec] = useState(60);
       const [isTimerRunning, setIsTimerRunning] = useState(false);
 
+      // Metronome
       const [metronomeRunning, setMetronomeRunning] = useState(false);
       const [tempoPhase, setTempoPhase] = useState('Lower (3s)');
       const [tempoCount, setTempoCount] = useState(3);
-
-      const fileInputRef = useRef(null);
 
       // Cycle Math
       const computeCycleData = () => {
@@ -684,8 +574,12 @@
       };
 
       const { cycleDay, phaseKey: activeCyclePhase, ovulationDay, daysUntilNextPeriod } = computeCycleData();
+      const loadMultiplier = CYCLE_MODES[activeCyclePhase] ? CYCLE_MODES[activeCyclePhase].modifier : 1.0;
 
-      // LocalStorage Sync
+      const currentExercises = MASTER_EXERCISE_DATA[difficulty][activeDay] || MASTER_EXERCISE_DATA.intermediate.A;
+      const activeExerciseObj = currentExercises.find(e => e.id === focusedExerciseId) || currentExercises[0];
+
+      // Persistence Sync
       useEffect(() => {
         localStorage.setItem('fm_difficulty', difficulty);
         localStorage.setItem('fm_day', activeDay);
@@ -699,65 +593,10 @@
         localStorage.setItem('fm_sets', JSON.stringify(completedSets));
         localStorage.setItem('fm_streak', JSON.stringify(streakHistory));
         localStorage.setItem('fm_session_archive', JSON.stringify(sessionArchive));
-        localStorage.setItem('fm_checked_groceries', JSON.stringify(checkedGroceries));
-        localStorage.setItem('fm_daily_log', JSON.stringify(dailyLog));
-        localStorage.setItem('fm_body_metrics', JSON.stringify(bodyMetrics));
         localStorage.setItem('fm_voice', voiceEnabled.toString());
-      }, [difficulty, activeDay, periodStartDate, cycleLengthDays, periodDurationDays, customSets, customReps, customRest, weightLogs, completedSets, streakHistory, sessionArchive, checkedGroceries, dailyLog, bodyMetrics, voiceEnabled]);
+      }, [difficulty, activeDay, periodStartDate, cycleLengthDays, periodDurationDays, customSets, customReps, customRest, weightLogs, completedSets, streakHistory, sessionArchive, voiceEnabled]);
 
-      // Speech Recognition
-      useEffect(() => {
-        const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (SpeechRec) {
-          const rec = new SpeechRec();
-          rec.continuous = true;
-          rec.interimResults = false;
-          rec.lang = 'en-US';
-          rec.onresult = (e) => {
-            const last = e.results.length - 1;
-            const command = e.results[last][0].transcript.trim().toLowerCase();
-            handleVoiceCommand(command);
-          };
-          rec.onerror = () => setHandsFreeListening(false);
-          recognitionRef.current = rec;
-        }
-      }, []);
-
-      const toggleHandsFree = () => {
-        if (!recognitionRef.current) {
-          alert("Speech recognition is not supported in this browser. Please use Chrome or Safari.");
-          return;
-        }
-        if (handsFreeListening) {
-          recognitionRef.current.stop();
-          setHandsFreeListening(false);
-          speakCoach("Voice control paused.", voiceEnabled);
-        } else {
-          try {
-            recognitionRef.current.start();
-            setHandsFreeListening(true);
-            speakCoach("Voice control active. Say 'Complete Set'.", voiceEnabled);
-          } catch (e) {
-            setHandsFreeListening(false);
-          }
-        }
-      };
-
-      const handleVoiceCommand = (cmd) => {
-        if (cmd.includes("complete") || cmd.includes("done") || cmd.includes("finish") || cmd.includes("next")) {
-          triggerNextIncompleteSet();
-        } else if (cmd.includes("pause") || cmd.includes("stop")) {
-          setIsTimerRunning(false);
-          setMetronomeRunning(false);
-        } else if (cmd.includes("resume") || cmd.includes("start")) {
-          setIsTimerRunning(true);
-        } else if (cmd.includes("tempo") || cmd.includes("metronome")) {
-          setActiveTab('tempo');
-          setMetronomeRunning(true);
-        }
-      };
-
-      // Rest Timer Interval
+      // Rest Timer Engine
       useEffect(() => {
         let interval = null;
         if (isTimerRunning && timerSeconds > 0) {
@@ -767,7 +606,6 @@
               else if (prev === 1) {
                 playTone(880, 'sine', 0.3);
                 speakCoach("Break is over. Next set ready.", voiceEnabled);
-                autoScrollToNextExercise();
               }
               return prev - 1;
             });
@@ -779,28 +617,7 @@
         return () => clearInterval(interval);
       }, [isTimerRunning, timerSeconds, voiceEnabled, targetTimerSec]);
 
-      // Warmup Interval
-      useEffect(() => {
-        let timer = null;
-        if (warmupRunning && warmupTimer > 0) {
-          timer = setInterval(() => setWarmupTimer(prev => prev - 1), 1000);
-        } else if (warmupTimer === 0 && warmupRunning) {
-          if (warmupIndex < WARMUP_ROUTINE.length - 1) {
-            setWarmupIndex(prev => prev + 1);
-            setWarmupTimer(WARMUP_ROUTINE[warmupIndex + 1].dur);
-            playTone(700, 'sine', 0.2);
-            speakCoach(`Next: ${WARMUP_ROUTINE[warmupIndex + 1].name}`, voiceEnabled);
-          } else {
-            setWarmupRunning(false);
-            setShowWarmupPlayer(false);
-            speakCoach("Warm-up complete! You are primed to lift.", voiceEnabled);
-            if (window.confetti) window.confetti({ particleCount: 50, spread: 60 });
-          }
-        }
-        return () => clearInterval(timer);
-      }, [warmupRunning, warmupTimer, warmupIndex, voiceEnabled]);
-
-      // Metronome Interval
+      // Metronome Engine
       useEffect(() => {
         let timer = null;
         if (metronomeRunning) {
@@ -816,47 +633,10 @@
         return () => clearInterval(timer);
       }, [metronomeRunning]);
 
-      // Readiness Calculations
-      const readinessScore = Math.max(1, Math.min(10, Math.round(dailyLog.sleep - dailyLog.stress * 0.4 - dailyLog.soreness * 0.4 + 4)));
-      const isHighCortisol = readinessScore <= 5;
-      const loadMultiplier = (isHighCortisol ? 0.85 : 1.0) * (CYCLE_MODES[activeCyclePhase] ? CYCLE_MODES[activeCyclePhase].modifier : 1.0);
-
-      const currentExercises = MASTER_EXERCISE_DATA[difficulty][activeDay] || MASTER_EXERCISE_DATA.intermediate.A;
-      const activeExerciseObj = currentExercises.find(e => e.id === focusedExerciseId) || currentExercises[0];
-
-      const autoScrollToNextExercise = () => {
-        for (const ex of currentExercises) {
-          const sCount = customSets[ex.id] ?? ex.defaultSets;
-          for (let i = 0; i < sCount; i++) {
-            if (!completedSets[`${ex.id}_set_${i}`]) {
-              setFocusedExerciseId(ex.id);
-              const el = document.getElementById(`ex_card_${ex.id}`);
-              if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              return;
-            }
-          }
-        }
-      };
-
-      const triggerNextIncompleteSet = () => {
-        for (const ex of currentExercises) {
-          const sCount = customSets[ex.id] ?? ex.defaultSets;
-          const rest = customRest[ex.id] ?? ex.defaultRest;
-          for (let i = 0; i < sCount; i++) {
-            const key = `${ex.id}_set_${i}`;
-            if (!completedSets[key]) {
-              triggerSetComplete(key, rest, ex.id);
-              return;
-            }
-          }
-        }
-      };
-
       const triggerSetComplete = (setKey, restSec, exId) => {
         const nextState = !completedSets[setKey];
         const updated = { ...completedSets, [setKey]: nextState };
         setCompletedSets(updated);
-
         if (exId) setFocusedExerciseId(exId);
 
         if (nextState) {
@@ -906,70 +686,6 @@
         speakCoach(`Session logged! Advanced to Workout ${nextDay}.`, voiceEnabled);
       };
 
-      const adjustSetCount = (exId, delta, defaultCount) => {
-        const currentCount = customSets[exId] ?? defaultCount;
-        const newCount = Math.max(1, Math.min(6, currentCount + delta));
-        setCustomSets({ ...customSets, [exId]: newCount });
-      };
-
-      const adjustRest = (exId, seconds) => {
-        setCustomRest({ ...customRest, [exId]: seconds });
-        setTargetTimerSec(seconds);
-        setTimerSeconds(seconds);
-      };
-
-      const applyProgressiveOverload = (exId, currentW) => {
-        const newW = currentW + 0.5;
-        setWeightLogs({ ...weightLogs, [exId]: newW });
-        speakCoach(`Load increased to ${newW.toFixed(1)} kilograms.`, voiceEnabled);
-      };
-
-      const toggleGrocery = (item) => {
-        setCheckedGroceries(prev => ({ ...prev, [item]: !prev[item] }));
-      };
-
-      const exportUserData = () => {
-        const backupObj = {
-          difficulty, activeDay, periodStartDate, cycleLengthDays, periodDurationDays, customSets, customReps, customRest, weightLogs, completedSets, streakHistory, sessionArchive, checkedGroceries, dailyLog, bodyMetrics, date: new Date().toISOString()
-        };
-        const blob = new Blob([JSON.stringify(backupObj, null, 2)], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `fem_metabolic_backup_${new Date().toISOString().slice(0, 10)}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
-      };
-
-      const importUserData = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (evt) => {
-          try {
-            const data = JSON.parse(evt.target.result);
-            if (data.difficulty) setDifficulty(data.difficulty);
-            if (data.periodStartDate) setPeriodStartDate(data.periodStartDate);
-            if (data.cycleLengthDays) setCycleLengthDays(data.cycleLengthDays);
-            if (data.periodDurationDays) setPeriodDurationDays(data.periodDurationDays);
-            if (data.customSets) setCustomSets(data.customSets);
-            if (data.customReps) setCustomReps(data.customReps);
-            if (data.customRest) setCustomRest(data.customRest);
-            if (data.weightLogs) setWeightLogs(data.weightLogs);
-            if (data.completedSets) setCompletedSets(data.completedSets);
-            if (data.streakHistory) setStreakHistory(data.streakHistory);
-            if (data.sessionArchive) setSessionArchive(data.sessionArchive);
-            if (data.checkedGroceries) setCheckedGroceries(data.checkedGroceries);
-            if (data.bodyMetrics) setBodyMetrics(data.bodyMetrics);
-            alert("Backup restored successfully!");
-          } catch (err) {
-            alert("Invalid backup file.");
-          }
-        };
-        reader.readAsText(file);
-      };
-
-      // Tonnage Math
       const totalSessionTonnage = currentExercises.reduce((total, ex) => {
         const loggedW = (weightLogs[ex.id] ?? ex.defaultWeight) * loadMultiplier;
         const sCount = customSets[ex.id] ?? ex.defaultSets;
@@ -979,17 +695,6 @@
         return total + Math.round(completedCount * reps * loggedW);
       }, 0);
 
-      let totalSetsCount = 0;
-      let completedSetsCount = 0;
-      currentExercises.forEach(ex => {
-        const sCount = customSets[ex.id] ?? ex.defaultSets;
-        for (let i = 0; i < sCount; i++) {
-          totalSetsCount++;
-          if (completedSets[`${ex.id}_set_${i}`]) completedSetsCount++;
-        }
-      });
-      const isWorkoutFullyCompleted = totalSetsCount > 0 && totalSetsCount === completedSetsCount;
-
       const radius = 22;
       const circumference = 2 * Math.PI * radius;
       const strokeDashoffset = circumference - (timerSeconds / (targetTimerSec || 60)) * circumference;
@@ -997,192 +702,90 @@
       return (
         <div className="min-h-screen max-w-md mx-auto bg-slate-950 pb-36 font-sans">
           
-          {/* Top Sticky Header */}
+          {/* Top Status Header */}
           <div className="sticky top-0 z-30 bg-slate-950/95 backdrop-blur-md border-b border-slate-800 px-4 py-3">
             <header className="flex justify-between items-center">
-              <div>
-                <h1 className="text-lg font-black text-white tracking-tight flex items-center gap-1.5">
-                  <span className="text-rose-500">🌸</span> FemMetabolic Pro
-                </h1>
-                <p className="text-[10px] text-slate-400">SA Nutrition & 3D Biomechanics Suite</p>
-              </div>
               <div className="flex items-center gap-2">
-                <button
-                  onClick={toggleHandsFree}
-                  className={`px-2.5 py-1.5 rounded-xl border text-xs font-bold transition-all flex items-center gap-1.5 ${
-                    handsFreeListening
-                      ? 'bg-rose-600 text-white border-rose-500 shadow-lg shadow-rose-900/60 mic-live'
-                      : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'
-                  }`}
-                  title="Hands-free Voice Commands"
-                >
-                  <span>🎤</span> {handsFreeListening ? "Listening..." : "Voice Log"}
-                </button>
+                <div className="w-8 h-8 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-xs">
+                  👤
+                </div>
+                <div>
+                  <h1 className="text-sm font-black text-white flex items-center gap-1.5">
+                    FemMetabolic Pro SA <span className="text-xs">🇿🇦</span>
+                  </h1>
+                  <p className="text-[9px] text-slate-400">Cycle Day {cycleDay} • {CYCLE_MODES[activeCyclePhase].name.split(" ")[0]}</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Est. Meal Cost</span>
+                <p className="text-xs font-black text-emerald-400">ZAR 55–65</p>
               </div>
             </header>
           </div>
 
           <div className="p-4 space-y-4">
 
-            {/* TAB 1: DASHBOARD & MENSTRUAL CALENDAR */}
+            {/* TAB 1: DASHBOARD & CYCLE CALENDAR */}
             {activeTab === 'dashboard' && (
               <div className="space-y-4">
-                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
+                <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl space-y-4">
                   <div className="flex justify-between items-center">
-                    <div>
-                      <h2 className="text-base font-black text-white flex items-center gap-2">
-                        <span>🗓️</span> Menstrual Cycle Calendar
-                      </h2>
-                      <p className="text-[11px] text-slate-400">Automates workout loads & carb timing</p>
-                    </div>
-                    <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border ${CYCLE_MODES[activeCyclePhase].color}`}>
-                      Day {cycleDay} of {cycleLengthDays}
+                    <h2 className="text-sm font-black text-white flex items-center gap-1.5">
+                      <span>🗓️</span> Menstrual Cycle Engine
+                    </h2>
+                    <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${CYCLE_MODES[activeCyclePhase].color}`}>
+                      Day {cycleDay} / {cycleLengthDays}
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-1 gap-3 bg-slate-950 p-3.5 rounded-xl border border-slate-800/80">
+                  <div className="bg-slate-950 p-3.5 rounded-2xl border border-slate-800 space-y-3">
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-300 mb-1">Last Period Start Date</label>
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Period Start Date</label>
                       <input
                         type="date"
                         value={periodStartDate}
                         onChange={(e) => setPeriodStartDate(e.target.value)}
-                        className="w-full bg-slate-900 border border-slate-700 text-white text-xs font-semibold rounded-lg px-3 py-2 focus:outline-none focus:border-rose-500"
+                        className="w-full bg-slate-900 border border-slate-700 text-white text-xs font-semibold rounded-xl px-3 py-2 focus:outline-none"
                       />
                     </div>
-
-                    <div className="grid grid-cols-2 gap-2 pt-1">
+                    <div className="grid grid-cols-2 gap-2">
                       <div>
-                        <div className="flex justify-between text-[10px] font-bold text-slate-400 mb-1">
+                        <div className="flex justify-between text-[9px] font-bold text-slate-400 mb-1">
                           <span>Cycle Length</span>
-                          <span className="text-rose-400">{cycleLengthDays} Days</span>
+                          <span className="text-rose-400">{cycleLengthDays}d</span>
                         </div>
-                        <input
-                          type="range"
-                          min="21"
-                          max="35"
-                          value={cycleLengthDays}
-                          onChange={(e) => setCycleLengthDays(Number(e.target.value))}
-                          className="w-full h-1.5 bg-slate-900 rounded-lg appearance-none cursor-pointer accent-rose-500"
-                        />
+                        <input type="range" min="21" max="35" value={cycleLengthDays} onChange={(e) => setCycleLengthDays(Number(e.target.value))} className="w-full h-1 bg-slate-900 rounded appearance-none cursor-pointer accent-rose-500" />
                       </div>
-
                       <div>
-                        <div className="flex justify-between text-[10px] font-bold text-slate-400 mb-1">
+                        <div className="flex justify-between text-[9px] font-bold text-slate-400 mb-1">
                           <span>Period Length</span>
-                          <span className="text-sky-400">{periodDurationDays} Days</span>
+                          <span className="text-sky-400">{periodDurationDays}d</span>
                         </div>
-                        <input
-                          type="range"
-                          min="3"
-                          max="8"
-                          value={periodDurationDays}
-                          onChange={(e) => setPeriodDurationDays(Number(e.target.value))}
-                          className="w-full h-1.5 bg-slate-900 rounded-lg appearance-none cursor-pointer accent-sky-500"
-                        />
+                        <input type="range" min="3" max="8" value={periodDurationDays} onChange={(e) => setPeriodDurationDays(Number(e.target.value))} className="w-full h-1 bg-slate-900 rounded appearance-none cursor-pointer accent-sky-500" />
                       </div>
                     </div>
                   </div>
 
-                  {/* Horizontal Cycle Bar */}
-                  <div>
-                    <div className="flex justify-between text-[10px] text-slate-400 font-bold uppercase mb-1.5">
-                      <span>Day 1</span>
-                      <span>Day {ovulationDay} (Ovulation)</span>
-                      <span>Day {cycleLengthDays}</span>
-                    </div>
-                    <div className="h-3 w-full bg-slate-950 rounded-full overflow-hidden flex border border-slate-800 relative">
-                      <div style={{ width: `${(periodDurationDays / cycleLengthDays) * 100}%` }} className="bg-sky-500 h-full"></div>
-                      <div style={{ width: `${((ovulationDay - 2 - periodDurationDays) / cycleLengthDays) * 100}%` }} className="bg-rose-500 h-full"></div>
-                      <div style={{ width: `${(3 / cycleLengthDays) * 100}%` }} className="bg-fuchsia-500 h-full"></div>
-                      <div style={{ width: `${((cycleLengthDays - (ovulationDay + 1)) / cycleLengthDays) * 100}%` }} className="bg-amber-500 h-full"></div>
-                      <div
-                        style={{ left: `${Math.min(98, Math.max(2, (cycleDay / cycleLengthDays) * 100))}%` }}
-                        className="absolute top-0 bottom-0 w-1 bg-white shadow-[0_0_8px_#ffffff] rounded-full transform -translate-x-1/2"
-                      ></div>
-                    </div>
-                  </div>
-
-                  <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-black text-white">{CYCLE_MODES[activeCyclePhase].name}</span>
-                      <span className="text-[10px] font-bold text-slate-400">Next Period: ~{daysUntilNextPeriod} days</span>
-                    </div>
-                    <p className="text-xs text-rose-400 font-semibold">{CYCLE_MODES[activeCyclePhase].tag}</p>
-                    <p className="text-[11px] text-slate-300 leading-relaxed pt-1 border-t border-slate-900">
-                      💡 <strong>Nutrition & Energy Rule:</strong> {CYCLE_MODES[activeCyclePhase].carbTip}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Readiness Scanner */}
-                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">Readiness & Cortisol Scanner</h3>
-                  <div className="space-y-4">
-                    <div>
-                      <div className="flex justify-between text-xs font-bold text-slate-300 mb-1">
-                        <span>Sleep Quality</span>
-                        <span className="text-sky-400">{dailyLog.sleep} / 10</span>
-                      </div>
-                      <input type="range" min="1" max="10" value={dailyLog.sleep} onChange={(e) => setDailyLog({...dailyLog, sleep: Number(e.target.value)})} className="w-full h-1.5 bg-slate-950 rounded-lg appearance-none cursor-pointer accent-sky-500" />
-                    </div>
-                    <div>
-                      <div className="flex justify-between text-xs font-bold text-slate-300 mb-1">
-                        <span>Stress / Cortisol</span>
-                        <span className="text-amber-400">{dailyLog.stress} / 10</span>
-                      </div>
-                      <input type="range" min="1" max="10" value={dailyLog.stress} onChange={(e) => setDailyLog({...dailyLog, stress: Number(e.target.value)})} className="w-full h-1.5 bg-slate-950 rounded-lg appearance-none cursor-pointer accent-amber-500" />
-                    </div>
-                    <div>
-                      <div className="flex justify-between text-xs font-bold text-slate-300 mb-1">
-                        <span>Muscle Soreness</span>
-                        <span className="text-rose-400">{dailyLog.soreness} / 10</span>
-                      </div>
-                      <input type="range" min="1" max="10" value={dailyLog.soreness} onChange={(e) => setDailyLog({...dailyLog, soreness: Number(e.target.value)})} className="w-full h-1.5 bg-slate-950 rounded-lg appearance-none cursor-pointer accent-rose-500" />
-                    </div>
-                  </div>
-
-                  <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 flex justify-between items-center">
-                    <div>
-                      <span className="text-[9px] font-bold text-slate-400 uppercase">Readiness Score</span>
-                      <p className={`text-xl font-black ${readinessScore >= 7 ? 'text-emerald-400' : readinessScore >= 5 ? 'text-amber-400' : 'text-rose-400'}`}>
-                        {readinessScore} / 10
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-[9px] font-bold text-slate-400 uppercase">Load Modifier</span>
-                      <p className="text-lg font-black text-white">{Math.round(loadMultiplier * 100)}%</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Data Backup */}
-                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex justify-between items-center shadow-lg">
-                  <div>
-                    <h4 className="text-xs font-bold text-white">Data Storage & Export</h4>
-                    <p className="text-[10px] text-slate-400">Backup your workouts and meal plans</p>
-                  </div>
-                  <div className="flex gap-2">
-                    <button onClick={exportUserData} className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold px-3 py-1.5 rounded-xl border border-slate-700">Export</button>
-                    <button onClick={() => fileInputRef.current.click()} className="bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold px-3 py-1.5 rounded-xl">Import</button>
-                    <input ref={fileInputRef} type="file" accept=".json" onChange={importUserData} className="hidden" />
+                  <div className="bg-slate-950 p-3.5 rounded-2xl border border-slate-800 space-y-1">
+                    <span className="text-xs font-black text-white">{CYCLE_MODES[activeCyclePhase].name}</span>
+                    <p className="text-[11px] text-rose-400 font-semibold">{CYCLE_MODES[activeCyclePhase].tag}</p>
+                    <p className="text-[10px] text-slate-300 leading-relaxed pt-1">{CYCLE_MODES[activeCyclePhase].carbTip}</p>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* TAB 2: WORKOUT */}
+            {/* TAB 2: WORKOUT (REALISTIC ANATOMICAL HEATMAP) */}
             {activeTab === 'workout' && (
               <>
+                {/* 3-Tier Difficulty Selector */}
                 <div className="bg-slate-900 p-1 rounded-2xl border border-slate-800 flex gap-1">
                   {['beginner', 'intermediate', 'advanced'].map((tier) => (
                     <button
                       key={tier}
                       onClick={() => setDifficulty(tier)}
-                      className={`flex-1 py-2 rounded-xl text-xs font-bold capitalize transition-all ${
-                        difficulty === tier
-                          ? 'bg-rose-600 text-white shadow-lg shadow-rose-950'
-                          : 'text-slate-400 hover:text-slate-200'
+                      className={`flex-1 py-1.5 rounded-xl text-xs font-bold capitalize transition-all ${
+                        difficulty === tier ? 'bg-rose-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200'
                       }`}
                     >
                       {tier}
@@ -1190,7 +793,8 @@
                   ))}
                 </div>
 
-                <div className="flex gap-2 items-center">
+                {/* Day Selector (A, B, C) */}
+                <div className="flex gap-2">
                   {['A', 'B', 'C'].map((day) => (
                     <button
                       key={day}
@@ -1208,50 +812,14 @@
                   ))}
                 </div>
 
-                <Interactive3DHumanoid activeMuscle={activeExerciseObj.primaryMuscle} exerciseName={activeExerciseObj.name} />
+                {/* --- REALISTIC ANATOMICAL MUSCLE HEATMAP CANVAS --- */}
+                <AnatomicalFemaleHeatmap
+                  activeMuscle={activeExerciseObj.primaryMuscle}
+                  exerciseName={activeExerciseObj.name}
+                />
 
-                {/* Finish & Next Day Banner */}
-                <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl flex flex-col gap-3">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <span className="text-[10px] font-bold uppercase text-slate-400">Session Progress</span>
-                      <p className="text-sm font-black text-white">{completedSetsCount} of {totalSetsCount} Sets Logged ({totalSessionTonnage.toLocaleString()} kg)</p>
-                    </div>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${isWorkoutFullyCompleted ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-slate-800 text-slate-400'}`}>
-                      {isWorkoutFullyCompleted ? "100% Done" : "In Progress"}
-                    </span>
-                  </div>
-
-                  <button
-                    onClick={advanceToNextWorkout}
-                    className="w-full bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white font-bold py-2.5 rounded-xl text-xs shadow-lg shadow-rose-950 flex items-center justify-center gap-1.5 transition-all"
-                  >
-                    <span>🏆</span> Finish & Advance to Next Workout ({activeDay === 'A' ? 'B' : activeDay === 'B' ? 'C' : 'A'})
-                  </button>
-                </div>
-
-                {/* Guided Warmup */}
-                <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-3 flex justify-between items-center">
-                  <div>
-                    <span className="text-[10px] font-bold text-rose-400 uppercase tracking-wider">Pre-Workout Protocol</span>
-                    <p className="text-xs text-slate-300 font-semibold">3-Min Guided Pelvic & Core Warm-Up</p>
-                  </div>
-                  <button
-                    onClick={() => {
-                      setShowWarmupPlayer(true);
-                      setWarmupIndex(0);
-                      setWarmupTimer(WARMUP_ROUTINE[0].dur);
-                      setWarmupRunning(true);
-                      speakCoach(`Starting warm-up. First: ${WARMUP_ROUTINE[0].name}`, voiceEnabled);
-                    }}
-                    className="bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold px-3.5 py-1.5 rounded-xl shadow-md"
-                  >
-                    ▶ Start Player
-                  </button>
-                </div>
-
-                {/* Exercise List */}
-                <div className="space-y-3.5">
+                {/* Exercise Cards */}
+                <div className="space-y-3">
                   {currentExercises.map((ex) => {
                     const setCount = customSets[ex.id] ?? ex.defaultSets;
                     const repTarget = customReps[ex.id] ?? ex.defaultReps;
@@ -1259,89 +827,39 @@
                     const baseWeight = weightLogs[ex.id] ?? ex.defaultWeight;
                     const isFocused = focusedExerciseId === ex.id;
 
-                    let allSetsDone = true;
-                    for (let s = 0; s < setCount; s++) {
-                      if (!completedSets[`${ex.id}_set_${s}`]) { allSetsDone = false; break; }
-                    }
-
                     return (
                       <div
-                        id={`ex_card_${ex.id}`}
                         key={ex.id}
                         onClick={() => setFocusedExerciseId(ex.id)}
-                        className={`bg-slate-900 border rounded-2xl p-4 shadow-md transition-all ${
-                          isFocused ? 'border-rose-500/80 bg-slate-900/95 ring-1 ring-rose-500/30' : 'border-slate-800'
+                        className={`bg-slate-900 border rounded-2xl p-3.5 shadow-md transition-all ${
+                          isFocused ? 'border-amber-500/80 bg-slate-900/95 ring-1 ring-amber-500/30' : 'border-slate-800'
                         }`}
                       >
                         <div className="flex items-start justify-between">
-                          <div className="flex items-center gap-3 cursor-pointer flex-1" onClick={() => setSelectedExercise(ex)}>
+                          <div className="flex items-center gap-3 cursor-pointer flex-1">
                             <img src={ex.gifUrl} alt={ex.name} className="w-12 h-12 rounded-xl object-cover border border-slate-700 shadow-inner" />
                             <div>
-                              <h3 className="text-sm font-bold text-slate-100 hover:text-rose-400 flex items-center gap-1">
-                                {ex.name} {isFocused && <span className="text-[9px] bg-rose-950 text-rose-300 px-1.5 py-0.5 rounded border border-rose-800">3D Focus</span>}
+                              <h3 className="text-xs font-bold text-slate-100 hover:text-amber-400 flex items-center gap-1">
+                                {ex.name} {isFocused && <span className="text-[8px] bg-amber-950 text-amber-300 px-1.5 py-0.5 rounded border border-amber-800">Target</span>}
                               </h3>
-                              <p className="text-[11px] text-slate-400 mt-0.5">Target: <span className="text-rose-300 font-medium">{ex.target}</span></p>
+                              <p className="text-[10px] text-slate-400 mt-0.5">Target: <span className="text-rose-300 font-medium">{ex.target}</span></p>
                             </div>
                           </div>
 
-                          <div className="flex flex-col items-end gap-1">
-                            <div className="flex items-center gap-1">
-                              <input
-                                type="number"
-                                step="0.5"
-                                value={baseWeight}
-                                onFocus={() => setFocusedExerciseId(ex.id)}
-                                onChange={(e) => setWeightLogs({ ...weightLogs, [ex.id]: parseFloat(e.target.value) || 0 })}
-                                className="w-12 bg-slate-950 border border-slate-700 text-white font-mono text-xs text-center py-1 rounded-lg focus:outline-none focus:border-rose-500"
-                              />
-                              <span className="text-[10px] text-slate-400">kg</span>
-                            </div>
-                            {allSetsDone && baseWeight > 0 && (
-                              <button
-                                onClick={(e) => { e.stopPropagation(); applyProgressiveOverload(ex.id, baseWeight); }}
-                                className="text-[9px] font-bold text-emerald-400 bg-emerald-950/90 border border-emerald-800/80 px-1.5 py-0.5 rounded-md hover:bg-emerald-900"
-                              >
-                                ⚡ +0.5kg Jump
-                              </button>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="bg-slate-950/80 p-2 rounded-xl border border-slate-800/80 flex flex-wrap items-center justify-between gap-2 text-xs mt-2.5">
                           <div className="flex items-center gap-1">
-                            <span className="text-[10px] text-slate-400 uppercase font-bold">Sets:</span>
-                            <button onClick={(e) => { e.stopPropagation(); adjustSetCount(ex.id, -1, ex.defaultSets); }} className="w-5 h-5 rounded bg-slate-800 text-slate-200 font-bold flex items-center justify-center">-</button>
-                            <span className="font-bold text-white font-mono">{setCount}</span>
-                            <button onClick={(e) => { e.stopPropagation(); adjustSetCount(ex.id, 1, ex.defaultSets); }} className="w-5 h-5 rounded bg-slate-800 text-slate-200 font-bold flex items-center justify-center">+</button>
-                          </div>
-
-                          <div className="flex items-center gap-1">
-                            <span className="text-[10px] text-slate-400 uppercase font-bold">Reps:</span>
                             <input
                               type="number"
-                              value={repTarget}
-                              onChange={(e) => setCustomReps({ ...customReps, [ex.id]: parseInt(e.target.value, 10) || 0 })}
-                              className="w-10 bg-slate-900 border border-slate-700 text-white text-center py-0.5 rounded font-mono font-bold text-xs"
+                              step="0.5"
+                              value={baseWeight}
+                              onChange={(e) => setWeightLogs({ ...weightLogs, [ex.id]: parseFloat(e.target.value) || 0 })}
+                              className="w-12 bg-slate-950 border border-slate-700 text-white font-mono text-xs text-center py-1 rounded-lg focus:outline-none focus:border-amber-500"
                             />
-                          </div>
-
-                          <div className="flex items-center gap-1">
-                            <span className="text-[10px] text-slate-400 uppercase font-bold">Break:</span>
-                            {[30, 60, 90].map((sec) => (
-                              <button
-                                key={sec}
-                                onClick={(e) => { e.stopPropagation(); adjustRest(ex.id, sec); }}
-                                className={`px-1.5 py-0.5 rounded text-[10px] font-bold border transition-all ${
-                                  restDuration === sec ? 'bg-rose-600 text-white border-rose-500' : 'bg-slate-900 text-slate-400 border-slate-800'
-                                }`}
-                              >
-                                {sec}s
-                              </button>
-                            ))}
+                            <span className="text-[10px] text-slate-400">kg</span>
                           </div>
                         </div>
 
-                        <div className="flex gap-2 pt-2">
+                        {/* Set Checkboxes */}
+                        <div className="flex gap-2 pt-2 mt-2 border-t border-slate-800/80">
                           {Array.from({ length: setCount }).map((_, idx) => {
                             const setKey = `${ex.id}_set_${idx}`;
                             const isDone = !!completedSets[setKey];
@@ -1352,8 +870,8 @@
                                   e.stopPropagation();
                                   triggerSetComplete(setKey, restDuration, ex.id);
                                 }}
-                                className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all shadow-sm ${
-                                  isDone ? 'bg-rose-600 text-white shadow' : 'bg-slate-950 text-slate-400 hover:bg-slate-800'
+                                className={`flex-1 py-1.5 rounded-xl text-xs font-bold transition-all shadow-sm ${
+                                  isDone ? 'bg-amber-600 text-white shadow' : 'bg-slate-950 text-slate-400 hover:bg-slate-800'
                                 }`}
                               >
                                 {isDone ? "✓" : `${idx + 1}`}
@@ -1365,187 +883,157 @@
                     );
                   })}
                 </div>
+
+                {/* Finish & Next Day Button */}
+                <button
+                  onClick={advanceToNextWorkout}
+                  className="w-full bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 text-white font-bold py-3 rounded-2xl text-xs shadow-xl flex items-center justify-center gap-1.5 transition-all"
+                >
+                  <span>🏆</span> Finish & Advance to Workout {activeDay === 'A' ? 'B' : activeDay === 'B' ? 'C' : 'A'}
+                </button>
               </>
             )}
 
-            {/* TAB 3: SOUTH AFRICAN MEAL PLAN & RECIPES */}
-            {activeTab === 'nutrition' && (
+            {/* TAB 3: MEALS & LOCAL SA SUBSTITUTIONS */}
+            {activeTab === 'meals' && (
               <div className="space-y-4">
                 
-                {/* Hero Header */}
-                <div className="relative rounded-2xl overflow-hidden border border-slate-800 shadow-xl">
-                  <img
-                    src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80"
-                    alt="South African Meal Prep"
-                    className="w-full h-28 object-cover opacity-50 brightness-75"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent p-3.5 flex flex-col justify-between">
-                    <span className="text-[10px] font-bold text-rose-400 uppercase tracking-widest bg-slate-950/80 px-2 py-0.5 rounded-full border border-rose-800/60 self-start">
-                      SA Budget-Friendly Blueprint (~R50-R65/day)
-                    </span>
-                    <div>
-                      <h2 className="text-base font-black text-white">Target: ~1,700 kcal Daily</h2>
-                      <p className="text-[11px] text-slate-300">Local Staples • Anti-Bloat • 40P/30C/30F</p>
+                {/* 7-Day Horizontal Day Picker */}
+                <div className="flex gap-1 overflow-x-auto pb-1">
+                  {SA_MEAL_PLAN_DAYS.map((m, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setMealDayIndex(idx)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 border transition-all ${
+                        mealDayIndex === idx ? 'bg-rose-600 text-white border-rose-500' : 'bg-slate-900 text-slate-400 border-slate-800'
+                      }`}
+                    >
+                      {m.day.slice(0, 3)}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Day Overview Header */}
+                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 flex justify-between items-center">
+                  <div>
+                    <h3 className="text-sm font-black text-white">{SA_MEAL_PLAN_DAYS[mealDayIndex].day} Blueprint</h3>
+                    <p className="text-[10px] text-rose-400 font-semibold">{SA_MEAL_PLAN_DAYS[mealDayIndex].type}</p>
+                  </div>
+                  <span className="text-[10px] font-mono font-bold bg-slate-950 text-emerald-400 px-2 py-1 rounded-lg border border-slate-800">
+                    Est. {SA_MEAL_PLAN_DAYS[mealDayIndex].cost}
+                  </span>
+                </div>
+
+                {/* 3 Food Photo Cards (Breakfast, Lunch, Dinner) */}
+                <div className="grid grid-cols-3 gap-2">
+                  {/* Breakfast */}
+                  <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-md flex flex-col">
+                    <div className="relative h-24 bg-slate-950">
+                      <img src="https://images.unsplash.com/photo-1517673132405-a56a62b18caf?auto=format&fit=crop&w=400&q=80" alt="Breakfast" className="w-full h-full object-cover" />
+                      <span className="absolute bottom-1 left-1.5 text-[8px] font-mono font-bold bg-black/70 text-slate-200 px-1 rounded">ZAR 20</span>
+                    </div>
+                    <div className="p-2 flex-1 flex flex-col justify-between">
+                      <h4 className="text-[10px] font-bold text-white leading-tight">Protein Oats & Woolies Berries</h4>
+                      <p className="text-[8px] text-slate-400 mt-1">• Jungle Oats<br/>• Blueberries<br/>• Protein</p>
+                    </div>
+                  </div>
+
+                  {/* Lunch */}
+                  <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-md flex flex-col">
+                    <div className="relative h-24 bg-slate-950">
+                      <img src="https://images.unsplash.com/photo-1532550907401-a500c9a57435?auto=format&fit=crop&w=400&q=80" alt="Lunch" className="w-full h-full object-cover" />
+                      <span className="absolute bottom-1 left-1.5 text-[8px] font-mono font-bold bg-black/70 text-slate-200 px-1 rounded">ZAR 24</span>
+                    </div>
+                    <div className="p-2 flex-1 flex flex-col justify-between">
+                      <h4 className="text-[10px] font-bold text-white leading-tight">Checkers Chicken & Patats</h4>
+                      <p className="text-[8px] text-slate-400 mt-1">• Skinless Fillet<br/>• Sweet Potato<br/>• Green Beans</p>
+                    </div>
+                  </div>
+
+                  {/* Dinner */}
+                  <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-md flex flex-col">
+                    <div className="relative h-24 bg-slate-950">
+                      <img src="https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=400&q=80" alt="Dinner" className="w-full h-full object-cover" />
+                      <span className="absolute bottom-1 left-1.5 text-[8px] font-mono font-bold bg-black/70 text-slate-200 px-1 rounded">ZAR 22</span>
+                    </div>
+                    <div className="p-2 flex-1 flex flex-col justify-between">
+                      <h4 className="text-[10px] font-bold text-white leading-tight">Lean Mince over Zoodles</h4>
+                      <p className="text-[8px] text-slate-400 mt-1">• 90/10 Mince<br/>• Baby Marrow<br/>• Marinara</p>
                     </div>
                   </div>
                 </div>
 
-                {/* Subtab Switcher */}
-                <div className="grid grid-cols-4 gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800 text-[11px] font-bold">
-                  <button onClick={() => setMealSubTab('plan')} className={`py-1.5 rounded-lg transition-all ${mealSubTab === 'plan' ? 'bg-rose-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}>7-Day</button>
-                  <button onClick={() => setMealSubTab('recipes')} className={`py-1.5 rounded-lg transition-all ${mealSubTab === 'recipes' ? 'bg-rose-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}>Recipes</button>
-                  <button onClick={() => setMealSubTab('grocery')} className={`py-1.5 rounded-lg transition-all ${mealSubTab === 'grocery' ? 'bg-rose-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}>Grocery</button>
-                  <button onClick={() => setMealSubTab('swaps')} className={`py-1.5 rounded-lg transition-all ${mealSubTab === 'swaps' ? 'bg-rose-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}>Swaps</button>
+                {/* Complete Category-by-Category Substitution Table */}
+                <div className="bg-slate-900 border border-slate-800 rounded-3xl p-4 shadow-xl space-y-3">
+                  <div className="text-center pb-1 border-b border-slate-800">
+                    <h3 className="text-xs font-black text-white">FemMetabolic Pro SA Ingredient Substitutions</h3>
+                    <p className="text-[9px] text-slate-400">Available at Checkers, Woolies, Food Lover's</p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 text-xs">
+                    {/* Lean Proteins */}
+                    <div className="space-y-1">
+                      <span className="text-[10px] font-bold text-rose-400 uppercase tracking-wider">Lean Proteins</span>
+                      <ul className="text-[10px] text-slate-300 space-y-0.5">
+                        {SA_SUBSTITUTIONS["Lean Proteins"].map((item, i) => (
+                          <li key={i} className="flex items-start gap-1">
+                            <span className="text-rose-500">•</span> <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    {/* Workout Carbs */}
+                    <div className="space-y-1">
+                      <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider">Workout Carbs</span>
+                      <ul className="text-[10px] text-slate-300 space-y-0.5">
+                        {SA_SUBSTITUTIONS["Workout Carbs"].map((item, i) => (
+                          <li key={i} className="flex items-start gap-1">
+                            <span className="text-amber-500">•</span> <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    {/* Fibrous Veg */}
+                    <div className="space-y-1 pt-2 border-t border-slate-800/80">
+                      <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">Fibrous Veg (Unlimited)</span>
+                      <ul className="text-[10px] text-slate-300 space-y-0.5">
+                        {SA_SUBSTITUTIONS["Fibrous Veg"].map((item, i) => (
+                          <li key={i} className="flex items-start gap-1">
+                            <span className="text-emerald-500">•</span> <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    {/* Healthy Fats */}
+                    <div className="space-y-1 pt-2 border-t border-slate-800/80">
+                      <span className="text-[10px] font-bold text-sky-400 uppercase tracking-wider">Healthy Fats</span>
+                      <ul className="text-[10px] text-slate-300 space-y-0.5">
+                        {SA_SUBSTITUTIONS["Healthy Fats"].map((item, i) => (
+                          <li key={i} className="flex items-start gap-1">
+                            <span className="text-sky-500">•</span> <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
                 </div>
-
-                {/* SUBTAB: 7-DAY MEAL PLAN */}
-                {mealSubTab === 'plan' && (
-                  <div className="space-y-3">
-                    {SA_MEAL_PLAN_DAYS.map((item, idx) => (
-                      <div key={idx} className="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-md space-y-2.5">
-                        <div className="flex justify-between items-center border-b border-slate-800/80 pb-2">
-                          <div>
-                            <span className="text-sm font-black text-white">{item.day}</span>
-                            <span className="text-[10px] text-emerald-400 font-bold ml-2 bg-emerald-950 px-1.5 py-0.5 rounded border border-emerald-800">{item.cost}</span>
-                            <p className="text-[10px] text-rose-400 font-semibold">{item.type}</p>
-                          </div>
-                          <span className="text-[9px] font-mono font-bold bg-slate-950 text-slate-300 px-2 py-1 rounded-lg border border-slate-800">
-                            {item.target}
-                          </span>
-                        </div>
-
-                        <div className="space-y-1.5 text-xs text-slate-300 leading-relaxed">
-                          <p><strong className="text-rose-400">🍳 Breakfast:</strong> {item.breakfast}</p>
-                          <p><strong className="text-sky-400">🥗 Lunch:</strong> {item.lunch}</p>
-                          <p><strong className="text-amber-400">🍎 Snack:</strong> {item.snack}</p>
-                          <p><strong className="text-emerald-400">🥩 Dinner:</strong> {item.dinner}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* SUBTAB: 4 MASTER RECIPES WITH PHOTOS */}
-                {mealSubTab === 'recipes' && (
-                  <div className="space-y-4">
-                    {SA_RECIPES.map((rec) => (
-                      <div key={rec.id} className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-lg space-y-3">
-                        <div className="relative h-36 bg-slate-950">
-                          <img src={rec.imgUrl} alt={rec.title} className="w-full h-full object-cover" />
-                          <div className="absolute bottom-2 left-3 bg-slate-950/80 backdrop-blur px-2.5 py-0.5 rounded-full border border-slate-700">
-                            <span className="text-[10px] font-bold text-rose-400">{rec.macros}</span>
-                          </div>
-                        </div>
-
-                        <div className="p-4 pt-1 space-y-3">
-                          <div className="flex justify-between items-center">
-                            <h3 className="text-sm font-black text-white leading-tight">{rec.title}</h3>
-                            <span className="text-[10px] font-bold text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded border border-emerald-800">{rec.servings}</span>
-                          </div>
-
-                          <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1.5">
-                            <p className="text-[10px] font-bold uppercase tracking-wider text-rose-400">Ingredients:</p>
-                            <ul className="text-xs text-slate-300 space-y-1">
-                              {rec.ingredients.map((ing, i) => (
-                                <li key={i} className="flex items-start gap-1.5">
-                                  <span className="text-rose-500">•</span> <span>{ing}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-
-                          <div className="space-y-1.5">
-                            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Method:</p>
-                            <ol className="text-xs text-slate-300 space-y-1.5 list-decimal list-inside leading-relaxed">
-                              {rec.steps.map((st, i) => (
-                                <li key={i} className="pl-1">{st}</li>
-                              ))}
-                            </ol>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* SUBTAB: INTERACTIVE LOCAL GROCERY CHECKLIST */}
-                {mealSubTab === 'grocery' && (
-                  <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl space-y-4">
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <h3 className="text-sm font-bold text-white">SA Pocket Grocery Checklist</h3>
-                        <p className="text-[10px] text-slate-400">Available at Checkers, Shoprite & Food Lover's</p>
-                      </div>
-                      <button
-                        onClick={() => setCheckedGroceries({})}
-                        className="text-[10px] font-bold text-rose-400 bg-slate-950 px-2 py-1 rounded-lg border border-slate-800"
-                      >
-                        Clear All
-                      </button>
-                    </div>
-
-                    {Object.keys(SA_GROCERY_CATEGORIES).map((catKey) => (
-                      <div key={catKey} className="space-y-1.5">
-                        <span className="text-xs font-bold text-rose-400 uppercase tracking-wider">{catKey}</span>
-                        <div className="space-y-1">
-                          {SA_GROCERY_CATEGORIES[catKey].map((item, i) => {
-                            const isChecked = !!checkedGroceries[item];
-                            return (
-                              <div
-                                key={i}
-                                onClick={() => toggleGrocery(item)}
-                                className={`p-2 rounded-xl text-xs flex items-center justify-between cursor-pointer border transition-all ${
-                                  isChecked ? 'bg-slate-950/40 text-slate-600 border-slate-900 line-through' : 'bg-slate-950 text-slate-200 border-slate-800 hover:border-slate-700'
-                                }`}
-                              >
-                                <span>{item}</span>
-                                <span className={`w-4 h-4 rounded flex items-center justify-center text-[10px] font-bold ${isChecked ? 'bg-emerald-600 text-white' : 'border border-slate-700'}`}>
-                                  {isChecked ? "✓" : ""}
-                                </span>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* SUBTAB: ALLERGEN & SENSITIVITY SWAP GUIDE */}
-                {mealSubTab === 'swaps' && (
-                  <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl space-y-4">
-                    <div>
-                      <h3 className="text-sm font-bold text-white">Allergen & Sensitivity Swaps</h3>
-                      <p className="text-[10px] text-slate-400">Direct substitutions that preserve 40P/30C/30F targets</p>
-                    </div>
-
-                    <div className="space-y-3">
-                      {ALLERGEN_SWAP_GUIDE.map((swap, idx) => (
-                        <div key={idx} className="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-1.5">
-                          <div className="flex items-center gap-2">
-                            <span className="text-base">{swap.icon}</span>
-                            <span className="text-xs font-bold text-rose-400">{swap.allergen}</span>
-                          </div>
-                          <p className="text-xs text-slate-300 leading-relaxed">{swap.solution}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
 
               </div>
             )}
 
             {/* TAB 4: VISUAL TEMPO METRONOME */}
             {activeTab === 'tempo' && (
-              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl text-center space-y-6">
+              <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl text-center space-y-6">
                 <div>
                   <h2 className="text-base font-black text-white">Visual 3-0-1 Rep Metronome</h2>
                   <p className="text-xs text-slate-400 mt-1">3s Lower • 0s Pause • 1s Lift</p>
                 </div>
-                <div className="h-52 bg-slate-950 rounded-2xl border border-slate-800 flex flex-col items-center justify-center relative overflow-hidden">
+                <div className="h-52 bg-slate-950 rounded-3xl border border-slate-800 flex flex-col items-center justify-center relative overflow-hidden">
                   <div
-                    className="w-28 h-28 rounded-2xl bg-rose-600/30 border-2 border-rose-500 flex flex-col items-center justify-center tempo-pulse shadow-2xl"
+                    className="w-28 h-28 rounded-2xl bg-amber-600/30 border-2 border-amber-500 flex flex-col items-center justify-center tempo-pulse shadow-2xl"
                     style={{
                       transform: metronomeRunning
                         ? tempoCount === 3
@@ -1559,12 +1047,12 @@
                     }}
                   >
                     <span className="text-3xl font-black font-mono text-white">{metronomeRunning ? tempoCount : "3-0-1"}</span>
-                    <span className="text-[10px] font-bold uppercase text-rose-300 mt-1">{tempoPhase}</span>
+                    <span className="text-[10px] font-bold uppercase text-amber-300 mt-1">{tempoPhase}</span>
                   </div>
                 </div>
                 <button
                   onClick={() => setMetronomeRunning(!metronomeRunning)}
-                  className={`w-full py-3.5 rounded-xl font-bold text-xs transition-all shadow-lg ${
+                  className={`w-full py-3.5 rounded-2xl font-bold text-xs transition-all shadow-lg ${
                     metronomeRunning ? 'bg-amber-600 text-white' : 'bg-rose-600 text-white'
                   }`}
                 >
@@ -1573,17 +1061,17 @@
               </div>
             )}
 
-            {/* TAB 5: HISTORY & 60-DAY PROGRESS */}
+            {/* TAB 5: HISTORY */}
             {activeTab === 'history' && (
               <div className="space-y-4">
-                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-3">
+                <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl space-y-3">
                   <h3 className="text-sm font-bold text-white">60-Day Consistency Grid</h3>
-                  <p className="text-xs text-slate-400">Completed Days: <strong className="text-rose-400">{streakHistory.length} Days</strong></p>
-                  <div className="grid grid-cols-10 gap-1.5 bg-slate-950 p-3 rounded-xl border border-slate-800">
+                  <p className="text-xs text-slate-400">Completed Sessions: <strong className="text-amber-400">{streakHistory.length} Days</strong></p>
+                  <div className="grid grid-cols-10 gap-1.5 bg-slate-950 p-3 rounded-2xl border border-slate-800">
                     {Array.from({ length: 60 }).map((_, i) => {
                       const isDone = i < streakHistory.length;
                       return (
-                        <div key={i} className={`h-5 rounded flex items-center justify-center text-[8px] font-bold ${isDone ? 'bg-rose-600 text-white shadow-sm' : 'bg-slate-900 text-slate-600'}`}>
+                        <div key={i} className={`h-5 rounded flex items-center justify-center text-[8px] font-bold ${isDone ? 'bg-amber-500 text-slate-950 shadow-sm font-black' : 'bg-slate-900 text-slate-600'}`}>
                           {i + 1}
                         </div>
                       );
@@ -1591,20 +1079,20 @@
                   </div>
                 </div>
 
-                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-3">
-                  <h3 className="text-sm font-bold text-white">Workout Log History</h3>
+                <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl space-y-3">
+                  <h3 className="text-sm font-bold text-white">Logged Session Archive</h3>
                   {sessionArchive.length === 0 ? (
-                    <p className="text-xs text-slate-500 italic py-2">No finished workouts logged yet. Finish a session to see history!</p>
+                    <p className="text-xs text-slate-500 italic py-2">Finish a workout to record history.</p>
                   ) : (
                     <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
                       {sessionArchive.map((session, idx) => (
                         <div key={idx} className="bg-slate-950 p-3 rounded-xl border border-slate-800 flex justify-between items-center text-xs">
                           <div>
-                            <span className="font-bold text-rose-400">Workout {session.workoutDay}</span>
+                            <span className="font-bold text-amber-400">Workout {session.workoutDay}</span>
                             <span className="text-slate-500 capitalize ml-2">({session.difficulty})</span>
                             <p className="text-[10px] text-slate-400">{session.date}</p>
                           </div>
-                          <span className="font-mono font-bold text-white">{session.tonnage.toLocaleString()} kg lifted</span>
+                          <span className="font-mono font-bold text-white">{session.tonnage.toLocaleString()} kg</span>
                         </div>
                       ))}
                     </div>
@@ -1625,7 +1113,7 @@
                     cx="24"
                     cy="24"
                     r={radius}
-                    stroke="#f43f5e"
+                    stroke="#f59e0b"
                     strokeWidth="4"
                     fill="transparent"
                     strokeDasharray={circumference}
@@ -1641,7 +1129,7 @@
                 </div>
               </div>
               <div className="flex gap-2">
-                <button onClick={() => setIsTimerRunning(!isTimerRunning)} className="bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition-all shadow-md">
+                <button onClick={() => setIsTimerRunning(!isTimerRunning)} className="bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition-all shadow-md">
                   {isTimerRunning ? "Pause" : "Start"}
                 </button>
                 <button onClick={() => { setIsTimerRunning(false); setTimerSeconds(targetTimerSec); }} className="bg-slate-800 text-slate-300 text-xs font-bold px-3 py-2 rounded-xl">
@@ -1651,12 +1139,12 @@
             </div>
           )}
 
-          {/* Thumb-Ergonomic Bottom Navigation */}
+          {/* Bottom Dock Navigation */}
           <nav className="fixed bottom-0 left-0 right-0 bg-slate-950 border-t border-slate-800/90 pb-6 pt-3 px-2 flex justify-around items-center z-50 shadow-2xl">
             <button
               onClick={() => setActiveTab('dashboard')}
               className={`flex-1 py-1.5 rounded-xl text-xs font-bold transition-all flex flex-col items-center gap-0.5 ${
-                activeTab === 'dashboard' ? 'text-rose-500 bg-rose-950/40' : 'text-slate-400 hover:text-slate-200'
+                activeTab === 'dashboard' ? 'text-amber-400 bg-amber-950/40' : 'text-slate-400 hover:text-slate-200'
               }`}
             >
               <span className="text-base">📊</span>
@@ -1665,25 +1153,25 @@
             <button
               onClick={() => setActiveTab('workout')}
               className={`flex-1 py-1.5 rounded-xl text-xs font-bold transition-all flex flex-col items-center gap-0.5 ${
-                activeTab === 'workout' ? 'text-rose-500 bg-rose-950/40' : 'text-slate-400 hover:text-slate-200'
+                activeTab === 'workout' ? 'text-amber-400 bg-amber-950/40' : 'text-slate-400 hover:text-slate-200'
               }`}
             >
               <span className="text-base">🏋️</span>
               <span>Workout</span>
             </button>
             <button
-              onClick={() => setActiveTab('nutrition')}
+              onClick={() => setActiveTab('meals')}
               className={`flex-1 py-1.5 rounded-xl text-xs font-bold transition-all flex flex-col items-center gap-0.5 ${
-                activeTab === 'nutrition' ? 'text-rose-500 bg-rose-950/40' : 'text-slate-400 hover:text-slate-200'
+                activeTab === 'meals' ? 'text-amber-400 bg-amber-950/40' : 'text-slate-400 hover:text-slate-200'
               }`}
             >
               <span className="text-base">🥗</span>
-              <span>SA Meals</span>
+              <span>Meals</span>
             </button>
             <button
               onClick={() => setActiveTab('tempo')}
               className={`flex-1 py-1.5 rounded-xl text-xs font-bold transition-all flex flex-col items-center gap-0.5 ${
-                activeTab === 'tempo' ? 'text-rose-500 bg-rose-950/40' : 'text-slate-400 hover:text-slate-200'
+                activeTab === 'tempo' ? 'text-amber-400 bg-amber-950/40' : 'text-slate-400 hover:text-slate-200'
               }`}
             >
               <span className="text-base">⏱️</span>
@@ -1692,83 +1180,13 @@
             <button
               onClick={() => setActiveTab('history')}
               className={`flex-1 py-1.5 rounded-xl text-xs font-bold transition-all flex flex-col items-center gap-0.5 ${
-                activeTab === 'history' ? 'text-rose-500 bg-rose-950/40' : 'text-slate-400 hover:text-slate-200'
+                activeTab === 'history' ? 'text-amber-400 bg-amber-950/40' : 'text-slate-400 hover:text-slate-200'
               }`}
             >
               <span className="text-base">📈</span>
               <span>History</span>
             </button>
           </nav>
-
-          {/* Guided 3-Minute Warmup Modal */}
-          {showWarmupPlayer && (
-            <div className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 z-50">
-              <div className="bg-slate-900 border border-slate-700 rounded-3xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl">
-                <div className="flex justify-between items-center">
-                  <span className="text-[10px] font-bold text-rose-400 uppercase tracking-wider">Warm-up {warmupIndex + 1} / {WARMUP_ROUTINE.length}</span>
-                  <button onClick={() => { setShowWarmupPlayer(false); setWarmupRunning(false); }} className="text-slate-400 text-sm font-bold">✕</button>
-                </div>
-                <h3 className="text-lg font-black text-white">{WARMUP_ROUTINE[warmupIndex].name}</h3>
-                <div className="w-24 h-24 rounded-full bg-rose-600/20 border-2 border-rose-500 mx-auto flex items-center justify-center">
-                  <span className="text-3xl font-black font-mono text-white">{warmupTimer}s</span>
-                </div>
-                <p className="text-xs text-slate-300 bg-slate-950 p-3 rounded-xl border border-slate-800 leading-relaxed">
-                  {WARMUP_ROUTINE[warmupIndex].cue}
-                </p>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => {
-                      if (warmupIndex < WARMUP_ROUTINE.length - 1) {
-                        setWarmupIndex(prev => prev + 1);
-                        setWarmupTimer(WARMUP_ROUTINE[warmupIndex + 1].dur);
-                      } else {
-                        setShowWarmupPlayer(false);
-                      }
-                    }}
-                    className="flex-1 bg-slate-800 text-slate-200 py-2.5 rounded-xl text-xs font-bold"
-                  >
-                    Skip Movement
-                  </button>
-                  <button
-                    onClick={() => setWarmupRunning(!warmupRunning)}
-                    className="flex-1 bg-rose-600 text-white py-2.5 rounded-xl text-xs font-bold shadow-lg"
-                  >
-                    {warmupRunning ? "Pause" : "Resume"}
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Exercise Form Modal */}
-          {selectedExercise && (
-            <div className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 z-50">
-              <div className="bg-slate-900 border border-slate-700 rounded-3xl max-w-sm w-full overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
-                <div className="relative h-44 bg-slate-950 shrink-0">
-                  <img src={selectedExercise.gifUrl} alt={selectedExercise.name} className="w-full h-full object-cover opacity-80" />
-                  <button onClick={() => setSelectedExercise(null)} className="absolute top-3 right-3 bg-black/60 text-white rounded-full w-7 h-7 flex items-center justify-center font-bold text-xs border border-slate-500 backdrop-blur">✕</button>
-                  <div className="absolute bottom-2 left-3 bg-slate-950/80 backdrop-blur px-2.5 py-0.5 rounded-full border border-rose-500/50">
-                    <span className="text-[10px] text-rose-400 font-mono font-bold">Tempo: {selectedExercise.tempo}</span>
-                  </div>
-                </div>
-
-                <div className="p-4 overflow-y-auto space-y-3">
-                  <div>
-                    <h3 className="text-base font-black text-white leading-tight">{selectedExercise.name}</h3>
-                    <p className="text-[11px] text-rose-400 font-bold uppercase tracking-wider mt-0.5">Target: {selectedExercise.target}</p>
-                  </div>
-
-                  <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs text-slate-300 leading-relaxed">
-                    <p><strong>Form Execution:</strong> {selectedExercise.cues}</p>
-                  </div>
-
-                  <button onClick={() => setSelectedExercise(null)} className="w-full bg-rose-600 hover:bg-rose-500 text-white py-3 rounded-xl font-bold text-xs transition-all shadow-lg shadow-rose-900/50">
-                    Close Form Guide
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
 
         </div>
       );
@@ -1778,3 +1196,4 @@
   </script>
 </body>
 </html>
+
