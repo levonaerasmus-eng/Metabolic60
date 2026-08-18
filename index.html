@@ -820,6 +820,54 @@
       }
     };
 
+    // --- Feminine Dual-Silhouette Body Map ---
+    function FeminineBodyMap({ activeMuscle, exerciseName }) {
+      const isTarget = (m) => activeMuscle === m;
+
+      return (
+        <div className="card-light rounded-3xl p-4 space-y-3">
+          <div className="flex justify-between items-center">
+            <div>
+              <p className="text-[10px] font-bold text-roseGold uppercase tracking-wider">Target Biomechanics</p>
+              <h3 className="text-sm font-serif font-bold text-charcoal">{exerciseName}</h3>
+            </div>
+            <div className="flex items-center gap-1.5 bg-blush-50 px-3 py-1 rounded-full border border-blush-200">
+              <span className="w-2 h-2 rounded-full bg-blush-500 animate-pulse"></span>
+              <span className="text-[11px] font-semibold text-blush-600 capitalize">{activeMuscle} Focus</span>
+            </div>
+          </div>
+
+          <div className="bg-blush-50/60 rounded-2xl p-4 border border-blush-100 flex items-center justify-around">
+            <div className="flex flex-col items-center">
+              <span className="text-[9px] font-semibold uppercase tracking-wider text-mutedMauve mb-1">Anterior (Front)</span>
+              <svg viewBox="0 0 100 200" className="w-20 h-40 drop-shadow-sm">
+                <circle cx="50" cy="18" r="9" fill="#E49B90" opacity="0.5" />
+                <rect x="46" y="27" width="8" height="6" fill="#E49B90" opacity="0.5" />
+                <path d="M 28 35 Q 50 32 72 35 L 77 48 L 23 48 Z" fill={isTarget("shoulders") ? "#D97365" : "#F6DDD9"} className={isTarget("shoulders") ? "muscle-glow" : ""} />
+                <rect x="30" y="47" width="40" height="18" rx="4" fill={isTarget("chest") ? "#D97365" : "#FBF0EE"} className={isTarget("chest") ? "muscle-glow" : ""} />
+                <rect x="34" y="68" width="32" height="26" rx="5" fill={isTarget("core") ? "#D97365" : "#FBF0EE"} className={isTarget("core") ? "muscle-glow" : ""} />
+                <rect x="18" y="50" width="8" height="42" rx="4" fill="#F6DDD9" />
+                <rect x="74" y="50" width="8" height="42" rx="4" fill="#F6DDD9" />
+                <path d="M 28 98 L 46 98 L 43 145 L 26 145 Z" fill={isTarget("quads") ? "#D97365" : "#FBF0EE"} className={isTarget("quads") ? "muscle-glow" : ""} />
+                <path d="M 54 98 L 72 98 L 74 145 L 57 145 Z" fill={isTarget("quads") ? "#D97365" : "#FBF0EE"} className={isTarget("quads") ? "muscle-glow" : ""} />
+              </svg>
+            </div>
+            <div className="w-[1px] h-32 bg-blush-200"></div>
+            <div className="flex flex-col items-center">
+              <span className="text-[9px] font-semibold uppercase tracking-wider text-mutedMauve mb-1">Posterior (Back)</span>
+              <svg viewBox="0 0 100 200" className="w-20 h-40 drop-shadow-sm">
+                <circle cx="50" cy="18" r="9" fill="#E49B90" opacity="0.5" />
+                <path d="M 26 35 Q 50 32 74 35 L 70 68 L 30 68 Z" fill={isTarget("lats") || isTarget("back") ? "#D97365" : "#FBF0EE"} className={isTarget("lats") || isTarget("back") ? "muscle-glow" : ""} />
+                <rect x="28" y="90" width="44" height="24" rx="7" fill={isTarget("glutes") ? "#D97365" : "#FBF0EE"} className={isTarget("glutes") ? "muscle-glow" : ""} />
+                <path d="M 28 116 L 46 116 L 43 145 L 26 145 Z" fill={isTarget("hamstrings") ? "#D97365" : "#FBF0EE"} className={isTarget("hamstrings") ? "muscle-glow" : ""} />
+                <path d="M 54 116 L 72 116 L 74 145 L 57 145 Z" fill={isTarget("hamstrings") ? "#D97365" : "#FBF0EE"} className={isTarget("hamstrings") ? "muscle-glow" : ""} />
+              </svg>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     // --- Complete 7-Day Master Meal Plan (No Prices) ---
     const SA_MEALS = [
       {
@@ -916,9 +964,9 @@
       "Healthy Fats": ["Avocado", "Raw Almonds", "Chia Seeds", "Olive Oil", "Sugar-Free Peanut Butter"]
     };
 
-    // --- Main Application Component ---
+    // --- Main Application Engine ---
     function App() {
-      const [tab, setTab] = useState("train"); // train, fuel, progress, profile
+      const [tab, setTab] = useState("train"); // train, fuel, progress, profile, about
       const [difficulty, setDifficulty] = useState(() => getStored("m60_diff", "intermediate"));
       const [workoutDay, setWorkoutDay] = useState(() => getStored("m60_day", "A"));
       const [focusedId, setFocusedId] = useState("i_a1");
@@ -1211,6 +1259,42 @@
         setFocusedId(EXERCISE_DATA[difficulty][nextDay][0].id);
       };
 
+      // Onboarding Handlers
+      const completeOnboarding = () => {
+        const finalized = { ...tempProfile, onboardingCompleted: true };
+        setUserProfile(finalized);
+        setStored("m60_user_profile", finalized);
+        setShowOnboardingModal(false);
+        setShowWelcomeScreen(false);
+        if (window.confetti) window.confetti({ particleCount: 150, spread: 90 });
+        triggerHaptic([50, 50, 50]);
+      };
+
+      const startOnboardingWizard = () => {
+        setTempProfile({ ...userProfile });
+        setOnboardingStep(1);
+        setShowOnboardingModal(true);
+      };
+
+      // Full App Reset
+      const executeFullReset = () => {
+        try {
+          localStorage.clear();
+        } catch (e) {}
+
+        setUserProfile(defaultProfile);
+        setWeights({});
+        setCompletedSets({});
+        setHistory([]);
+        setCheckedGroceries({});
+        setWaterGlasses(0);
+        setDifficulty("intermediate");
+        setWorkoutDay("A");
+        setShowResetConfirmModal(false);
+        setShowWelcomeScreen(true);
+        triggerHaptic([100, 50, 100]);
+      };
+
       // Milestone Badges
       const totalHistoricalTonnage = history.reduce((sum, h) => sum + (h.tonnage || 0), 0) + liveSessionVolume;
       const badges = [
@@ -1431,7 +1515,7 @@
                 {/* 7. FEMININE BODY HEATMAP */}
                 <FeminineBodyMap activeMuscle={activeEx.primary} exerciseName={activeEx.name} />
 
-                {/* 8. INTERACTIVE EXERCISE CARDS */}
+                {/* 8. INTERACTIVE EXERCISE CARDS (Tap opens Cadence & Cues Modal) */}
                 <div className="space-y-3">
                   {currentList.map(ex => {
                     const isCurrent = focusedId === ex.id;
@@ -1837,7 +1921,7 @@
                   <div className="flex items-center justify-between pb-3 border-b border-blush-100">
                     <div className="flex items-center gap-3">
                       <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blush-300 via-blush-400 to-roseGold text-white flex items-center justify-center font-serif text-lg font-bold shadow-sm">
-                        {userProfile?.name ? userProfile.name[0] : 'M'}
+                        {userProfile?.name ? userProfile.name[0] : 'L'}
                       </div>
                       <div>
                         <h2 className="text-sm font-serif font-bold text-charcoal">{userProfile.name || 'Lindiwe'}, {userProfile.age || 29}y</h2>
@@ -1996,6 +2080,85 @@
                         </span>
                       </div>
                     ))}
+                  </div>
+                </div>
+
+              </div>
+            )}
+
+            {/* TAB 5: ABOUT, DISCLOSURES & CONTACT */}
+            {tab === "about" && (
+              <div className="space-y-4">
+                
+                {/* Brand & Version Card */}
+                <div className="card-light p-4 rounded-3xl space-y-2 text-center">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blush-300 via-blush-400 to-roseGold text-white flex items-center justify-center mx-auto text-xl font-serif font-bold shadow-sm">
+                    ✨
+                  </div>
+                  <h2 className="text-base font-serif font-bold text-charcoal">metabolic60</h2>
+                  <p className="text-xs text-blush-600 font-medium">Version 2.4.0 (PWA Standalone)</p>
+                  <p className="text-[11px] text-mutedMauve leading-relaxed pt-1">
+                    A personalized feminine metabolic strength, tempo cadence, and hormonal phasing system.
+                  </p>
+                </div>
+
+                {/* MANDATORY LEGAL & CLINICAL DISCLOSURES */}
+                <div className="card-light p-4 rounded-3xl space-y-3 border-blush-300">
+                  <h3 className="text-xs font-serif font-bold text-charcoal uppercase tracking-wider">
+                    ⚖️ Mandatory Clinical & Legal Disclosures
+                  </h3>
+
+                  {/* Disclosure 1: Medical Disclaimer */}
+                  <div className="bg-blush-50/70 p-3 rounded-2xl space-y-1 border border-blush-200 text-xs">
+                    <h4 className="font-bold text-blush-600">1. Not Medical or Healthcare Advice</h4>
+                    <p className="text-[10px] text-charcoal/80 leading-relaxed">
+                      metabolic60 is designed strictly for educational, athletic conditioning, and lifestyle enhancement purposes. This application does not provide medical diagnoses, treatment plans, clinical advice, or prescriptions. Always consult a qualified physician or healthcare provider prior to undertaking any resistance exercise, caloric restriction, or nutritional adjustment.
+                    </p>
+                  </div>
+
+                  {/* Disclosure 2: Non-Contraceptive Disclaimer */}
+                  <div className="bg-rose-50/80 p-3 rounded-2xl space-y-1 border border-rose-200 text-xs">
+                    <h4 className="font-bold text-rose-700">2. Not a Contraceptive or Diagnostic Device</h4>
+                    <p className="text-[10px] text-rose-900/80 leading-relaxed">
+                      The menstrual cycle tracking and hormonal phase estimation within metabolic60 are intended solely for athletic training load modulation and nutritional timing. It is <strong>NOT</strong> a medical birth control method, diagnostic tool, or natural family planning contraception device.
+                    </p>
+                  </div>
+
+                  {/* Disclosure 3: Physical Exercise Waiver */}
+                  <div className="bg-blush-50/70 p-3 rounded-2xl space-y-1 border border-blush-200 text-xs">
+                    <h4 className="font-bold text-blush-600">3. Assumption of Physical Risk</h4>
+                    <p className="text-[10px] text-charcoal/80 leading-relaxed">
+                      Participating in progressive overload strength training carries inherent risk of injury. By utilizing these workout routines, you voluntarily assume all associated risks and agree to perform movements within your safe physical capabilities.
+                    </p>
+                  </div>
+
+                  {/* Disclosure 4: Data Privacy Notice */}
+                  <div className="bg-blush-50/70 p-3 rounded-2xl space-y-1 border border-blush-200 text-xs">
+                    <h4 className="font-bold text-blush-600">4. Privacy & Data Sovereignty (POPIA / GDPR)</h4>
+                    <p className="text-[10px] text-charcoal/80 leading-relaxed">
+                      Your privacy is absolute. 100% of your biometric data, weight logs, menstrual dates, and questionnaire answers are stored exclusively in your device’s local storage. No health metrics are transmitted, sold, or stored on external cloud databases.
+                    </p>
+                  </div>
+                </div>
+
+                {/* CONTACT & SUPPORT DETAILS */}
+                <div className="card-light p-4 rounded-3xl space-y-2.5">
+                  <h3 className="text-xs font-serif font-bold text-charcoal uppercase tracking-wider">
+                    📬 Official Support & Contact
+                  </h3>
+                  <div className="space-y-1.5 text-xs text-charcoal/80">
+                    <div className="flex justify-between py-1 border-b border-blush-100">
+                      <span className="text-mutedMauve">Support Inquiries:</span>
+                      <span className="font-bold text-blush-600">support@metabolic60.app</span>
+                    </div>
+                    <div className="flex justify-between py-1 border-b border-blush-100">
+                      <span className="text-mutedMauve">Official Website:</span>
+                      <span className="font-bold text-blush-600">metabolic60.app</span>
+                    </div>
+                    <div className="flex justify-between py-1">
+                      <span className="text-mutedMauve">Medical Emergency:</span>
+                      <span className="font-bold text-rose-600">Call Local Emergency (112 / 911)</span>
+                    </div>
                   </div>
                 </div>
 
@@ -2367,43 +2530,42 @@
             </div>
           )}
 
-          {/* BOTTOM NAVIGATION DOCK */}
-          <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur border-t border-blush-200 px-4 py-2.5 flex justify-around items-center z-40 shadow-sm">
+          {/* BOTTOM NAVIGATION DOCK (5 TABS) */}
+          <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur border-t border-blush-200 px-3 py-2.5 flex justify-around items-center z-40 shadow-sm">
             <button
               onClick={() => { setTab("train"); triggerHaptic(10); }}
-              className={`flex flex-col items-center gap-0.5 text-xs font-medium transition-all ${
-                tab === "train" ? "text-blush-600 font-bold" : "text-mutedMauve"
-              }`}
+              className={`flex flex-col items-center gap-0.5 text-xs ${tab === "train" ? "text-blush-600 font-bold" : "text-mutedMauve"}`}
             >
               <span className="text-base">🌸</span>
               <span className="text-[10px]">Train</span>
             </button>
             <button
               onClick={() => { setTab("fuel"); triggerHaptic(10); }}
-              className={`flex flex-col items-center gap-0.5 text-xs font-medium transition-all ${
-                tab === "fuel" ? "text-blush-600 font-bold" : "text-mutedMauve"
-              }`}
+              className={`flex flex-col items-center gap-0.5 text-xs ${tab === "fuel" ? "text-blush-600 font-bold" : "text-mutedMauve"}`}
             >
               <span className="text-base">🥗</span>
               <span className="text-[10px]">Fuel</span>
             </button>
             <button
               onClick={() => { setTab("progress"); triggerHaptic(10); }}
-              className={`flex flex-col items-center gap-0.5 text-xs font-medium transition-all ${
-                tab === "progress" ? "text-blush-600 font-bold" : "text-mutedMauve"
-              }`}
+              className={`flex flex-col items-center gap-0.5 text-xs ${tab === "progress" ? "text-blush-600 font-bold" : "text-mutedMauve"}`}
             >
               <span className="text-base">🗓️</span>
               <span className="text-[10px]">Calendar</span>
             </button>
             <button
               onClick={() => { setTab("profile"); triggerHaptic(10); }}
-              className={`flex flex-col items-center gap-0.5 text-xs font-medium transition-all ${
-                tab === "profile" ? "text-blush-600 font-bold" : "text-mutedMauve"
-              }`}
+              className={`flex flex-col items-center gap-0.5 text-xs ${tab === "profile" ? "text-blush-600 font-bold" : "text-mutedMauve"}`}
             >
               <span className="text-base">✨</span>
               <span className="text-[10px]">Profile</span>
+            </button>
+            <button
+              onClick={() => { setTab("about"); triggerHaptic(10); }}
+              className={`flex flex-col items-center gap-0.5 text-xs ${tab === "about" ? "text-blush-600 font-bold" : "text-mutedMauve"}`}
+            >
+              <span className="text-base">📜</span>
+              <span className="text-[10px]">About</span>
             </button>
           </nav>
 
