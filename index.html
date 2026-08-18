@@ -21,15 +21,18 @@
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- React 18 & Babel UMD for robust in-browser compiling -->
+  <!-- React 18 & Babel UMD -->
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <!-- IndexedDB Promise Wrapper -->
+  <script src="https://cdn.jsdelivr.net/npm/idb@8/build/umd.js"></script>
   <!-- Canvas Confetti -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
   <script>
     tailwind.config = {
+      darkMode: 'class',
       theme: {
         extend: {
           fontFamily: {
@@ -59,24 +62,12 @@
 
   <style>
     body {
-      background-color: #FAF6F4;
-      color: #2D2726;
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       -webkit-tap-highlight-color: transparent;
       user-select: none;
     }
     .card-light {
-      background: #FFFFFF;
-      border: 1px solid rgba(228, 155, 144, 0.22);
-      box-shadow: 0 8px 24px -4px rgba(217, 115, 101, 0.08);
-    }
-    .card-active {
-      background: #FFFDFC;
-      border-color: #D97365;
-      box-shadow: 0 10px 28px -4px rgba(217, 115, 101, 0.2);
-    }
-    .muscle-glow {
-      filter: drop-shadow(0 0 6px rgba(217, 115, 101, 0.8));
+      transition: background-color 0.3s ease, border-color 0.3s ease;
     }
     .timer-arc {
       transition: stroke-dashoffset 1s linear;
@@ -94,10 +85,10 @@
     ::-webkit-scrollbar-thumb { background: #E49B90; border-radius: 4px; }
   </style>
 </head>
-<body class="bg-[#FAF6F4] text-charcoal antialiased">
+<body class="antialiased">
   <div id="root">
     <div style="display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;color:#D97365;">
-      ✨ Loading M60 Complete Transformation System...
+      ✨ Loading M60 Elite Transformation Suite...
     </div>
   </div>
 
@@ -119,10 +110,10 @@
       render() {
         if (this.state.hasError) {
           return (
-            <div className="min-h-screen max-w-md mx-auto p-6 flex flex-col items-center justify-center text-center space-y-4">
+            <div className="min-h-screen max-w-md mx-auto p-6 flex flex-col items-center justify-center text-center space-y-4 bg-[#FAF6F4] text-[#2D2726]">
               <div className="w-14 h-14 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center text-2xl">⚠️</div>
-              <h2 className="text-base font-serif font-bold text-charcoal">Quick App Reset</h2>
-              <p className="text-xs text-mutedMauve">A temporary cache collision occurred. Tap below to relaunch cleanly.</p>
+              <h2 className="text-base font-serif font-bold">Quick App Reset</h2>
+              <p className="text-xs text-mutedMauve">A temporary state collision occurred. Tap below to relaunch cleanly.</p>
               <button
                 onClick={() => { try { localStorage.clear(); } catch(e){} window.location.reload(); }}
                 className="w-full py-3 rounded-2xl bg-blush-500 text-white font-bold text-xs shadow-md"
@@ -164,7 +155,47 @@
       }
     };
 
-    // --- Audio & Speech Synthesis Engine ---
+    // --- IndexedDB Async Engine ---
+    const DB_NAME = 'm60_elite_db';
+    const STORE_NAME = 'user_data';
+
+    const initDB = async () => {
+      if (typeof window === 'undefined' || !window.idb) return null;
+      try {
+        return await idb.openDB(DB_NAME, 1, {
+          upgrade(db) {
+            if (!db.objectStoreNames.contains(STORE_NAME)) {
+              db.createObjectStore(STORE_NAME);
+            }
+          },
+        });
+      } catch (e) {
+        return null;
+      }
+    };
+
+    const getIDBItem = async (key, fallback) => {
+      try {
+        const db = await initDB();
+        if (!db) return getSafeStored(key, fallback);
+        const val = await db.get(STORE_NAME, key);
+        return (val !== undefined && val !== null) ? val : getSafeStored(key, fallback);
+      } catch (e) {
+        return getSafeStored(key, fallback);
+      }
+    };
+
+    const setIDBItem = async (key, val) => {
+      try {
+        setSafeStored(key, val);
+        const db = await initDB();
+        if (db) {
+          await db.put(STORE_NAME, val, key);
+        }
+      } catch (e) {}
+    };
+
+    // --- Audio & Web Speech Engine ---
     let sharedAudioCtx = null;
     let activeUtterance = null;
 
@@ -273,64 +304,64 @@
 
     // --- Master Data Structures ---
     const CYCLE_MODES = {
-      menstrual: { name: "Menstrual Phase (Days 1–5)", short: "Menstrual", tag: "Gentle Flow & Restore", color: "text-rose-600 border-rose-200 bg-rose-50", mod: 0.85, tip: "Hormones at baseline. Prioritize graceful movement, deep belly breaths, and warm herbal infusions." },
-      follicular: { name: "Follicular Phase (Days 6–13)", short: "Follicular", tag: "Glow & Sculpt Power", color: "text-pink-600 border-pink-200 bg-pink-50", mod: 1.0, tip: "Estrogen rising! Peak insulin sensitivity and radiant vitality. Prime time to sculpt and increase resistance." },
-      ovulatory: { name: "Ovulatory Phase (Days 14–16)", short: "Ovulatory", tag: "Radiant Strength & PRs", color: "text-amber-600 border-amber-200 bg-amber-50", mod: 1.05, tip: "Peak confidence & energy output. Push your physical personal bests with clean, controlled form." },
-      luteal: { name: "Luteal Phase (Days 17–28)", short: "Luteal", tag: "Steady Burn & Calibrate", color: "text-purple-600 border-purple-200 bg-purple-50", mod: 0.9, tip: "Progesterone dominance elevates core temperature. Hydrate with 3L+ water and honor strict rest cadence." }
+      menstrual: { name: "Menstrual Phase (Days 1–5)", short: "Menstrual", tag: "Gentle Flow & Restore", color: "text-rose-600 border-rose-200 bg-rose-50 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800", mod: 0.85, tip: "Hormones at baseline. Prioritize graceful movement, deep belly breaths, and warm herbal infusions." },
+      follicular: { name: "Follicular Phase (Days 6–13)", short: "Follicular", tag: "Glow & Sculpt Power", color: "text-pink-600 border-pink-200 bg-pink-50 dark:bg-pink-950/40 dark:text-pink-300 dark:border-pink-800", mod: 1.0, tip: "Estrogen rising! Peak insulin sensitivity and radiant vitality. Prime time to sculpt and increase resistance." },
+      ovulatory: { name: "Ovulatory Phase (Days 14–16)", short: "Ovulatory", tag: "Radiant Strength & PRs", color: "text-amber-600 border-amber-200 bg-amber-50 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800", mod: 1.05, tip: "Peak confidence & energy output. Push your physical personal bests with clean, controlled form." },
+      luteal: { name: "Luteal Phase (Days 17–28)", short: "Luteal", tag: "Steady Burn & Calibrate", color: "text-purple-600 border-purple-200 bg-purple-50 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-800", mod: 0.9, tip: "Progesterone dominance elevates core temperature. Hydrate with 3L+ water and honor strict rest cadence." }
     };
 
     const EXERCISE_DATA = {
       beginner: {
         A: [
-          { id: "b_a1", name: "Elegance Box Squats", target: "Glutes & Quads", primary: "quads", sets: 3, reps: 10, rest: 60, tempo: "3-0-1", ecc: 3, pause: 0, conc: 1, defaultKg: 0, img: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Crown tall, chest proud. Sit hips backward like settling onto fragile glass; drive through mid-foot and heels to rise.", execution: ["Stand 10cm in front of a chair with feet shoulder-width apart and toes turned out 15°.", "Inhale into lower belly, bracing core as hips hinge backward.", "Lower for 3 steady seconds until glutes lightly kiss the seat.", "Exhale and drive through the floor to stand tall."] },
-          { id: "b_a2", name: "Incline Push-Ups", target: "Chest & Sculpted Arms", primary: "chest", sets: 3, reps: 8, rest: 60, tempo: "2-0-1", ecc: 2, pause: 0, conc: 1, defaultKg: 0, img: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=600&q=80", cues: "Shoulders drawn down away from ears. Body moves like a solid board with elbows at a 45° arrow angle.", execution: ["Place hands slightly wider than shoulder-width on a sturdy counter.", "Lower chest toward the ledge for 2 seconds with elbows at 45°.", "Press away powerfully while maintaining core support."] },
-          { id: "b_a3", name: "Glute Sculpt Bridge", target: "Gluteus Maximus", primary: "glutes", sets: 3, reps: 12, rest: 45, tempo: "2-2-1", ecc: 2, pause: 2, conc: 1, defaultKg: 0, img: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80", cues: "Ribs knit down toward pelvis. Drive through heels and hold a 2-second peak glute contraction at top.", execution: ["Lie on back with knees bent at 90°.", "Drive through heels to lift hips in line with knees.", "Squeeze glutes for 2 full seconds at peak.", "Lower with control."] },
-          { id: "b_a4", name: "Seated Shoulder Sculpt", target: "Deltoids & Posture", primary: "shoulders", sets: 3, reps: 10, rest: 60, tempo: "2-0-1", ecc: 2, pause: 0, conc: 1, defaultKg: 3.0, img: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=600&q=80", cues: "Sit tall with vertical spine. Press dumbbells upward without letting lower back arch.", execution: ["Sit tall with core engaged and feet grounded.", "Press weights straight up overhead without shrugging.", "Lower back to chin height over 2 seconds."] },
-          { id: "b_a5", name: "Core Deadbugs", target: "Deep Transverse Core", primary: "core", sets: 3, reps: 8, rest: 45, tempo: "2-1-2", ecc: 2, pause: 1, conc: 2, defaultKg: 0, img: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=600&q=80", cues: "Zero daylight beneath lower back. Glue spine to mat as opposite arm and leg slowly reach away.", execution: ["Lie flat with arms extended upward and knees at 90°.", "Press lower back firmly into the mat.", "Slowly extend opposite arm and leg out hover-height.", "Return to center with deep abdominal control."] }
+          { id: "b_a1", name: "Elegance Box Squats", target: "Glutes & Quads", primary: "quads", sets: 3, reps: 10, rest: 60, tempo: "3-0-1", ecc: 3, pause: 0, conc: 1, defaultKg: 0, img: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Crown tall, chest proud. Sit hips backward like settling onto fragile glass; drive through mid-foot and heels to rise.", execution: ["Stand 10cm in front of a chair with feet shoulder-width apart and toes turned out 15°.", "Inhale into lower belly, bracing core as hips hinge backward.", "Lower for 3 steady seconds until glutes lightly kiss the seat.", "Exhale and drive through the floor to stand tall."], swaps: ["Bodyweight Goblet Squats", "Incline Wall Sit"] },
+          { id: "b_a2", name: "Incline Push-Ups", target: "Chest & Sculpted Arms", primary: "chest", sets: 3, reps: 8, rest: 60, tempo: "2-0-1", ecc: 2, pause: 0, conc: 1, defaultKg: 0, img: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=600&q=80", cues: "Shoulders drawn down away from ears. Body moves like a solid board with elbows at a 45° arrow angle.", execution: ["Place hands slightly wider than shoulder-width on a sturdy counter.", "Lower chest toward the ledge for 2 seconds with elbows at 45°.", "Press away powerfully while maintaining core support."], swaps: ["Kneeling Floor Push-Ups", "Dumbbell Floor Press"] },
+          { id: "b_a3", name: "Glute Sculpt Bridge", target: "Gluteus Maximus", primary: "glutes", sets: 3, reps: 12, rest: 45, tempo: "2-2-1", ecc: 2, pause: 2, conc: 1, defaultKg: 0, img: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80", cues: "Ribs knit down toward pelvis. Drive through heels and hold a 2-second peak glute contraction at top.", execution: ["Lie on back with knees bent at 90°.", "Drive through heels to lift hips in line with knees.", "Squeeze glutes for 2 full seconds at peak.", "Lower with control."], swaps: ["Banded Glute Bridges", "Bodyweight Hip Thrusts"] },
+          { id: "b_a4", name: "Seated Shoulder Sculpt", target: "Deltoids & Posture", primary: "shoulders", sets: 3, reps: 10, rest: 60, tempo: "2-0-1", ecc: 2, pause: 0, conc: 1, defaultKg: 3.0, img: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=600&q=80", cues: "Sit tall with vertical spine. Press dumbbells upward without letting lower back arch.", execution: ["Sit tall with core engaged and feet grounded.", "Press weights straight up overhead without shrugging.", "Lower back to chin height over 2 seconds."], swaps: ["Standing Band Press", "Lateral Raises"] },
+          { id: "b_a5", name: "Core Deadbugs", target: "Deep Transverse Core", primary: "core", sets: 3, reps: 8, rest: 45, tempo: "2-1-2", ecc: 2, pause: 1, conc: 2, defaultKg: 0, img: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=600&q=80", cues: "Zero daylight beneath lower back. Glue spine to mat as opposite arm and leg slowly reach away.", execution: ["Lie flat with arms extended upward and knees at 90°.", "Press lower back firmly into the mat.", "Slowly extend opposite arm and leg out hover-height.", "Return to center with deep abdominal control."], swaps: ["Bird Dog Hold", "Modified Plank Hold"] }
         ],
         B: [
-          { id: "b_b1", name: "Supported Back Rows", target: "Lats & Waist Taper", primary: "lats", sets: 3, reps: 10, rest: 60, tempo: "2-1-1", ecc: 2, pause: 1, conc: 1, defaultKg: 4.0, img: "https://images.unsplash.com/photo-1605296867304-46d5465a13f1?auto=format&fit=crop&w=600&q=80", cues: "Draw elbow softly back toward hip pocket.", execution: ["Support on flat bench with long spine.", "Draw elbow up and back toward hip pocket.", "Squeeze lat for 1 second at top."] },
-          { id: "b_b2", name: "Glute Split Squats", target: "Glutes & Thighs", primary: "glutes", sets: 3, reps: 8, rest: 60, tempo: "2-0-1", ecc: 2, pause: 0, conc: 1, defaultKg: 0, img: "https://images.unsplash.com/photo-1434682881908-b43d0467b798?auto=format&fit=crop&w=600&q=80", cues: "Keep front heel grounded and chest lifted.", execution: ["Take a long step back, dropping back knee toward mat.", "Drive through front heel to return to top with balance."] },
-          { id: "b_b3", name: "Side Clamshells", target: "Gluteus Medius", primary: "glutes", sets: 3, reps: 12, rest: 45, tempo: "2-1-1", ecc: 2, pause: 1, conc: 1, defaultKg: 0, img: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80", cues: "Rotate top knee upward without letting hips roll backward.", execution: ["Lie on your side with knees bent at 90°.", "Open top knee like a clamshell while keeping feet glued.", "Hold peak contraction for 1 second."] },
-          { id: "b_b4", name: "Standing DB Curls", target: "Biceps Definition", primary: "lats", sets: 3, reps: 10, rest: 45, tempo: "2-0-1", ecc: 2, pause: 0, conc: 1, defaultKg: 3.0, img: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=600&q=80", cues: "Elbows glued to side ribs. Curl weights up with zero momentum.", execution: ["Stand tall holding dumbbells at sides, palms facing forward.", "Lock elbows firmly against ribs.", "Curl dumbbells upward toward shoulders.", "Lower with strict control over 2 seconds."] }
+          { id: "b_b1", name: "Supported Back Rows", target: "Lats & Waist Taper", primary: "lats", sets: 3, reps: 10, rest: 60, tempo: "2-1-1", ecc: 2, pause: 1, conc: 1, defaultKg: 4.0, img: "https://images.unsplash.com/photo-1605296867304-46d5465a13f1?auto=format&fit=crop&w=600&q=80", cues: "Draw elbow softly back toward hip pocket.", execution: ["Support on flat bench with long spine.", "Draw elbow up and back toward hip pocket.", "Squeeze lat for 1 second at top."], swaps: ["Resistance Band Rows", "Inverted Bodyweight Rows"] },
+          { id: "b_b2", name: "Glute Split Squats", target: "Glutes & Thighs", primary: "glutes", sets: 3, reps: 8, rest: 60, tempo: "2-0-1", ecc: 2, pause: 0, conc: 1, defaultKg: 0, img: "https://images.unsplash.com/photo-1434682881908-b43d0467b798?auto=format&fit=crop&w=600&q=80", cues: "Keep front heel grounded and chest lifted.", execution: ["Take a long step back, dropping back knee toward mat.", "Drive through front heel to return to top with balance."], swaps: ["Stationary Lunges", "Step-Ups"] },
+          { id: "b_b3", name: "Side Clamshells", target: "Gluteus Medius", primary: "glutes", sets: 3, reps: 12, rest: 45, tempo: "2-1-1", ecc: 2, pause: 1, conc: 1, defaultKg: 0, img: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80", cues: "Rotate top knee upward without letting hips roll backward.", execution: ["Lie on your side with knees bent at 90°.", "Open top knee like a clamshell while keeping feet glued.", "Hold peak contraction for 1 second."], swaps: ["Side Leg Raises", "Banded Fire Hydrants"] },
+          { id: "b_b4", name: "Standing DB Curls", target: "Biceps Definition", primary: "lats", sets: 3, reps: 10, rest: 45, tempo: "2-0-1", ecc: 2, pause: 0, conc: 1, defaultKg: 3.0, img: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=600&q=80", cues: "Elbows glued to side ribs. Curl weights up with zero momentum.", execution: ["Stand tall holding dumbbells at sides, palms facing forward.", "Lock elbows firmly against ribs.", "Curl dumbbells upward toward shoulders.", "Lower with strict control over 2 seconds."], swaps: ["Band Hammer Curls", "Concentration Curls"] }
         ],
         C: [
-          { id: "b_c1", name: "Step-Up Elevation", target: "Glutes & Legs", primary: "glutes", sets: 3, reps: 8, rest: 60, tempo: "2-0-1", ecc: 2, pause: 0, conc: 1, defaultKg: 0, img: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Power through the top heel; step down with light grace.", execution: ["Place full foot on step.", "Drive through heel to stand tall.", "Lower under control."] },
-          { id: "b_c2", name: "Romanian Deadlift", target: "Hamstrings & Glutes", primary: "hamstrings", sets: 3, reps: 10, rest: 60, tempo: "3-0-1", ecc: 3, pause: 0, conc: 1, defaultKg: 4.0, img: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=600&q=80", cues: "Hinge hips back like closing a door behind you.", execution: ["Hinge at hips with soft knees and long spine.", "Lower weights along shins until hamstrings stretch.", "Drive hips forward to stand tall."] },
-          { id: "b_c3", name: "Prone Y-Raises", target: "Deltoids & Back Posture", primary: "shoulders", sets: 3, reps: 12, rest: 45, tempo: "2-1-1", ecc: 2, pause: 1, conc: 1, defaultKg: 0, img: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=600&q=80", cues: "Thumbs point to ceiling. Squeeze lower shoulder blades down and back.", execution: ["Lie face down on a mat with arms in a wide Y shape.", "Rotate hands so thumbs point straight up.", "Elevate arms 10cm off floor without arching lower back.", "Lower gently back to mat."] }
+          { id: "b_c1", name: "Step-Up Elevation", target: "Glutes & Legs", primary: "glutes", sets: 3, reps: 8, rest: 60, tempo: "2-0-1", ecc: 2, pause: 0, conc: 1, defaultKg: 0, img: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Power through the top heel; step down with light grace.", execution: ["Place full foot on step.", "Drive through heel to stand tall.", "Lower under control."], swaps: ["Bulgarian Split Squats", "Reverse Lunges"] },
+          { id: "b_c2", name: "Romanian Deadlift", target: "Hamstrings & Glutes", primary: "hamstrings", sets: 3, reps: 10, rest: 60, tempo: "3-0-1", ecc: 3, pause: 0, conc: 1, defaultKg: 4.0, img: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=600&q=80", cues: "Hinge hips back like closing a door behind you.", execution: ["Hinge at hips with soft knees and long spine.", "Lower weights along shins until hamstrings stretch.", "Drive hips forward to stand tall."], swaps: ["Good Mornings", "Banded Hamstring Pulls"] },
+          { id: "b_c3", name: "Prone Y-Raises", target: "Deltoids & Posture", primary: "shoulders", sets: 3, reps: 12, rest: 45, tempo: "2-1-1", ecc: 2, pause: 1, conc: 1, defaultKg: 0, img: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=600&q=80", cues: "Thumbs point to ceiling. Squeeze lower shoulder blades down and back.", execution: ["Lie face down on a mat with arms in a wide Y shape.", "Rotate hands so thumbs point straight up.", "Elevate arms 10cm off floor without arching lower back.", "Lower gently back to mat."], swaps: ["Seated Band Pull-Aparts", "Prone W-Raises"] }
         ]
       },
       intermediate: {
         A: [
-          { id: "i_a1", name: "Dumbbell Goblet Squats", target: "Glutes & Quads", primary: "quads", sets: 3, reps: 12, rest: 60, tempo: "3-0-1", ecc: 3, pause: 0, conc: 1, defaultKg: 7.5, img: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Hold weight close to chest; descend with deep control.", execution: ["Cup dumbbell head vertically at chest.", "Descend 3s until hips break parallel.", "Drive through heels to stand."] },
-          { id: "i_a2", name: "Dumbbell Floor Press", target: "Chest & Triceps", primary: "chest", sets: 3, reps: 12, rest: 60, tempo: "2-0-1", ecc: 2, pause: 0, conc: 1, defaultKg: 5.0, img: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=600&q=80", cues: "Upper arms tap floor lightly at 45°.", execution: ["Lie on mat with knees bent.", "Lower weights until triceps kiss floor.", "Press back up in arc over chest."] },
-          { id: "i_a3", name: "DB Romanian Deadlift", target: "Hamstrings & Glute Lift", primary: "hamstrings", sets: 3, reps: 12, rest: 60, tempo: "3-1-1", ecc: 3, pause: 1, conc: 1, defaultKg: 7.5, img: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=600&q=80", cues: "Hinge hips straight back; skim dumbbells along shins.", execution: ["Keep spine long and lats locked in place.", "Push hips back for 3 seconds into a deep stretch.", "Drive hips forward into glute contraction."] },
-          { id: "i_a4", name: "Seated DB Shoulder Press", target: "Deltoid Cap", primary: "shoulders", sets: 3, reps: 10, rest: 60, tempo: "2-0-1", ecc: 2, pause: 0, conc: 1, defaultKg: 4.0, img: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=600&q=80", cues: "Brace core to protect lower back. Drive dumbbells overhead smoothly.", execution: ["Sit tall with core braced.", "Press weights overhead in a fluid motion.", "Lower under control over 2 seconds."] },
-          { id: "i_a5", name: "Lateral Deltoid Raises", target: "Shoulder Definition", primary: "shoulders", sets: 3, reps: 12, rest: 45, tempo: "2-1-1", ecc: 2, pause: 1, conc: 1, defaultKg: 2.5, img: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=600&q=80", cues: "Lead with elbows in the scapular plane. Pause at parallel.", execution: ["Stand with slight forward hip hinge.", "Raise arms out to sides in a wide arc.", "Hold peak contraction for 1 second.", "Lower smoothly over 2 seconds."] }
+          { id: "i_a1", name: "Dumbbell Goblet Squats", target: "Glutes & Quads", primary: "quads", sets: 3, reps: 12, rest: 60, tempo: "3-0-1", ecc: 3, pause: 0, conc: 1, defaultKg: 7.5, img: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Hold weight close to chest; descend with deep control.", execution: ["Cup dumbbell head vertically at chest.", "Descend 3s until hips break parallel.", "Drive through heels to stand."], swaps: ["Barbell Front Squats", "Dumbbell Sumo Squats"] },
+          { id: "i_a2", name: "Dumbbell Floor Press", target: "Chest & Triceps", primary: "chest", sets: 3, reps: 12, rest: 60, tempo: "2-0-1", ecc: 2, pause: 0, conc: 1, defaultKg: 5.0, img: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=600&q=80", cues: "Upper arms tap floor lightly at 45°.", execution: ["Lie on mat with knees bent.", "Lower weights until triceps kiss floor.", "Press back up in arc over chest."], swaps: ["Incline Push-Ups", "Dumbbell Bench Press"] },
+          { id: "i_a3", name: "DB Romanian Deadlift", target: "Hamstrings & Glute Lift", primary: "hamstrings", sets: 3, reps: 12, rest: 60, tempo: "3-1-1", ecc: 3, pause: 1, conc: 1, defaultKg: 7.5, img: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=600&q=80", cues: "Hinge hips straight back; skim dumbbells along shins.", execution: ["Keep spine long and lats locked in place.", "Push hips back for 3 seconds into a deep stretch.", "Drive hips forward into glute contraction."], swaps: ["Single-Leg Romanian Deadlifts", "Barbell RDLs"] },
+          { id: "i_a4", name: "Seated DB Shoulder Press", target: "Deltoid Cap", primary: "shoulders", sets: 3, reps: 10, rest: 60, tempo: "2-0-1", ecc: 2, pause: 0, conc: 1, defaultKg: 4.0, img: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=600&q=80", cues: "Brace core to protect lower back. Drive dumbbells overhead smoothly.", execution: ["Sit tall with core braced.", "Press weights overhead in a fluid motion.", "Lower under control over 2 seconds."], swaps: ["Arnold Press", "Pike Push-Ups"] },
+          { id: "i_a5", name: "Lateral Deltoid Raises", target: "Shoulder Definition", primary: "shoulders", sets: 3, reps: 12, rest: 45, tempo: "2-1-1", ecc: 2, pause: 1, conc: 1, defaultKg: 2.5, img: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=600&q=80", cues: "Lead with elbows in the scapular plane. Pause at parallel.", execution: ["Stand with slight forward hip hinge.", "Raise arms out to sides in a wide arc.", "Hold peak contraction for 1 second.", "Lower smoothly over 2 seconds."], swaps: ["Cable Lateral Raises", "Upright Rows"] }
         ],
         B: [
-          { id: "i_b1", name: "Weighted Hip Thrust", target: "Gluteus Maximus", primary: "glutes", sets: 3, reps: 15, rest: 60, tempo: "2-2-1", ecc: 2, pause: 2, conc: 1, defaultKg: 10.0, img: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80", cues: "Lock out glutes at top with chin tucked and ribs down.", execution: ["Rest shoulder blades across bench edge.", "Drive through heels to full hip extension.", "Squeeze glutes for 2 seconds at peak."] },
-          { id: "i_b2", name: "Single-Arm DB Row", target: "Lats & Waist Taper", primary: "lats", sets: 3, reps: 10, rest: 60, tempo: "2-1-1", ecc: 2, pause: 1, conc: 1, defaultKg: 6.0, img: "https://images.unsplash.com/photo-1605296867304-46d5465a13f1?auto=format&fit=crop&w=600&q=80", cues: "Pull elbow smoothly to hip pocket without rotating pelvis.", execution: ["Support on flat bench with flat spine.", "Pull weight upward toward hip pocket.", "Hold peak contraction for 1 second; lower over 2 seconds."] },
-          { id: "i_b3", name: "Reverse Lunge Glute Stretch", target: "Glutes & Quads", primary: "glutes", sets: 3, reps: 10, rest: 60, tempo: "2-0-1", ecc: 2, pause: 0, conc: 1, defaultKg: 5.0, img: "https://images.unsplash.com/photo-1434682881908-b43d0467b798?auto=format&fit=crop&w=600&q=80", cues: "Take a generous step back; maintain vertical front shin.", execution: ["Take large step backward, lowering back knee until hovering.", "Drive through front heel to return to standing."] },
-          { id: "i_b4", name: "Banded Face Pulls", target: "Rear Delts & Posture", primary: "shoulders", sets: 3, reps: 15, rest: 45, tempo: "2-2-1", ecc: 2, pause: 2, conc: 1, defaultKg: 0, img: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=600&q=80", cues: "Pull band to eye height; rotate thumbs and hands outward.", execution: ["Anchor band at eye level; pull toward nose bridge.", "Rotate hands outward into double bicep pose.", "Hold rear shoulder squeeze for 2 full seconds."] }
+          { id: "i_b1", name: "Weighted Hip Thrust", target: "Gluteus Maximus", primary: "glutes", sets: 3, reps: 15, rest: 60, tempo: "2-2-1", ecc: 2, pause: 2, conc: 1, defaultKg: 10.0, img: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80", cues: "Lock out glutes at top with chin tucked and ribs down.", execution: ["Rest shoulder blades across bench edge.", "Drive through heels to full hip extension.", "Squeeze glutes for 2 seconds at peak."], swaps: ["Single-Leg Hip Thrusts", "Glute Bridges"] },
+          { id: "i_b2", name: "Single-Arm DB Row", target: "Lats & Waist Taper", primary: "lats", sets: 3, reps: 10, rest: 60, tempo: "2-1-1", ecc: 2, pause: 1, conc: 1, defaultKg: 6.0, img: "https://images.unsplash.com/photo-1605296867304-46d5465a13f1?auto=format&fit=crop&w=600&q=80", cues: "Pull elbow smoothly to hip pocket without rotating pelvis.", execution: ["Support on flat bench with flat spine.", "Pull weight upward toward hip pocket.", "Hold peak contraction for 1 second; lower over 2 seconds."], swaps: ["Cable Seated Rows", "Chest-Supported DB Rows"] },
+          { id: "i_b3", name: "Reverse Lunge Glute Stretch", target: "Glutes & Quads", primary: "glutes", sets: 3, reps: 10, rest: 60, tempo: "2-0-1", ecc: 2, pause: 0, conc: 1, defaultKg: 5.0, img: "https://images.unsplash.com/photo-1434682881908-b43d0467b798?auto=format&fit=crop&w=600&q=80", cues: "Take a generous step back; maintain vertical front shin.", execution: ["Take large step backward, lowering back knee until hovering.", "Drive through front heel to return to standing."], swaps: ["Walking Lunges", "Bulgarian Split Squats"] },
+          { id: "i_b4", name: "Banded Face Pulls", target: "Rear Delts & Posture", primary: "shoulders", sets: 3, reps: 15, rest: 45, tempo: "2-2-1", ecc: 2, pause: 2, conc: 1, defaultKg: 0, img: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=600&q=80", cues: "Pull band to eye height; rotate thumbs and hands outward.", execution: ["Anchor band at eye level; pull toward nose bridge.", "Rotate hands outward into double bicep pose.", "Hold rear shoulder squeeze for 2 full seconds."], swaps: ["Rear Delt Flyes", "Seated Cable Pull-Aparts"] }
         ],
         C: [
-          { id: "i_c1", name: "Weighted Step-Ups", target: "Gluteus Maximus", primary: "glutes", sets: 3, reps: 10, rest: 60, tempo: "2-0-1", ecc: 2, pause: 0, conc: 1, defaultKg: 4.0, img: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Drive purely through elevated heel.", execution: ["Place entire foot on elevated box.", "Drive through heel to ascend.", "Lower under control."] },
-          { id: "i_c2", name: "Dumbbell Thrusters", target: "Full Body Metabolic", primary: "quads", sets: 3, reps: 10, rest: 60, tempo: "1-0-1", ecc: 1, pause: 0, conc: 1, defaultKg: 4.0, img: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=600&q=80", cues: "Use upward leg momentum to press dumbbells overhead.", execution: ["Hold dumbbells at shoulders; squat deep.", "Explode upward and press weights overhead.", "Catch weights at shoulders descending into next rep."] },
-          { id: "i_c3", name: "DB Sumo Squats", target: "Adductors & Glutes", primary: "quads", sets: 3, reps: 12, rest: 60, tempo: "3-0-1", ecc: 3, pause: 0, conc: 1, defaultKg: 8.0, img: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Wide stance, knees pushed wide over toes.", execution: ["Take wide stance with toes turned 45°.", "Lower straight down for 3 seconds.", "Drive through heels to rise, squeezing glutes."] }
+          { id: "i_c1", name: "Weighted Step-Ups", target: "Gluteus Maximus", primary: "glutes", sets: 3, reps: 10, rest: 60, tempo: "2-0-1", ecc: 2, pause: 0, conc: 1, defaultKg: 4.0, img: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Drive purely through elevated heel.", execution: ["Place entire foot on elevated box.", "Drive through heel to ascend.", "Lower under control."], swaps: ["Box Jumps", "Reverse Lunges"] },
+          { id: "i_c2", name: "Dumbbell Thrusters", target: "Full Body Metabolic", primary: "quads", sets: 3, reps: 10, rest: 60, tempo: "1-0-1", ecc: 1, pause: 0, conc: 1, defaultKg: 4.0, img: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=600&q=80", cues: "Use upward leg momentum to press dumbbells overhead.", execution: ["Hold dumbbells at shoulders; squat deep.", "Explode upward and press weights overhead.", "Catch weights at shoulders descending into next rep."], swaps: ["Clean & Press", "Squat to Overhead Press"] },
+          { id: "i_c3", name: "DB Sumo Squats", target: "Adductors & Glutes", primary: "quads", sets: 3, reps: 12, rest: 60, tempo: "3-0-1", ecc: 3, pause: 0, conc: 1, defaultKg: 8.0, img: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Wide stance, knees pushed wide over toes.", execution: ["Take wide stance with toes turned 45°.", "Lower straight down for 3 seconds.", "Drive through heels to rise, squeezing glutes."], swaps: ["Plie Squats", "Goblet Squats"] }
         ]
       },
       advanced: {
         A: [
-          { id: "a_a1", name: "1.5-Rep DB Goblet Squats", target: "Glutes & Quads", primary: "quads", sets: 4, reps: 12, rest: 45, tempo: "3-1-1", ecc: 3, pause: 1, conc: 1, defaultKg: 10.0, img: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Squat deep, rise halfway, return to bottom, explode up.", execution: ["Descend 3s to full depth.", "Rise halfway, pause 1s, sink back to bottom.", "Drive through heels to stand."] },
-          { id: "a_a2", name: "Superset: DB RDL + Floor Press", target: "Hamstrings & Chest", primary: "hamstrings", sets: 4, reps: 12, rest: 45, tempo: "2-0-1", ecc: 2, pause: 0, conc: 1, defaultKg: 9.0, img: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=600&q=80", cues: "Seamless transition. RDLs straight into floor press.", execution: ["Perform 12 strict DB RDLs.", "Drop straight down into 12 DB floor chest presses.", "Rest 45s after both movements."] }
+          { id: "a_a1", name: "1.5-Rep DB Goblet Squats", target: "Glutes & Quads", primary: "quads", sets: 4, reps: 12, rest: 45, tempo: "3-1-1", ecc: 3, pause: 1, conc: 1, defaultKg: 10.0, img: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Squat deep, rise halfway, return to bottom, explode up.", execution: ["Descend 3s to full depth.", "Rise halfway, pause 1s, sink back to bottom.", "Drive through heels to stand."], swaps: ["Pause Squats", "Barbell Back Squats"] },
+          { id: "a_a2", name: "Superset: DB RDL + Floor Press", target: "Hamstrings & Chest", primary: "hamstrings", sets: 4, reps: 12, rest: 45, tempo: "2-0-1", ecc: 2, pause: 0, conc: 1, defaultKg: 9.0, img: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=600&q=80", cues: "Seamless transition. RDLs straight into floor press.", execution: ["Perform 12 strict DB RDLs.", "Drop straight down into 12 DB floor chest presses.", "Rest 45s after both movements."], swaps: ["Barbell Complex", "Dumbbell Circuit"] }
         ],
         B: [
-          { id: "a_b1", name: "Single-Leg DB Hip Thrust", target: "Gluteus Maximus", primary: "glutes", sets: 4, reps: 12, rest: 45, tempo: "2-2-1", ecc: 2, pause: 2, conc: 1, defaultKg: 6.0, img: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80", cues: "Keep pelvis level as you lock out working glute.", execution: ["Upper back on bench, one leg lifted.", "Drive through grounded heel to full extension, hold 2s."] },
-          { id: "a_b2", name: "DB Renegade Row to Push-Up", target: "Core & Upper Body", primary: "core", sets: 4, reps: 8, rest: 45, tempo: "2-1-1", ecc: 2, pause: 1, conc: 1, defaultKg: 6.0, img: "https://images.unsplash.com/photo-1605296867304-46d5465a13f1?auto=format&fit=crop&w=600&q=80", cues: "Feet wide for plank stability. Row right, row left, push-up.", execution: ["High plank on dumbbells.", "Row right dumbbell, row left, lower into strict push-up."] }
+          { id: "a_b1", name: "Single-Leg DB Hip Thrust", target: "Gluteus Maximus", primary: "glutes", sets: 4, reps: 12, rest: 45, tempo: "2-2-1", ecc: 2, pause: 2, conc: 1, defaultKg: 6.0, img: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80", cues: "Keep pelvis level as you lock out working glute.", execution: ["Upper back on bench, one leg lifted.", "Drive through grounded heel to full extension, hold 2s."], swaps: ["Barbell Hip Thrusts", "Banded B-Stance Thrusts"] },
+          { id: "a_b2", name: "DB Renegade Row to Push-Up", target: "Core & Upper Body", primary: "core", sets: 4, reps: 8, rest: 45, tempo: "2-1-1", ecc: 2, pause: 1, conc: 1, defaultKg: 6.0, img: "https://images.unsplash.com/photo-1605296867304-46d5465a13f1?auto=format&fit=crop&w=600&q=80", cues: "Feet wide for plank stability. Row right, row left, push-up.", execution: ["High plank on dumbbells.", "Row right dumbbell, row left, lower into strict push-up."], swaps: ["Reacher Planks", "Man Makers"] }
         ],
         C: [
-          { id: "a_c1", name: "Clean to Squat to Press", target: "Metabolic Complex", primary: "quads", sets: 4, reps: 10, rest: 45, tempo: "1-0-1", ecc: 1, pause: 0, conc: 1, defaultKg: 6.0, img: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=600&q=80", cues: "Hinge, clean to shoulders, deep squat, press overhead.", execution: ["Clean dumbbells to shoulders, sink into deep squat, press overhead."] }
+          { id: "a_c1", name: "Clean to Squat to Press", target: "Metabolic Complex", primary: "quads", sets: 4, reps: 10, rest: 45, tempo: "1-0-1", ecc: 1, pause: 0, conc: 1, defaultKg: 6.0, img: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=600&q=80", cues: "Hinge, clean to shoulders, deep squat, press overhead.", execution: ["Clean dumbbells to shoulders, sink into deep squat, press overhead."], swaps: ["Snatch Complex", "Thrusters"] }
         ]
       }
     };
@@ -433,7 +464,7 @@
       try {
         const params = new URLSearchParams(window.location.search);
         const tabParam = params.get('tab');
-        if (['train', 'fuel', 'progress', 'profile', 'settings', 'about'].includes(tabParam)) {
+        if (['train', 'fuel', 'progress', 'profile', 'vault', 'settings', 'about'].includes(tabParam)) {
           return tabParam;
         }
       } catch (e) {}
@@ -504,15 +535,19 @@
       const [availableVoices, setAvailableVoices] = useState([]);
       const [wakeLockActive, setWakeLockActive] = useState(false);
       const [hapticsEnabled, setHapticsEnabled] = useState(() => getSafeStored("m60_haptics", true));
+      const [darkMode, setDarkMode] = useState(() => getSafeStored("m60_dark_mode", false));
 
       const [activeModalExercise, setActiveModalExercise] = useState(null);
       const [activeModalPacing, setActiveModalPacing] = useState(false);
       const [modalPacePhase, setModalPacePhase] = useState("Ready");
       const [modalPaceCount, setModalPaceCount] = useState(3);
+      const [swapModalEx, setSwapModalEx] = useState(null);
 
       const [weights, setWeights] = useState(() => getSafeStored("m60_weights", {}));
       const [completedSets, setCompletedSets] = useState(() => getSafeStored("m60_sets", {}));
       const [history, setHistory] = useState(() => getSafeStored("m60_history", []));
+      const [progressPhotos, setProgressPhotos] = useState(() => getSafeStored("m60_photos", []));
+      const [privacyBlur, setPrivacyBlur] = useState(true);
       const [selectedCalendarDate, setSelectedCalendarDate] = useState(null);
 
       const defaultProfile = {
@@ -562,6 +597,52 @@
       const [periodStart, setPeriodStart] = useState(() => getSafeStored("m60_pstart", "2026-08-01"));
       const [cycleLen, setCycleLen] = useState(() => getSafeStored("m60_clen", 28));
 
+      // Asynchronous IndexedDB Loading on Mount
+      useEffect(() => {
+        const loadIDBState = async () => {
+          const diff = await getIDBItem("m60_diff", "intermediate");
+          const day = await getIDBItem("m60_day", "A");
+          const wts = await getIDBItem("m60_weights", {});
+          const sets = await getIDBItem("m60_sets", {});
+          const hist = await getIDBItem("m60_history", []);
+          const photos = await getIDBItem("m60_photos", []);
+          const prof = await getIDBItem("m60_user_profile", defaultProfile);
+          const amode = await getIDBItem("m60_audio_mode", "voice");
+          const sRate = await getIDBItem("m60_speech_rate", 1.05);
+          const sPitch = await getIDBItem("m60_speech_pitch", 1.15);
+          const aVol = await getIDBItem("m60_audio_vol", 1.0);
+          const vUri = await getIDBItem("m60_voice_uri", "");
+          const hapt = await getIDBItem("m60_haptics", true);
+          const dark = await getIDBItem("m60_dark_mode", false);
+
+          setDifficulty(typeof diff === 'string' ? diff.toLowerCase() : "intermediate");
+          setWorkoutDay(day || "A");
+          setWeights(wts || {});
+          setCompletedSets(sets || {});
+          setHistory(Array.isArray(hist) ? hist : []);
+          setProgressPhotos(Array.isArray(photos) ? photos : []);
+          setUserProfile((prof && typeof prof === 'object') ? { ...defaultProfile, ...prof } : defaultProfile);
+          setAudioMode(amode || "voice");
+          setSpeechRate(Number(sRate) || 1.05);
+          setSpeechPitch(Number(sPitch) || 1.15);
+          setAudioVolume(Number(aVol) || 1.0);
+          setSelectedVoiceURI(vUri || "");
+          setHapticsEnabled(hapt !== false);
+          setDarkMode(!!dark);
+        };
+        loadIDBState();
+      }, []);
+
+      // Dark Mode Class Toggle on Root Body
+      useEffect(() => {
+        if (darkMode) {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      }, [darkMode]);
+
+      // Query Device Voices
       useEffect(() => {
         const loadVoices = () => {
           if (typeof window !== 'undefined' && 'speechSynthesis' in window && window.speechSynthesis) {
@@ -581,6 +662,7 @@
         }
       }, []);
 
+      // Screen Wake Lock Engine
       useEffect(() => {
         let wakeLockObj = null;
         const requestWakeLock = async () => {
@@ -596,47 +678,82 @@
         };
       }, [wakeLockActive]);
 
-      const calcMetabolicTargets = (p) => {
+      // Media Session API for Background Audio Ducking
+      useEffect(() => {
+        if ('mediaSession' in navigator) {
+          try {
+            navigator.mediaSession.metadata = new MediaMetadata({
+              title: 'M60 Metabolic Sculpt Session',
+              artist: 'metabolic60 • Feminine Transformation',
+              album: 'Hormonal Rhythm Active',
+              artwork: [{ src: 'https://cdn-icons-png.flaticon.com/512/3048/3048398.png', sizes: '512x512', type: 'image/png' }]
+            });
+            navigator.mediaSession.setActionHandler('play', () => unlockAudioAndSpeech());
+            navigator.mediaSession.setActionHandler('pause', () => {});
+          } catch (e) {}
+        }
+      }, []);
+
+      const calcMetabolicTargets = (p, currentCyclePhase) => {
         const safeP = (p && typeof p === 'object') ? p : defaultProfile;
         const w = Number(safeP.currentWeight) || 75;
         const h = Number(safeP.height) || 165;
         const a = Number(safeP.age) || 30;
         const bmr = Math.round(10 * w + 6.25 * h - 5 * a - 161);
         const tdee = Math.round(bmr * 1.375);
-        const deficitCals = Math.max(1450, tdee - 350);
+        let deficitCals = Math.max(1450, tdee - 350);
         
+        if (currentCyclePhase === 'luteal') {
+          deficitCals += 150;
+        }
+
         let pRatio = 0.40, cRatio = 0.30, fRatio = 0.30;
         if (safeP.somatotype === "Ectomorph") { pRatio = 0.30; cRatio = 0.50; fRatio = 0.20; }
         else if (safeP.somatotype === "Mesomorph") { pRatio = 0.35; cRatio = 0.40; fRatio = 0.25; }
+
+        if (currentCyclePhase === 'luteal') {
+          cRatio += 0.05;
+          pRatio -= 0.05;
+        }
 
         const pGrams = Math.round((deficitCals * pRatio) / 4);
         const cGrams = Math.round((deficitCals * cRatio) / 4);
         const fGrams = Math.round((deficitCals * fRatio) / 9);
 
-        return { calories: deficitCals, pGrams, cGrams, fGrams, pRatio: Math.round(pRatio * 100), cRatio: Math.round(cRatio * 100), fRatio: Math.round(fRatio * 100) };
+        return { 
+          calories: deficitCals, 
+          pGrams, 
+          cGrams, 
+          fGrams, 
+          pRatio: Math.round(pRatio * 100), 
+          cRatio: Math.round(cRatio * 100), 
+          fRatio: Math.round(fRatio * 100),
+          isLutealBuffered: currentCyclePhase === 'luteal'
+        };
       };
 
-      const metabolicTargets = calcMetabolicTargets(userProfile);
+      const cycle = calcCycle();
+      const metabolicTargets = calcMetabolicTargets(userProfile, cycle.phase);
 
-      useEffect(() => { setSafeStored("m60_diff", difficulty); }, [difficulty]);
-      useEffect(() => { setSafeStored("m60_day", workoutDay); }, [workoutDay]);
-      useEffect(() => { setSafeStored("m60_weights", weights); }, [weights]);
-      useEffect(() => { setSafeStored("m60_sets", completedSets); }, [completedSets]);
-      useEffect(() => { setSafeStored("m60_history", history); }, [history]);
-      useEffect(() => { setSafeStored("m60_grocery", checkedGroceries); }, [checkedGroceries]);
-      useEffect(() => { setSafeStored(`m60_water_${todayDateStr}`, waterGlasses); }, [waterGlasses, todayDateStr]);
-      useEffect(() => { setSafeStored("m60_pstart", periodStart); }, [periodStart]);
-      useEffect(() => { setSafeStored("m60_clen", cycleLen); }, [cycleLen]);
-      useEffect(() => { setSafeStored("m60_user_profile", userProfile); }, [userProfile]);
-      useEffect(() => { setSafeStored("m60_audio_mode", audioMode); }, [audioMode]);
-      useEffect(() => { setSafeStored("m60_speech_rate", speechRate); }, [speechRate]);
-      useEffect(() => { setSafeStored("m60_speech_pitch", speechPitch); }, [speechPitch]);
-      useEffect(() => { setSafeStored("m60_audio_vol", audioVolume); }, [audioVolume]);
-      useEffect(() => { setSafeStored("m60_voice_uri", selectedVoiceURI); }, [selectedVoiceURI]);
-      useEffect(() => { setSafeStored("m60_haptics", hapticsEnabled); }, [hapticsEnabled]);
+      useEffect(() => { setIDBItem("m60_diff", difficulty); }, [difficulty]);
+      useEffect(() => { setIDBItem("m60_day", workoutDay); }, [workoutDay]);
+      useEffect(() => { setIDBItem("m60_weights", weights); }, [weights]);
+      useEffect(() => { setIDBItem("m60_sets", completedSets); }, [completedSets]);
+      useEffect(() => { setIDBItem("m60_history", history); }, [history]);
+      useEffect(() => { setIDBItem("m60_photos", progressPhotos); }, [progressPhotos]);
+      useEffect(() => { setIDBItem("m60_user_profile", userProfile); }, [userProfile]);
+      useEffect(() => { setIDBItem("m60_audio_mode", audioMode); }, [audioMode]);
+      useEffect(() => { setIDBItem("m60_haptics", hapticsEnabled); }, [hapticsEnabled]);
+      useEffect(() => { setIDBItem("m60_dark_mode", darkMode); }, [darkMode]);
+      useEffect(() => { setIDBItem("m60_speech_rate", speechRate); }, [speechRate]);
+      useEffect(() => { setIDBItem("m60_speech_pitch", speechPitch); }, [speechPitch]);
+      useEffect(() => { setIDBItem("m60_audio_vol", audioVolume); }, [audioVolume]);
+      useEffect(() => { setIDBItem("m60_voice_uri", selectedVoiceURI); }, [selectedVoiceURI]);
+      useEffect(() => { setIDBItem(`m60_water_${todayDateStr}`, waterGlasses); }, [waterGlasses, todayDateStr]);
 
       const speechSettings = { rate: speechRate, pitch: speechPitch, volume: audioVolume, voiceURI: selectedVoiceURI };
 
+      // Rest Timer Engine with Push Notification Trigger
       useEffect(() => {
         let timer = null;
         if (isResting && restSec > 0) {
@@ -655,6 +772,16 @@
                 speakPrompt("Rest complete. Start next set", audioMode, speechSettings);
                 if (hapticsEnabled) triggerHaptic([40, 60, 40]);
                 setIsResting(false);
+
+                // Trigger Web Push Notification if permitted
+                if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+                  try {
+                    new Notification("M60 Rest Complete ✨", {
+                      body: "Time to start your next sculpted set!",
+                      icon: "https://cdn-icons-png.flaticon.com/512/3048/3048398.png"
+                    });
+                  } catch (e) {}
+                }
               }
               return prev - 1;
             });
@@ -663,6 +790,7 @@
         return () => clearInterval(timer);
       }, [isResting, restSec, audioMode, speechSettings, audioVolume, hapticsEnabled]);
 
+      // Global Metronome Engine
       useEffect(() => {
         let timer = null;
         if (tempoRunning) {
@@ -678,6 +806,7 @@
         return () => clearInterval(timer);
       }, [tempoRunning, audioVolume, hapticsEnabled]);
 
+      // Live Cadence Engine with Spoken Audio Prompts
       useEffect(() => {
         let timer = null;
         if (activeModalExercise && activeModalPacing) {
@@ -720,7 +849,7 @@
         return () => clearInterval(timer);
       }, [activeModalExercise, activeModalPacing, audioMode, speechSettings, audioVolume, hapticsEnabled]);
 
-      const calcCycle = () => {
+      function calcCycle() {
         try {
           const start = new Date(periodStart || "2026-08-01");
           start.setHours(0, 0, 0, 0);
@@ -739,27 +868,17 @@
         } catch (e) {
           return { day: 1, phase: "follicular", info: CYCLE_MODES.follicular };
         }
-      };
+      }
 
-      const cycle = calcCycle();
       const safeDiffKey = (difficulty && typeof difficulty === 'string') ? difficulty.toLowerCase() : "intermediate";
       const tierData = EXERCISE_DATA[safeDiffKey] || EXERCISE_DATA.intermediate;
       const safeDayKey = (workoutDay && ["A", "B", "C"].includes(workoutDay)) ? workoutDay : "A";
       const currentList = tierData[safeDayKey] || tierData.A || EXERCISE_DATA.intermediate.A;
 
       const activeEx = currentList.find(e => e && e.id === focusedId) || currentList[0] || {
-        id: "fallback",
-        name: "Movement",
-        target: "Sculpt",
-        primary: "quads",
-        sets: 3,
-        reps: 10,
-        rest: 60,
-        tempo: "3-0-1",
-        defaultKg: 0,
+        id: "fallback", name: "Movement", target: "Sculpt", primary: "quads", sets: 3, reps: 10, rest: 60, tempo: "3-0-1", defaultKg: 0,
         img: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80",
-        cues: "Focus on mind-muscle connection and controlled posture.",
-        execution: ["Perform with controlled tempo."]
+        cues: "Focus on mind-muscle connection and controlled posture.", execution: ["Perform with controlled tempo."], swaps: []
       };
 
       const currentLoadMod = (cycle && cycle.info && cycle.info.mod) ? cycle.info.mod : 1.0;
@@ -840,6 +959,61 @@
         playBeepTone(659.25, 0.06, audioVolume);
       };
 
+      // 1-Tap WhatsApp Grocery Export
+      const exportGroceryToWhatsApp = () => {
+        let text = "🛒 *M60 Supermarket Grocery List*\n\n";
+        let hasItems = false;
+        Object.keys(GROCERY_CATEGORIES).forEach(cat => {
+          const items = GROCERY_CATEGORIES[cat].filter(item => !checkedGroceries[item]);
+          if (items.length > 0) {
+            hasItems = true;
+            text += `*${cat}*:\n`;
+            items.forEach(i => { text += `• ${i}\n`; });
+            text += `\n`;
+          }
+        });
+        if (!hasItems) {
+          text += "All grocery items checked off! ✨";
+        }
+        const encoded = encodeURIComponent(text);
+        window.open(`https://wa.me/?text=${encoded}`, '_blank');
+      };
+
+      // In-Workout Exercise Swapping
+      const substituteExercise = (oldExId, newExName) => {
+        const listCopy = [...currentList];
+        const idx = listCopy.findIndex(e => e.id === oldExId);
+        if (idx !== -1) {
+          listCopy[idx] = {
+            ...listCopy[idx],
+            name: newExName,
+            id: oldExId + '_swap_' + Date.now()
+          };
+          // Update database transiently
+          EXERCISE_DATA[safeDiffKey][safeDayKey] = listCopy;
+          setFocusedId(listCopy[idx].id);
+        }
+        setSwapModalEx(null);
+        if (hapticsEnabled) triggerHaptic(20);
+      };
+
+      const handlePhotoUpload = (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const newPhoto = {
+              id: Date.now(),
+              date: new Date().toLocaleDateString("en-ZA", { month: "short", day: "numeric", year: "numeric" }),
+              url: reader.result
+            };
+            setProgressPhotos([newPhoto, ...progressPhotos]);
+            if (hapticsEnabled) triggerHaptic([30, 50, 30]);
+          };
+          reader.readAsDataURL(file);
+        }
+      };
+
       const finishWorkout = () => {
         unlockAudioAndSpeech();
         const localDateStr = getLocalDateStr();
@@ -868,7 +1042,7 @@
       const completeOnboarding = () => {
         const finalized = { ...tempProfile, onboardingCompleted: true };
         setUserProfile(finalized);
-        setSafeStored("m60_user_profile", finalized);
+        setIDBItem("m60_user_profile", finalized);
         setShowOnboardingModal(false);
         setShowWelcomeScreen(false);
         if (window.confetti) window.confetti({ particleCount: 150, spread: 90 });
@@ -887,6 +1061,7 @@
         setWeights({});
         setCompletedSets({});
         setHistory([]);
+        setProgressPhotos([]);
         setCheckedGroceries({});
         setWaterGlasses(0);
         setDifficulty("intermediate");
@@ -903,6 +1078,7 @@
           weights,
           completedSets,
           history,
+          progressPhotos,
           periodStart,
           cycleLen,
           waterGlasses,
@@ -928,6 +1104,7 @@
               if (parsed.weights) setWeights(parsed.weights);
               if (parsed.completedSets) setCompletedSets(parsed.completedSets);
               if (parsed.history) setHistory(parsed.history);
+              if (parsed.progressPhotos) setProgressPhotos(parsed.progressPhotos);
               if (parsed.periodStart) setPeriodStart(parsed.periodStart);
               if (parsed.cycleLen) setCycleLen(parsed.cycleLen);
               alert("✨ M60 backup successfully restored!");
@@ -961,15 +1138,15 @@
       const monthName = now.toLocaleString("default", { month: "long" });
 
       return (
-        <div className="min-h-screen max-w-md mx-auto pb-24 flex flex-col justify-between" onClick={unlockAudioAndSpeech}>
+        <div className={`min-h-screen max-w-md mx-auto pb-24 flex flex-col justify-between ${darkMode ? 'bg-[#1E1918] text-[#F8F4EE]' : 'bg-[#FAF6F4] text-charcoal'}`} onClick={unlockAudioAndSpeech}>
           
           {/* TOP APP BAR */}
-          <header className="sticky top-0 z-30 bg-[#FAF6F4]/90 backdrop-blur border-b border-blush-200 px-4 py-3 flex items-center justify-between shadow-sm">
+          <header className={`sticky top-0 z-30 backdrop-blur border-b px-4 py-3 flex items-center justify-between shadow-sm ${darkMode ? 'bg-[#1E1918]/90 border-rose-900/30' : 'bg-[#FAF6F4]/90 border-blush-200'}`}>
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blush-400 to-roseGold flex items-center justify-center text-white text-xs font-serif font-black shadow-sm">
                 M60
               </div>
-              <h1 className="text-base font-serif font-bold text-charcoal tracking-tight">M60 ✨</h1>
+              <h1 className={`text-base font-serif font-bold tracking-tight ${darkMode ? 'text-champagne' : 'text-charcoal'}`}>M60 ✨</h1>
             </div>
             
             <div className="flex items-center gap-2">
@@ -984,12 +1161,12 @@
                   if (nextMode === "voice") speakPrompt("Voice coaching active", "voice", speechSettings);
                   else if (nextMode === "chimes") playChime([659.25, 783.99], 0.1, audioVolume);
                 }}
-                className="text-[10px] font-bold text-blush-600 bg-blush-100/90 px-2.5 py-1 rounded-full border border-blush-200 flex items-center gap-1 hover:bg-blush-200"
+                className={`text-[10px] font-bold px-2.5 py-1 rounded-full border flex items-center gap-1 ${darkMode ? 'text-rose-300 bg-rose-950/60 border-rose-800' : 'text-blush-600 bg-blush-100/90 border-blush-200'}`}
               >
                 <span>{audioMode === "voice" ? "🗣️ Voice" : audioMode === "chimes" ? "🔔 Chimes" : "🔇 Mute"}</span>
               </button>
 
-              <span className="text-[11px] font-medium text-blush-600 bg-blush-100/80 px-2.5 py-0.5 rounded-full border border-blush-200">
+              <span className={`text-[11px] font-medium px-2.5 py-0.5 rounded-full border ${darkMode ? 'text-rose-300 bg-rose-950/40 border-rose-800' : 'text-blush-600 bg-blush-100/80 border-blush-200'}`}>
                 Day {cycle.day}
               </span>
             </div>
@@ -1000,7 +1177,7 @@
             {/* TAB 1: TRAIN */}
             {tab === "train" && (
               <div className="space-y-3.5">
-                <div className="card-light rounded-3xl p-4 space-y-3 border-blush-300">
+                <div className={`rounded-3xl p-4 space-y-3 border card-light ${darkMode ? 'bg-[#2D2726] border-rose-900/30' : 'bg-white border-blush-300'}`}>
                   <div className="flex justify-between items-center">
                     <span className="text-[10px] font-bold text-roseGold uppercase tracking-widest">Hormonal Rhythm</span>
                     <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${cycle.info.color}`}>
@@ -1008,20 +1185,20 @@
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2.5 bg-blush-50/70 p-3 rounded-2xl border border-blush-200">
+                  <div className={`grid grid-cols-2 gap-2.5 p-3 rounded-2xl border ${darkMode ? 'bg-[#1E1918] border-rose-900/30' : 'bg-blush-50/70 border-blush-200'}`}>
                     <div>
                       <label className="block text-[9px] font-semibold text-mutedMauve uppercase mb-1">Period Start</label>
                       <input
                         type="date"
                         value={periodStart}
                         onChange={e => setPeriodStart(e.target.value)}
-                        className="w-full bg-white border border-blush-200 text-charcoal text-[11px] font-medium p-1.5 rounded-xl focus:outline-none"
+                        className={`w-full text-[11px] font-medium p-1.5 rounded-xl focus:outline-none border ${darkMode ? 'bg-[#2D2726] text-champagne border-rose-900/40' : 'bg-white text-charcoal border-blush-200'}`}
                       />
                     </div>
                     <div>
                       <div className="flex justify-between text-[9px] font-semibold text-mutedMauve uppercase mb-1">
                         <span>Cycle Length</span>
-                        <span className="text-blush-600 font-bold">{cycleLen}d</span>
+                        <span className="text-blush-600 dark:text-rose-400 font-bold">{cycleLen}d</span>
                       </div>
                       <input
                         type="range"
@@ -1034,23 +1211,23 @@
                     </div>
                   </div>
 
-                  <p className="text-[11px] text-charcoal/80 bg-white/80 p-2.5 rounded-2xl leading-relaxed border border-blush-100">
+                  <p className={`text-[11px] p-2.5 rounded-2xl leading-relaxed border ${darkMode ? 'bg-[#1E1918] text-champagne/90 border-rose-900/30' : 'bg-white/80 text-charcoal/80 border-blush-100'}`}>
                     🌸 <strong>{cycle.info.tag}:</strong> {cycle.info.tip}
                   </p>
                 </div>
 
-                <div className="card-light p-3.5 rounded-2xl flex items-center justify-between">
+                <div className={`p-3.5 rounded-2xl flex items-center justify-between card-light ${darkMode ? 'bg-[#2D2726] border-rose-900/30' : 'bg-white border-blush-200'}`}>
                   <div>
                     <span className="text-[9px] font-bold text-roseGold uppercase tracking-wider">Session Load</span>
-                    <p className="text-xs font-black text-blush-600 font-mono">{liveSessionVolume.toLocaleString()} kg Sculpted</p>
+                    <p className="text-xs font-black text-blush-600 dark:text-rose-400 font-mono">{liveSessionVolume.toLocaleString()} kg Sculpted</p>
                   </div>
                   <div className="text-right">
                     <span className="text-[9px] font-bold text-roseGold uppercase tracking-wider">Workout Progress</span>
-                    <p className="text-xs font-black text-charcoal font-mono">{completedSetsCount} / {totalSetsCount} Sets Completed</p>
+                    <p className={`text-xs font-black font-mono ${darkMode ? 'text-champagne' : 'text-charcoal'}`}>{completedSetsCount} / {totalSetsCount} Sets Completed</p>
                   </div>
                 </div>
 
-                <div className="card-light p-1 rounded-2xl flex gap-1">
+                <div className={`p-1 rounded-2xl flex gap-1 card-light ${darkMode ? 'bg-[#2D2726] border-rose-900/30' : 'bg-white border-blush-200'}`}>
                   {["beginner", "intermediate", "advanced"].map(tier => (
                     <button
                       key={tier}
@@ -1063,7 +1240,7 @@
                         if (hapticsEnabled) triggerHaptic(10);
                       }}
                       className={`flex-1 py-1.5 rounded-xl text-xs font-semibold capitalize transition-all ${
-                        safeDiffKey === tier ? "bg-blush-500 text-white shadow-sm font-bold" : "text-mutedMauve hover:text-charcoal"
+                        safeDiffKey === tier ? "bg-blush-500 text-white shadow-sm font-bold" : "text-mutedMauve hover:text-charcoal dark:hover:text-champagne"
                       }`}
                     >
                       {tier}
@@ -1085,7 +1262,7 @@
                             if (hapticsEnabled) triggerHaptic(10);
                           }}
                           className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all border ${
-                            workoutDay === d ? "bg-white text-blush-600 border-blush-400 shadow-sm" : "bg-blush-50/60 text-mutedMauve border-blush-100"
+                            workoutDay === d ? (darkMode ? 'bg-[#2D2726] text-rose-400 border-rose-500 shadow-sm' : 'bg-white text-blush-600 border-blush-400 shadow-sm') : (darkMode ? 'bg-[#1E1918] text-mutedMauve border-rose-900/30' : 'bg-blush-50/60 text-mutedMauve border-blush-100')
                           }`}
                         >
                           Workout {d}
@@ -1094,20 +1271,20 @@
                     </div>
                     <button
                       onClick={() => { setShowTempo(!showTempo); if (hapticsEnabled) triggerHaptic(12); }}
-                      className="card-light px-3 py-2 rounded-xl text-xs font-semibold text-charcoal hover:bg-blush-50"
+                      className={`px-3 py-2 rounded-xl text-xs font-semibold card-light ${darkMode ? 'bg-[#2D2726] text-champagne border-rose-900/30' : 'bg-white text-charcoal'}`}
                     >
                       ⏱️ 3-0-1 Tempo
                     </button>
                   </div>
 
-                  <div className="card-light p-2.5 rounded-2xl flex items-center justify-between gap-2">
+                  <div className={`p-2.5 rounded-2xl flex items-center justify-between gap-2 card-light ${darkMode ? 'bg-[#2D2726] border-rose-900/30' : 'bg-white border-blush-200'}`}>
                     <span className="text-[9px] font-bold uppercase text-roseGold">Quick Rest:</span>
                     <div className="flex gap-1.5">
                       {[30, 45, 60, 90].map(s => (
                         <button
                           key={s}
                           onClick={() => startManualTimer(s)}
-                          className="bg-blush-50 hover:bg-blush-100 text-blush-600 px-2.5 py-1 rounded-lg text-[10px] font-bold border border-blush-200"
+                          className={`px-2.5 py-1 rounded-lg text-[10px] font-bold border ${darkMode ? 'bg-[#1E1918] text-rose-300 border-rose-900/40 hover:bg-[#2D2726]' : 'bg-blush-50 hover:bg-blush-100 text-blush-600 border-blush-200'}`}
                         >
                           {s}s
                         </button>
@@ -1117,10 +1294,10 @@
                 </div>
 
                 {isResting && (
-                  <div className="card-light border-blush-400 p-3.5 rounded-2xl flex items-center justify-between animate-pulse">
+                  <div className={`p-3.5 rounded-2xl flex items-center justify-between animate-pulse card-light border-blush-400 ${darkMode ? 'bg-[#2D2726] border-rose-500' : 'bg-white'}`}>
                     <div className="flex items-center gap-3">
                       <svg width="40" height="40" className="w-10 h-10 shrink-0">
-                        <circle cx="20" cy="20" r={arcRadius} stroke="#FBF0EE" strokeWidth="3.5" fill="transparent" />
+                        <circle cx="20" cy="20" r={arcRadius} stroke={darkMode ? "#3D3534" : "#FBF0EE"} strokeWidth="3.5" fill="transparent" />
                         <circle
                           cx="20"
                           cy="20"
@@ -1133,11 +1310,11 @@
                           strokeLinecap="round"
                           className="timer-arc"
                         />
-                        <text x="20" y="24" textAnchor="middle" fill="#2D2726" fontSize="10" fontWeight="bold">{restSec}s</text>
+                        <text x="20" y="24" textAnchor="middle" fill={darkMode ? "#F8F4EE" : "#2D2726"} fontSize="10" fontWeight="bold">{restSec}s</text>
                       </svg>
                       <div>
                         <span className="text-[9px] font-bold uppercase tracking-wider text-roseGold">Resting Interval</span>
-                        <p className="text-xs font-bold text-blush-600">Breathe & prepare for your next set</p>
+                        <p className={`text-xs font-bold ${darkMode ? 'text-rose-300' : 'text-blush-600'}`}>Breathe & prepare for your next set</p>
                       </div>
                     </div>
                     <button onClick={() => { setIsResting(false); if (hapticsEnabled) triggerHaptic(10); }} className="text-[10px] text-mutedMauve underline">
@@ -1147,19 +1324,19 @@
                 )}
 
                 {showTempo && (
-                  <div className="card-light p-4 rounded-2xl text-center space-y-3 border-blush-300">
+                  <div className={`p-4 rounded-2xl text-center space-y-3 card-light ${darkMode ? 'bg-[#2D2726] border-rose-900/40' : 'bg-white border-blush-300'}`}>
                     <div className="flex justify-between items-center">
-                      <span className="text-xs font-bold text-blush-600 font-serif">3-0-1 Rep Metronome</span>
+                      <span className={`text-xs font-bold font-serif ${darkMode ? 'text-rose-400' : 'text-blush-600'}`}>3-0-1 Rep Metronome</span>
                       <button onClick={() => setShowTempo(false)} className="text-xs text-mutedMauve">✕</button>
                     </div>
-                    <div className="py-3 bg-blush-50/80 rounded-2xl border border-blush-200">
-                      <div className="text-3xl font-black font-mono text-charcoal">{tempoRunning ? tempoCount : "3-0-1"}</div>
-                      <p className="text-[10px] text-blush-600 font-bold uppercase tracking-wider mt-1">{tempoPhase}</p>
+                    <div className={`py-3 rounded-2xl border ${darkMode ? 'bg-[#1E1918] border-rose-900/30' : 'bg-blush-50/80 border-blush-200'}`}>
+                      <div className={`text-3xl font-black font-mono ${darkMode ? 'text-champagne' : 'text-charcoal'}`}>{tempoRunning ? tempoCount : "3-0-1"}</div>
+                      <p className="text-[10px] text-blush-600 dark:text-rose-400 font-bold uppercase tracking-wider mt-1">{tempoPhase}</p>
                     </div>
                     <button
                       onClick={() => { setTempoRunning(!tempoRunning); if (hapticsEnabled) triggerHaptic(15); }}
                       className={`w-full py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm ${
-                        tempoRunning ? "bg-blush-600 text-white" : "bg-blush-100 text-blush-600 hover:bg-blush-200"
+                        tempoRunning ? "bg-blush-600 text-white" : (darkMode ? 'bg-rose-950/60 text-rose-300 border border-rose-800' : 'bg-blush-100 text-blush-600 hover:bg-blush-200')
                       }`}
                     >
                       {tempoRunning ? "Pause Metronome" : "Start 3-0-1 Metronome"}
@@ -1190,8 +1367,8 @@
                           setActiveModalPacing(false);
                           if (hapticsEnabled) triggerHaptic(12);
                         }}
-                        className={`p-4 rounded-3xl transition-all cursor-pointer hover:border-blush-400 ${
-                          isCurrent ? "card-active" : "card-light"
+                        className={`p-4 rounded-3xl transition-all cursor-pointer card-light ${
+                          isCurrent ? (darkMode ? 'bg-[#2D2726] border-rose-500 shadow-lg' : 'card-active') : (darkMode ? 'bg-[#2D2726] border-rose-900/30 hover:border-rose-700' : 'card-light')
                         }`}
                       >
                         <div className="flex items-center justify-between mb-3">
@@ -1199,14 +1376,14 @@
                             <img src={ex.img} alt={ex.name} className="w-12 h-12 rounded-2xl object-cover border border-blush-200 shadow-sm shrink-0" />
                             <div>
                               <div className="flex items-center gap-1.5">
-                                <h4 className="text-xs font-serif font-bold text-charcoal">{ex.name}</h4>
-                                {exDone && <span className="text-[8px] bg-rose-100 text-blush-600 px-2 py-0.5 rounded-full font-bold">Done</span>}
+                                <h4 className={`text-xs font-serif font-bold ${darkMode ? 'text-champagne' : 'text-charcoal'}`}>{ex.name}</h4>
+                                {exDone && <span className={`text-[8px] px-2 py-0.5 rounded-full font-bold ${darkMode ? 'bg-rose-950 text-rose-300' : 'bg-rose-100 text-blush-600'}`}>Done</span>}
                               </div>
-                              <p className="text-[10px] text-blush-600 font-medium mt-0.5">⏱️ Tempo: {ex.tempo} • {ex.target}</p>
+                              <p className="text-[10px] text-blush-600 dark:text-rose-400 font-medium mt-0.5">⏱️ Tempo: {ex.tempo} • {ex.target}</p>
                             </div>
                           </div>
                           
-                          <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
+                          <div className="flex items-center gap-1.5" onClick={e => e.stopPropagation()}>
                             <input
                               type="number"
                               step="0.5"
@@ -1215,9 +1392,16 @@
                                 const v = e.target.value;
                                 setWeights({ ...weights, [ex.id]: v === '' ? '' : parseFloat(v) });
                               }}
-                              className="w-12 bg-blush-50 border border-blush-200 text-center text-xs font-bold text-charcoal py-1 rounded-xl focus:outline-none focus:border-blush-400"
+                              className={`w-12 text-center text-xs font-bold py-1 rounded-xl focus:outline-none border ${darkMode ? 'bg-[#1E1918] text-champagne border-rose-900/40' : 'bg-blush-50 text-charcoal border-blush-200'}`}
                             />
                             <span className="text-[10px] text-mutedMauve">kg</span>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); setSwapModalEx(ex); }}
+                              title="Swap Exercise"
+                              className={`p-1.5 rounded-xl border text-xs ${darkMode ? 'bg-[#1E1918] text-rose-300 border-rose-900/40 hover:bg-rose-950' : 'bg-blush-50 text-blush-600 border-blush-200 hover:bg-blush-100'}`}
+                            >
+                              🔄
+                            </button>
                           </div>
                         </div>
 
@@ -1233,7 +1417,7 @@
                                   toggleSet(setKey, ex.rest, ex.id, ex);
                                 }}
                                 className={`flex-1 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                                  isDone ? "bg-blush-500 text-white shadow-sm" : "bg-blush-50 text-mutedMauve border border-blush-100 hover:bg-blush-100"
+                                  isDone ? "bg-blush-500 text-white shadow-sm" : (darkMode ? 'bg-[#1E1918] text-mutedMauve border border-rose-900/30 hover:bg-rose-950/50' : 'bg-blush-50 text-mutedMauve border border-blush-100 hover:bg-blush-100')
                                 }`}
                               >
                                 {isDone ? "✓" : sIdx + 1}
@@ -1263,14 +1447,14 @@
             {tab === "fuel" && (
               <div className="space-y-4">
                 
-                <div className="card-light p-4 rounded-3xl space-y-2.5">
+                <div className={`p-4 rounded-3xl space-y-2.5 card-light ${darkMode ? 'bg-[#2D2726] border-rose-900/30' : 'bg-white border-blush-200'}`}>
                   <div className="flex justify-between items-center">
                     <div>
-                      <h3 className="text-xs font-bold text-charcoal uppercase tracking-wider">3L Daily Hydration Radiance</h3>
-                      <p className="text-[10px] text-blush-600 font-medium">8 Glasses (~375ml each) • {waterGlasses * 375} / 3000 ml</p>
+                      <h3 className={`text-xs font-bold uppercase tracking-wider ${darkMode ? 'text-champagne' : 'text-charcoal'}`}>3L Daily Hydration Radiance</h3>
+                      <p className="text-[10px] text-blush-600 dark:text-rose-400 font-medium">8 Glasses (~375ml each) • {waterGlasses * 375} / 3000 ml</p>
                     </div>
                     <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
-                      waterGlasses >= 8 ? "bg-rose-100 text-blush-600 border-blush-300" : "bg-blush-50 text-mutedMauve border-blush-200"
+                      waterGlasses >= 8 ? (darkMode ? 'bg-rose-950 text-rose-300 border-rose-800' : 'bg-rose-100 text-blush-600 border-blush-300') : (darkMode ? 'bg-[#1E1918] text-mutedMauve border-rose-900/30' : 'bg-blush-50 text-mutedMauve border-blush-200')
                     }`}>
                       {waterGlasses >= 8 ? "Goal Reached! 💧" : `${8 - waterGlasses} Left`}
                     </span>
@@ -1284,7 +1468,7 @@
                           key={gIdx}
                           onClick={() => setWater(gIdx)}
                           className={`h-10 rounded-xl text-sm font-bold flex items-center justify-center border transition-all ${
-                            isFilled ? "bg-blush-400 text-white border-blush-500 shadow-sm scale-105" : "bg-blush-50 text-blush-200 border-blush-100"
+                            isFilled ? "bg-blush-400 text-white border-blush-500 shadow-sm scale-105" : (darkMode ? 'bg-[#1E1918] text-mutedMauve border-rose-900/40' : 'bg-blush-50 text-blush-200 border-blush-100')
                           }`}
                         >
                           💧
@@ -1294,11 +1478,11 @@
                   </div>
                 </div>
 
-                <div className="card-light p-1 rounded-2xl flex gap-1 text-xs font-semibold">
+                <div className={`p-1 rounded-2xl flex gap-1 text-xs font-semibold card-light ${darkMode ? 'bg-[#2D2726] border-rose-900/30' : 'bg-white border-blush-200'}`}>
                   <button
                     onClick={() => { setFuelSubTab("meals"); if (hapticsEnabled) triggerHaptic(8); }}
                     className={`flex-1 py-1.5 rounded-xl transition-all ${
-                      fuelSubTab === "meals" ? "bg-blush-500 text-white shadow-sm font-bold" : "text-mutedMauve hover:text-charcoal"
+                      fuelSubTab === "meals" ? "bg-blush-500 text-white shadow-sm font-bold" : "text-mutedMauve hover:text-charcoal dark:hover:text-champagne"
                     }`}
                   >
                     Recipes
@@ -1306,7 +1490,7 @@
                   <button
                     onClick={() => { setFuelSubTab("checklist"); if (hapticsEnabled) triggerHaptic(8); }}
                     className={`flex-1 py-1.5 rounded-xl transition-all ${
-                      fuelSubTab === "checklist" ? "bg-blush-500 text-white shadow-sm font-bold" : "text-mutedMauve hover:text-charcoal"
+                      fuelSubTab === "checklist" ? "bg-blush-500 text-white shadow-sm font-bold" : "text-mutedMauve hover:text-charcoal dark:hover:text-champagne"
                     }`}
                   >
                     Grocery List
@@ -1314,7 +1498,7 @@
                   <button
                     onClick={() => { setFuelSubTab("swaps"); if (hapticsEnabled) triggerHaptic(8); }}
                     className={`flex-1 py-1.5 rounded-xl transition-all ${
-                      fuelSubTab === "swaps" ? "bg-blush-500 text-white shadow-sm font-bold" : "text-mutedMauve hover:text-charcoal"
+                      fuelSubTab === "swaps" ? "bg-blush-500 text-white shadow-sm font-bold" : "text-mutedMauve hover:text-charcoal dark:hover:text-champagne"
                     }`}
                   >
                     Swaps
@@ -1329,7 +1513,7 @@
                           key={idx}
                           onClick={() => { setMealDayIdx(idx); setExpandedMealIdx(null); if (hapticsEnabled) triggerHaptic(8); }}
                           className={`px-3.5 py-1.5 rounded-xl text-xs font-bold shrink-0 border transition-all ${
-                            mealDayIdx === idx ? "bg-white text-blush-600 border-blush-400 shadow-sm" : "bg-blush-50 text-mutedMauve border-blush-100"
+                            mealDayIdx === idx ? (darkMode ? 'bg-[#2D2726] text-rose-300 border-rose-500 shadow-sm' : 'bg-white text-blush-600 border-blush-400 shadow-sm') : (darkMode ? 'bg-[#2D2726] text-mutedMauve border-rose-900/30' : 'bg-blush-50 text-mutedMauve border-blush-100')
                           }`}
                         >
                           {m.day.slice(0, 3)}
@@ -1338,12 +1522,12 @@
                     </div>
 
                     {SA_MEALS[mealDayIdx] && (
-                      <div className="p-3 bg-blush-50/70 rounded-2xl border border-blush-200 flex justify-between items-center text-xs">
+                      <div className={`p-3 rounded-2xl border flex justify-between items-center text-xs ${darkMode ? 'bg-[#2D2726] border-rose-900/30' : 'bg-blush-50/70 border-blush-200'}`}>
                         <div>
-                          <span className="font-serif font-bold text-charcoal">{SA_MEALS[mealDayIdx].day} Meal Plan</span>
+                          <span className={`font-serif font-bold ${darkMode ? 'text-champagne' : 'text-charcoal'}`}>{SA_MEALS[mealDayIdx].day} Meal Plan</span>
                           <p className="text-[10px] text-mutedMauve">{SA_MEALS[mealDayIdx].type}</p>
                         </div>
-                        <span className="text-[10px] font-bold text-blush-600 bg-white px-2.5 py-1 rounded-xl border border-blush-200">
+                        <span className={`text-[10px] font-bold px-2.5 py-1 rounded-xl border ${darkMode ? 'bg-[#1E1918] text-rose-300 border-rose-900/40' : 'bg-white text-blush-600 border-blush-200'}`}>
                           {SA_MEALS[mealDayIdx].target}
                         </span>
                       </div>
@@ -1353,27 +1537,27 @@
                       {((SA_MEALS[mealDayIdx] && SA_MEALS[mealDayIdx].meals) ? SA_MEALS[mealDayIdx].meals : []).map((meal, mIdx) => {
                         const isExpanded = expandedMealIdx === mIdx;
                         return (
-                          <div key={mIdx} className="card-light rounded-2xl overflow-hidden transition-all">
+                          <div key={mIdx} className={`rounded-2xl overflow-hidden transition-all card-light ${darkMode ? 'bg-[#2D2726] border-rose-900/30' : 'bg-white border-blush-200'}`}>
                             <div
                               onClick={() => { setExpandedMealIdx(isExpanded ? null : mIdx); if (hapticsEnabled) triggerHaptic(8); }}
-                              className="p-3 flex items-center justify-between cursor-pointer hover:bg-blush-50/50 gap-2.5"
+                              className={`p-3 flex items-center justify-between cursor-pointer gap-2.5 ${darkMode ? 'hover:bg-rose-950/30' : 'hover:bg-blush-50/50'}`}
                             >
                               <img src={meal.img} alt={meal.title} className="w-12 h-12 rounded-xl object-cover border border-blush-100 shrink-0" />
                               <div className="flex-1">
-                                <span className="text-[9px] font-bold uppercase tracking-wider text-blush-600">{meal.name}</span>
-                                <h4 className="text-xs font-serif font-bold text-charcoal">{meal.title}</h4>
+                                <span className="text-[9px] font-bold uppercase tracking-wider text-blush-600 dark:text-rose-400">{meal.name}</span>
+                                <h4 className={`text-xs font-serif font-bold ${darkMode ? 'text-champagne' : 'text-charcoal'}`}>{meal.title}</h4>
                               </div>
-                              <span className={`text-xs text-mutedMauve transition-transform ${isExpanded ? 'rotate-180 text-blush-600' : ''}`}>
+                              <span className={`text-xs text-mutedMauve transition-transform ${isExpanded ? 'rotate-180 text-blush-600 dark:text-rose-400' : ''}`}>
                                 ▼
                               </span>
                             </div>
 
                             {isExpanded && (
-                              <div className="p-3.5 pt-0 space-y-2 border-t border-blush-100 bg-blush-50/30">
-                                <p className="text-[11px] text-charcoal/80 bg-white p-2.5 rounded-xl border border-blush-100 mt-2">
+                              <div className={`p-3.5 pt-0 space-y-2 border-t ${darkMode ? 'border-rose-900/30 bg-[#1E1918]/50' : 'border-blush-100 bg-blush-50/30'}`}>
+                                <p className={`text-[11px] p-2.5 rounded-xl border mt-2 ${darkMode ? 'bg-[#2D2726] text-champagne/90 border-rose-900/40' : 'bg-white text-charcoal/80 border-blush-100'}`}>
                                   <strong>Ingredients:</strong> {meal.desc}
                                 </p>
-                                <ol className="text-[11px] text-charcoal/80 space-y-1 list-decimal list-inside pl-0.5">
+                                <ol className={`text-[11px] space-y-1 list-decimal list-inside pl-0.5 ${darkMode ? 'text-champagne/80' : 'text-charcoal/80'}`}>
                                   {meal.steps.map((st, sIdx) => (
                                     <li key={sIdx}>{st}</li>
                                   ))}
@@ -1388,24 +1572,33 @@
                 )}
 
                 {fuelSubTab === "checklist" && (
-                  <div className="card-light p-4 rounded-3xl space-y-3.5">
-                    <div className="flex justify-between items-center pb-1 border-b border-blush-100">
+                  <div className={`p-4 rounded-3xl space-y-3.5 card-light ${darkMode ? 'bg-[#2D2726] border-rose-900/30' : 'bg-white border-blush-200'}`}>
+                    <div className="flex justify-between items-center pb-1 border-b border-blush-100 dark:border-rose-900/30">
                       <div>
-                        <h3 className="text-xs font-serif font-bold text-charcoal uppercase tracking-wider">Supermarket Checklist</h3>
+                        <h3 className={`text-xs font-serif font-bold uppercase tracking-wider ${darkMode ? 'text-champagne' : 'text-charcoal'}`}>Supermarket Checklist</h3>
                         <p className="text-[10px] text-mutedMauve">Tap items to mark off as you shop</p>
                       </div>
-                      <button
-                        onClick={() => { setCheckedGroceries({}); if (hapticsEnabled) triggerHaptic(15); }}
-                        className="text-[10px] font-bold text-blush-600 bg-blush-50 px-2.5 py-1 rounded-lg border border-blush-200"
-                      >
-                        Reset
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={exportGroceryToWhatsApp}
+                          title="Share to WhatsApp"
+                          className="px-2.5 py-1 rounded-lg bg-emerald-600 text-white text-[10px] font-bold shadow-sm hover:bg-emerald-500"
+                        >
+                          💬 WhatsApp
+                        </button>
+                        <button
+                          onClick={() => { setCheckedGroceries({}); if (hapticsEnabled) triggerHaptic(15); }}
+                          className={`text-[10px] font-bold px-2.5 py-1 rounded-lg border ${darkMode ? 'bg-[#1E1918] text-rose-300 border-rose-900/40' : 'bg-blush-50 text-blush-600 border-blush-200'}`}
+                        >
+                          Reset
+                        </button>
+                      </div>
                     </div>
 
                     <div className="space-y-3">
                       {Object.keys(GROCERY_CATEGORIES).map((catName) => (
                         <div key={catName} className="space-y-1.5">
-                          <span className="text-[10px] font-bold text-blush-600 uppercase tracking-widest">{catName}</span>
+                          <span className="text-[10px] font-bold text-blush-600 dark:text-rose-400 uppercase tracking-widest">{catName}</span>
                           <div className="space-y-1">
                             {GROCERY_CATEGORIES[catName].map((item, i) => {
                               const isDone = !!checkedGroceries[item];
@@ -1414,12 +1607,14 @@
                                   key={i}
                                   onClick={() => toggleGroceryItem(item)}
                                   className={`p-2.5 rounded-xl text-xs flex items-center justify-between cursor-pointer border transition-all ${
-                                    isDone ? "bg-blush-50/50 text-mutedMauve line-through border-blush-100" : "bg-white text-charcoal border-blush-200 hover:border-blush-400"
+                                    isDone 
+                                      ? (darkMode ? 'bg-[#1E1918] text-mutedMauve line-through border-rose-900/20' : 'bg-blush-50/50 text-mutedMauve line-through border-blush-100') 
+                                      : (darkMode ? 'bg-[#1E1918] text-champagne border-rose-900/40 hover:border-rose-500' : 'bg-white text-charcoal border-blush-200 hover:border-blush-400')
                                   }`}
                                 >
                                   <span>{item}</span>
                                   <span className={`w-4 h-4 rounded flex items-center justify-center text-[10px] font-bold ${
-                                    isDone ? "bg-blush-500 text-white" : "border border-blush-300"
+                                    isDone ? "bg-blush-500 text-white" : (darkMode ? 'border border-rose-800' : 'border border-blush-300')
                                   }`}>
                                     {isDone ? "✓" : ""}
                                   </span>
@@ -1434,13 +1629,13 @@
                 )}
 
                 {fuelSubTab === "swaps" && (
-                  <div className="card-light p-4 rounded-3xl space-y-3">
-                    <h3 className="text-xs font-serif font-bold text-charcoal uppercase tracking-wider">Lifestyle Substitution Matrix</h3>
+                  <div className={`p-4 rounded-3xl space-y-3 card-light ${darkMode ? 'bg-[#2D2726] border-rose-900/30' : 'bg-white border-blush-200'}`}>
+                    <h3 className={`text-xs font-serif font-bold uppercase tracking-wider ${darkMode ? 'text-champagne' : 'text-charcoal'}`}>Lifestyle Substitution Matrix</h3>
                     <div className="grid grid-cols-2 gap-3 text-xs">
                       {Object.keys(SUBSTITUTIONS).map((cat, i) => (
                         <div key={i} className="space-y-1">
-                          <span className="text-[10px] font-bold text-blush-600 uppercase">{cat}</span>
-                          <ul className="text-[11px] text-charcoal/80 space-y-0.5">
+                          <span className="text-[10px] font-bold text-blush-600 dark:text-rose-400 uppercase">{cat}</span>
+                          <ul className={`text-[11px] space-y-0.5 ${darkMode ? 'text-champagne/80' : 'text-charcoal/80'}`}>
                             {SUBSTITUTIONS[cat].map((item, idx) => (
                               <li key={idx}>• {item}</li>
                             ))}
@@ -1457,19 +1652,19 @@
             {/* TAB 3: PROGRESS */}
             {tab === "progress" && (
               <div className="space-y-4">
-                <div className="card-light p-4 rounded-3xl space-y-3">
+                <div className={`p-4 rounded-3xl space-y-3 card-light ${darkMode ? 'bg-[#2D2726] border-rose-900/30' : 'bg-white border-blush-200'}`}>
                   <div className="flex justify-between items-center">
                     <div>
                       <span className="text-[9px] font-bold text-roseGold uppercase tracking-widest">Consistency Map</span>
-                      <h3 className="text-sm font-serif font-bold text-charcoal">{monthName} {currentYear}</h3>
+                      <h3 className={`text-sm font-serif font-bold ${darkMode ? 'text-champagne' : 'text-charcoal'}`}>{monthName} {currentYear}</h3>
                     </div>
-                    <span className="text-[10px] font-bold text-blush-600 bg-blush-50 px-2.5 py-0.5 rounded-full border border-blush-200">
+                    <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${darkMode ? 'text-rose-300 bg-rose-950/60 border-rose-800' : 'text-blush-600 bg-blush-50 border-blush-200'}`}>
                       {safeHistory.filter(h => h.fullDate && h.fullDate.startsWith(`${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`)).length} Workouts Done
                     </span>
                   </div>
 
-                  <div className="bg-blush-50/60 p-3 rounded-2xl border border-blush-100 space-y-1">
-                    <div className="grid grid-cols-7 text-center text-[9px] font-bold text-mutedMauve pb-1 border-b border-blush-200">
+                  <div className={`p-3 rounded-2xl border space-y-1 ${darkMode ? 'bg-[#1E1918] border-rose-900/30' : 'bg-blush-50/60 border-blush-100'}`}>
+                    <div className="grid grid-cols-7 text-center text-[9px] font-bold text-mutedMauve pb-1 border-b border-blush-200 dark:border-rose-900/40">
                       <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
                     </div>
                     <div className="grid grid-cols-7 gap-1 pt-1">
@@ -1488,8 +1683,8 @@
                             onClick={() => workoutDone && setSelectedCalendarDate(workoutDone)}
                             className={`h-9 rounded-xl flex flex-col items-center justify-center text-[10px] font-bold relative transition-all ${
                               workoutDone ? "bg-blush-400 text-white shadow-sm cursor-pointer scale-105" :
-                              isToday ? "bg-white text-blush-600 border border-blush-400" :
-                              "text-mutedMauve"
+                              isToday ? (darkMode ? 'bg-[#2D2726] text-rose-300 border border-rose-500' : 'bg-white text-blush-600 border border-blush-400') :
+                              (darkMode ? 'text-mutedMauve bg-[#2D2726]/40' : 'text-mutedMauve')
                             }`}
                           >
                             <span>{dayNum}</span>
@@ -1501,8 +1696,8 @@
                   </div>
 
                   {selectedCalendarDate && (
-                    <div className="p-3 bg-blush-50 rounded-2xl border border-blush-300 space-y-1 text-xs">
-                      <div className="flex justify-between items-center font-bold text-blush-600">
+                    <div className={`p-3 rounded-2xl border space-y-1 text-xs ${darkMode ? 'bg-[#1E1918] border-rose-500 text-rose-300' : 'bg-blush-50 border-blush-300 text-blush-600'}`}>
+                      <div className="flex justify-between items-center font-bold">
                         <span>Workout {selectedCalendarDate.day} Completed</span>
                         <button onClick={() => setSelectedCalendarDate(null)}>✕</button>
                       </div>
@@ -1511,13 +1706,13 @@
                   )}
                 </div>
 
-                <div className="card-light p-4 rounded-3xl space-y-3">
+                <div className={`p-4 rounded-3xl space-y-3 card-light ${darkMode ? 'bg-[#2D2726] border-rose-900/30' : 'bg-white border-blush-200'}`}>
                   <div className="flex justify-between items-center">
                     <div>
                       <span className="text-[9px] font-bold text-roseGold uppercase tracking-widest">60-Day Transformation</span>
-                      <h3 className="text-sm font-serif font-bold text-charcoal">Challenge Timeline</h3>
+                      <h3 className={`text-sm font-serif font-bold ${darkMode ? 'text-champagne' : 'text-charcoal'}`}>Challenge Timeline</h3>
                     </div>
-                    <span className="text-xs font-mono font-bold text-blush-600 bg-blush-50 px-2.5 py-1 rounded-xl border border-blush-200">
+                    <span className={`text-xs font-mono font-bold px-2.5 py-1 rounded-xl border ${darkMode ? 'text-rose-300 bg-[#1E1918] border-rose-900/40' : 'text-blush-600 bg-blush-50 border-blush-200'}`}>
                       {safeHistory.length} / 60 Days
                     </span>
                   </div>
@@ -1525,16 +1720,16 @@
                   <div className="space-y-1.5">
                     <div className="flex justify-between text-[10px] font-semibold text-mutedMauve">
                       <span>Phase 1: Metabolic Sculpt (Days 1–30)</span>
-                      <span className="text-blush-600">{Math.min(30, safeHistory.length)} / 30</span>
+                      <span className="text-blush-600 dark:text-rose-400">{Math.min(30, safeHistory.length)} / 30</span>
                     </div>
-                    <div className="grid grid-cols-10 gap-1 bg-blush-50/60 p-2.5 rounded-2xl border border-blush-100">
+                    <div className={`grid grid-cols-10 gap-1 p-2.5 rounded-2xl border ${darkMode ? 'bg-[#1E1918] border-rose-900/30' : 'bg-blush-50/60 border-blush-100'}`}>
                       {Array.from({ length: 30 }).map((_, i) => {
                         const isDone = i < safeHistory.length;
                         return (
                           <div
                             key={i}
                             className={`h-6 rounded-lg flex items-center justify-center text-[9px] font-bold transition-all ${
-                              isDone ? "bg-blush-500 text-white shadow-sm" : "bg-white text-blush-200"
+                              isDone ? "bg-blush-500 text-white shadow-sm" : (darkMode ? 'bg-[#2D2726] text-mutedMauve' : 'bg-white text-blush-200')
                             }`}
                           >
                             {isDone ? "✓" : i + 1}
@@ -1549,14 +1744,14 @@
                       <span>Phase 2: Glute Lift & Waist Taper (Days 31–60)</span>
                       <span className="text-roseGold">{Math.max(0, Math.min(30, history.length - 30))} / 30</span>
                     </div>
-                    <div className="grid grid-cols-10 gap-1 bg-blush-50/60 p-2.5 rounded-2xl border border-blush-100">
+                    <div className={`grid grid-cols-10 gap-1 p-2.5 rounded-2xl border ${darkMode ? 'bg-[#1E1918] border-rose-900/30' : 'bg-blush-50/60 border-blush-100'}`}>
                       {Array.from({ length: 30 }).map((_, i) => {
                         const isDone = (i + 30) < safeHistory.length;
                         return (
                           <div
                             key={i + 30}
                             className={`h-6 rounded-lg flex items-center justify-center text-[9px] font-bold transition-all ${
-                              isDone ? "bg-roseGold text-white shadow-sm" : "bg-white text-blush-200"
+                              isDone ? "bg-roseGold text-white shadow-sm" : (darkMode ? 'bg-[#2D2726] text-mutedMauve' : 'bg-white text-blush-200')
                             }`}
                           >
                             {isDone ? "✓" : i + 31}
@@ -1572,58 +1767,65 @@
             {/* TAB 4: PROFILE */}
             {tab === "profile" && (
               <div className="space-y-4">
-                <div className="card-light p-4 rounded-3xl space-y-4">
-                  <div className="flex items-center justify-between pb-3 border-b border-blush-100">
+                <div className={`p-4 rounded-3xl space-y-4 card-light ${darkMode ? 'bg-[#2D2726] border-rose-900/30' : 'bg-white border-blush-200'}`}>
+                  <div className="flex items-center justify-between pb-3 border-b border-blush-100 dark:border-rose-900/30">
                     <div className="flex items-center gap-3">
                       <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blush-300 via-blush-400 to-roseGold text-white flex items-center justify-center font-serif text-sm font-bold shadow-sm">
                         M60
                       </div>
                       <div>
-                        <h2 className="text-sm font-serif font-bold text-charcoal">{userProfile.name || 'Lindiwe'}, {userProfile.age || 29}y</h2>
-                        <p className="text-xs text-blush-600 font-medium">{userProfile.somatotype} • {userProfile.experience}</p>
+                        <h2 className={`text-sm font-serif font-bold ${darkMode ? 'text-champagne' : 'text-charcoal'}`}>{userProfile.name || 'Lindiwe'}, {userProfile.age || 29}y</h2>
+                        <p className="text-xs text-blush-600 dark:text-rose-400 font-medium">{userProfile.somatotype} • {userProfile.experience}</p>
                       </div>
                     </div>
                     <button
                       onClick={() => { setTourSlide(0); setShowWelcomeScreen(true); if (hapticsEnabled) triggerHaptic(10); }}
-                      className="text-[10px] font-bold text-blush-600 bg-blush-50 px-3 py-1 rounded-xl border border-blush-200 hover:bg-blush-100"
+                      className={`text-[10px] font-bold px-3 py-1 rounded-xl border ${darkMode ? 'text-rose-300 bg-[#1E1918] border-rose-900/40 hover:bg-rose-950' : 'text-blush-600 bg-blush-50 border-blush-200 hover:bg-blush-100'}`}
                     >
                       ▶ Interactive Tour
                     </button>
                   </div>
 
-                  <div className="bg-blush-50/70 p-2.5 rounded-2xl flex items-center justify-between text-xs border border-blush-100">
+                  <div className={`p-2.5 rounded-2xl flex items-center justify-between text-xs border ${darkMode ? 'bg-[#1E1918] border-rose-900/30' : 'bg-blush-50/70 border-blush-100'}`}>
                     <span className="text-mutedMauve font-medium">Primary Focus:</span>
-                    <span className="font-serif font-bold text-blush-600">{userProfile.goal}</span>
+                    <span className="font-serif font-bold text-blush-600 dark:text-rose-400">{userProfile.goal}</span>
                   </div>
 
-                  <div className="bg-blush-50/60 p-3.5 rounded-2xl border border-blush-200 space-y-2">
+                  <div className={`p-3.5 rounded-2xl border space-y-2 ${darkMode ? 'bg-[#1E1918] border-rose-900/40' : 'bg-blush-50/60 border-blush-200'}`}>
                     <div className="flex justify-between items-center">
-                      <span className="text-[9px] font-bold text-roseGold uppercase tracking-widest">Calibrated Metabolic Targets</span>
-                      <span className="text-[10px] font-bold text-blush-600 font-mono">{metabolicTargets.pRatio}P / {metabolicTargets.cRatio}C / {metabolicTargets.fRatio}F</span>
+                      <span className="text-[9px] font-bold text-roseGold uppercase tracking-widest">
+                        {metabolicTargets.isLutealBuffered ? "🌙 Luteal Phase Calibrated (+150 kcal Buffer)" : "Calibrated Metabolic Targets"}
+                      </span>
+                      <span className="text-[10px] font-bold text-blush-600 dark:text-rose-400 font-mono">{metabolicTargets.pRatio}P / {metabolicTargets.cRatio}C / {metabolicTargets.fRatio}F</span>
                     </div>
                     <div className="flex justify-between items-baseline">
-                      <span className="text-lg font-serif font-bold text-charcoal">{metabolicTargets.calories.toLocaleString()} <span className="text-xs font-normal text-mutedMauve">kcal / day</span></span>
+                      <span className={`text-lg font-serif font-bold ${darkMode ? 'text-champagne' : 'text-charcoal'}`}>{metabolicTargets.calories.toLocaleString()} <span className="text-xs font-normal text-mutedMauve">kcal / day</span></span>
                       <span className="text-[11px] text-mutedMauve">Daily Deficit Target</span>
                     </div>
+                    {metabolicTargets.isLutealBuffered && (
+                      <p className="text-[10px] text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/60 p-2 rounded-xl border border-purple-200 dark:border-purple-800">
+                        ✨ <strong>Phase Notice:</strong> Your calorie target is slightly elevated today to support core temperature and natural energy needs during your Luteal phase.
+                      </p>
+                    )}
                     <div className="grid grid-cols-3 gap-2 pt-1">
-                      <div className="bg-white p-2 rounded-xl text-center border border-blush-100">
+                      <div className={`p-2 rounded-xl text-center border ${darkMode ? 'bg-[#2D2726] border-rose-900/30' : 'bg-white border-blush-100'}`}>
                         <span className="text-[8px] text-mutedMauve uppercase block font-bold">Protein</span>
-                        <span className="text-xs font-bold text-charcoal">{metabolicTargets.pGrams}g</span>
+                        <span className={`text-xs font-bold ${darkMode ? 'text-champagne' : 'text-charcoal'}`}>{metabolicTargets.pGrams}g</span>
                       </div>
-                      <div className="bg-white p-2 rounded-xl text-center border border-blush-100">
+                      <div className={`p-2 rounded-xl text-center border ${darkMode ? 'bg-[#2D2726] border-rose-900/30' : 'bg-white border-blush-100'}`}>
                         <span className="text-[8px] text-mutedMauve uppercase block font-bold">Carbs</span>
-                        <span className="text-xs font-bold text-charcoal">{metabolicTargets.cGrams}g</span>
+                        <span className={`text-xs font-bold ${darkMode ? 'text-champagne' : 'text-charcoal'}`}>{metabolicTargets.cGrams}g</span>
                       </div>
-                      <div className="bg-white p-2 rounded-xl text-center border border-blush-100">
+                      <div className={`p-2 rounded-xl text-center border ${darkMode ? 'bg-[#2D2726] border-rose-900/30' : 'bg-white border-blush-100'}`}>
                         <span className="text-[8px] text-mutedMauve uppercase block font-bold">Fats</span>
-                        <span className="text-xs font-bold text-charcoal">{metabolicTargets.fGrams}g</span>
+                        <span className={`text-xs font-bold ${darkMode ? 'text-champagne' : 'text-charcoal'}`}>{metabolicTargets.fGrams}g</span>
                       </div>
                     </div>
                   </div>
 
                   <div className="space-y-1.5">
                     <span className="text-[9px] font-bold text-roseGold uppercase tracking-wider">Current Measurements</span>
-                    <div className="grid grid-cols-2 gap-2 bg-blush-50/40 p-3 rounded-2xl border border-blush-100 text-xs">
+                    <div className={`grid grid-cols-2 gap-2 p-3 rounded-2xl border text-xs ${darkMode ? 'bg-[#1E1918] border-rose-900/30' : 'bg-blush-50/40 border-blush-100'}`}>
                       <div>
                         <span className="text-[9px] text-mutedMauve uppercase font-semibold">Current Weight</span>
                         <div className="flex items-baseline gap-1 mt-0.5">
@@ -1635,7 +1837,7 @@
                               const v = e.target.value;
                               setUserProfile({ ...userProfile, currentWeight: v === '' ? '' : parseFloat(v) });
                             }}
-                            className="w-14 bg-white border border-blush-200 text-center font-bold text-charcoal p-1 rounded-lg focus:outline-none"
+                            className={`w-14 text-center font-bold p-1 rounded-lg focus:outline-none border ${darkMode ? 'bg-[#2D2726] text-champagne border-rose-900/40' : 'bg-white text-charcoal border-blush-200'}`}
                           />
                           <span className="text-mutedMauve">kg</span>
                         </div>
@@ -1651,12 +1853,12 @@
                               const v = e.target.value;
                               setUserProfile({ ...userProfile, targetWeight: v === '' ? '' : parseFloat(v) });
                             }}
-                            className="w-14 bg-white border border-blush-200 text-center font-bold text-blush-600 p-1 rounded-lg focus:outline-none"
+                            className={`w-14 text-center font-bold p-1 rounded-lg focus:outline-none border ${darkMode ? 'bg-[#2D2726] text-rose-400 border-rose-900/40' : 'bg-white text-blush-600 border-blush-200'}`}
                           />
                           <span className="text-mutedMauve">kg</span>
                         </div>
                       </div>
-                      <div className="pt-2 border-t border-blush-100">
+                      <div className="pt-2 border-t border-blush-100 dark:border-rose-900/30">
                         <span className="text-[9px] text-mutedMauve uppercase font-semibold">Waist</span>
                         <div className="flex items-baseline gap-1 mt-0.5">
                           <input
@@ -1666,12 +1868,12 @@
                               const v = e.target.value;
                               setUserProfile({ ...userProfile, waist: v === '' ? '' : parseInt(v, 10) });
                             }}
-                            className="w-14 bg-white border border-blush-200 text-center font-bold text-charcoal p-1 rounded-lg focus:outline-none"
+                            className={`w-14 text-center font-bold p-1 rounded-lg focus:outline-none border ${darkMode ? 'bg-[#2D2726] text-champagne border-rose-900/40' : 'bg-white text-charcoal border-blush-200'}`}
                           />
                           <span className="text-mutedMauve">cm</span>
                         </div>
                       </div>
-                      <div className="pt-2 border-t border-blush-100">
+                      <div className="pt-2 border-t border-blush-100 dark:border-rose-900/30">
                         <span className="text-[9px] text-mutedMauve uppercase font-semibold">Hips</span>
                         <div className="flex items-baseline gap-1 mt-0.5">
                           <input
@@ -1681,7 +1883,7 @@
                               const v = e.target.value;
                               setUserProfile({ ...userProfile, hips: v === '' ? '' : parseInt(v, 10) });
                             }}
-                            className="w-14 bg-white border border-blush-200 text-center font-bold text-charcoal p-1 rounded-lg focus:outline-none"
+                            className={`w-14 text-center font-bold p-1 rounded-lg focus:outline-none border ${darkMode ? 'bg-[#2D2726] text-champagne border-rose-900/40' : 'bg-white text-charcoal border-blush-200'}`}
                           />
                           <span className="text-mutedMauve">cm</span>
                         </div>
@@ -1692,40 +1894,42 @@
                   <div className="space-y-2 pt-1">
                     <button
                       onClick={startOnboardingWizard}
-                      className="w-full py-2.5 rounded-xl bg-blush-50 text-xs font-bold text-blush-600 hover:bg-blush-100 transition-all border border-blush-200"
+                      className={`w-full py-2.5 rounded-xl text-xs font-bold transition-all border ${darkMode ? 'bg-[#1E1918] text-rose-300 border-rose-900/40 hover:bg-rose-950' : 'bg-blush-50 text-blush-600 border-blush-200 hover:bg-blush-100'}`}
                     >
                       ✨ Edit Profile & Somatotype Questionnaire
                     </button>
                     <button
                       onClick={() => setShowResetConfirmModal(true)}
-                      className="w-full py-2.5 rounded-xl bg-rose-50 text-xs font-bold text-rose-600 border border-rose-200 transition-all"
+                      className="w-full py-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 text-xs font-bold text-rose-600 dark:text-rose-300 border border-rose-200 dark:border-rose-800 transition-all"
                     >
                       ⚠️ Reset All Lifestyle & Workout Records
                     </button>
                   </div>
                 </div>
 
-                <div className="card-light p-4 rounded-3xl space-y-3">
+                <div className={`p-4 rounded-3xl space-y-3 card-light ${darkMode ? 'bg-[#2D2726] border-rose-900/30' : 'bg-white border-blush-200'}`}>
                   <div className="flex justify-between items-center">
-                    <h3 className="text-xs font-serif font-bold text-charcoal uppercase tracking-wider">Milestone Achievements</h3>
-                    <span className="text-[10px] font-bold text-blush-600">{badges.filter(b => b.unlocked).length} / {badges.length} Unlocked</span>
+                    <h3 className={`text-xs font-serif font-bold uppercase tracking-wider ${darkMode ? 'text-champagne' : 'text-charcoal'}`}>Milestone Achievements</h3>
+                    <span className="text-[10px] font-bold text-blush-600 dark:text-rose-400">{badges.filter(b => b.unlocked).length} / {badges.length} Unlocked</span>
                   </div>
                   <div className="grid grid-cols-1 gap-2">
                     {badges.map(b => (
                       <div
                         key={b.id}
                         className={`p-3 rounded-2xl border flex items-center justify-between text-xs transition-all ${
-                          b.unlocked ? "bg-blush-50/60 border-blush-300 text-charcoal" : "bg-white border-blush-100 text-mutedMauve opacity-50"
+                          b.unlocked 
+                            ? (darkMode ? 'bg-[#1E1918] border-rose-900/40 text-champagne' : 'bg-blush-50/60 border-blush-300 text-charcoal') 
+                            : (darkMode ? 'bg-[#1E1918]/40 border-rose-900/20 text-mutedMauve opacity-50' : 'bg-white border-blush-100 text-mutedMauve opacity-50')
                         }`}
                       >
                         <div className="flex items-center gap-2.5">
                           <span className="text-lg">{b.icon}</span>
                           <div>
-                            <h4 className="font-bold text-charcoal">{b.name}</h4>
+                            <h4 className={`font-bold ${darkMode ? 'text-champagne' : 'text-charcoal'}`}>{b.name}</h4>
                             <p className="text-[10px] text-mutedMauve">{b.desc}</p>
                           </div>
                         </div>
-                        <span className={`text-[10px] font-bold ${b.unlocked ? "text-blush-600" : "text-mutedMauve"}`}>
+                        <span className={`text-[10px] font-bold ${b.unlocked ? (darkMode ? 'text-rose-400' : 'text-blush-600') : 'text-mutedMauve'}`}>
                           {b.unlocked ? "Unlocked" : "Locked"}
                         </span>
                       </div>
@@ -1735,18 +1939,93 @@
               </div>
             )}
 
+            {/* TAB: PRIVATE PROGRESS PHOTO VAULT */}
+            {tab === "vault" && (
+              <div className="space-y-4">
+                <div className={`p-4 rounded-3xl space-y-3 card-light ${darkMode ? 'bg-[#2D2726] border-rose-900/30' : 'bg-white border-blush-200'}`}>
+                  <div className="flex justify-between items-center border-b border-blush-100 dark:border-rose-900/30 pb-3">
+                    <div>
+                      <span className="text-[9px] font-bold text-roseGold uppercase tracking-widest">Secure Locker</span>
+                      <h3 className={`text-sm font-serif font-bold ${darkMode ? 'text-champagne' : 'text-charcoal'}`}>Progress Photo Vault</h3>
+                    </div>
+                    <button
+                      onClick={() => setPrivacyBlur(!privacyBlur)}
+                      className={`text-[10px] font-bold px-3 py-1 rounded-xl border ${
+                        privacyBlur ? (darkMode ? 'bg-rose-950 text-rose-300 border-rose-800' : 'bg-rose-100 text-blush-600 border-blush-300') : (darkMode ? 'bg-[#1E1918] text-champagne border-rose-900/40' : 'bg-blush-50 text-charcoal border-blush-200')
+                      }`}
+                    >
+                      {privacyBlur ? "🔒 Privacy Blur: ON" : "👁️ Privacy Blur: OFF"}
+                    </button>
+                  </div>
+
+                  <p className="text-[11px] text-mutedMauve leading-relaxed">
+                    Store confidential progress photos directly in your device's private offline database. No images leave your phone.
+                  </p>
+
+                  <label className="w-full py-3 rounded-2xl bg-gradient-to-r from-blush-400 to-blush-500 text-white font-bold text-xs shadow-md flex items-center justify-center gap-1.5 cursor-pointer">
+                    <span>📷 Upload New Progress Photo</span>
+                    <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
+                  </label>
+                </div>
+
+                {progressPhotos.length === 0 ? (
+                  <div className={`p-8 rounded-3xl text-center space-y-2 card-light ${darkMode ? 'bg-[#2D2726] border-rose-900/30' : 'bg-white border-blush-200'}`}>
+                    <span className="text-3xl">📸</span>
+                    <h4 className={`text-xs font-serif font-bold ${darkMode ? 'text-champagne' : 'text-charcoal'}`}>No Photos in Vault Yet</h4>
+                    <p className="text-[10px] text-mutedMauve">Upload your Day 1 transformation picture to start tracking side-by-side progress.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <h4 className={`text-xs font-serif font-bold uppercase tracking-wider ${darkMode ? 'text-champagne' : 'text-charcoal'}`}>Saved Check-Ins ({progressPhotos.length})</h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      {progressPhotos.map((p) => (
+                        <div key={p.id} className={`p-2.5 rounded-2xl border space-y-2 card-light ${darkMode ? 'bg-[#2D2726] border-rose-900/30' : 'bg-white border-blush-200'}`}>
+                          <div className="relative aspect-[3/4] rounded-xl overflow-hidden bg-charcoal/10">
+                            <img
+                              src={p.url}
+                              alt="Progress Check-in"
+                              className={`w-full h-full object-cover transition-all ${privacyBlur ? 'blur-md hover:blur-none' : ''}`}
+                            />
+                            {privacyBlur && (
+                              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                <span className="bg-charcoal/80 text-white text-[9px] font-bold px-2 py-1 rounded-full">Blurred for Privacy</span>
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex justify-between items-center text-[10px]">
+                            <span className="font-bold text-blush-600 dark:text-rose-400">{p.date}</span>
+                            <button
+                              onClick={() => {
+                                if (confirm("Delete this progress photo?")) {
+                                  setProgressPhotos(progressPhotos.filter(x => x.id !== p.id));
+                                  if (hapticsEnabled) triggerHaptic(15);
+                                }
+                              }}
+                              className="text-rose-500 hover:underline"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* TAB 5: SETTINGS */}
             {tab === "settings" && (
               <div className="space-y-4">
-                <div className="card-light p-4 rounded-3xl space-y-3.5">
-                  <div className="flex justify-between items-center border-b border-blush-100 pb-2">
-                    <h3 className="text-xs font-serif font-bold text-charcoal uppercase tracking-wider">
+                <div className={`p-4 rounded-3xl space-y-3.5 card-light ${darkMode ? 'bg-[#2D2726] border-rose-900/30' : 'bg-white border-blush-200'}`}>
+                  <div className="flex justify-between items-center border-b border-blush-100 dark:border-rose-900/30 pb-2">
+                    <h3 className={`text-xs font-serif font-bold uppercase tracking-wider ${darkMode ? 'text-champagne' : 'text-charcoal'}`}>
                       🔊 Voice & Audio Settings
                     </h3>
-                    <span className="text-[10px] font-bold text-blush-600 capitalize">{audioMode} Mode</span>
+                    <span className="text-[10px] font-bold text-blush-600 dark:text-rose-400 capitalize">{audioMode} Mode</span>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-1.5 p-1 bg-blush-50/80 rounded-2xl border border-blush-100 text-xs">
+                  <div className={`grid grid-cols-3 gap-1.5 p-1 rounded-2xl border text-xs ${darkMode ? 'bg-[#1E1918] border-rose-900/40' : 'bg-blush-50/80 border-blush-100'}`}>
                     {[
                       { id: "voice", label: "🗣️ Voice" },
                       { id: "chimes", label: "🔔 Chimes" },
@@ -1756,7 +2035,7 @@
                         key={m.id}
                         onClick={() => { setAudioMode(m.id); unlockAudioAndSpeech(); if (hapticsEnabled) triggerHaptic(10); }}
                         className={`py-2 rounded-xl text-center font-bold transition-all ${
-                          audioMode === m.id ? "bg-blush-500 text-white shadow-sm" : "text-mutedMauve hover:text-charcoal"
+                          audioMode === m.id ? "bg-blush-500 text-white shadow-sm" : "text-mutedMauve hover:text-charcoal dark:hover:text-champagne"
                         }`}
                       >
                         {m.label}
@@ -1770,7 +2049,7 @@
                       <select
                         value={selectedVoiceURI}
                         onChange={e => setSelectedVoiceURI(e.target.value)}
-                        className="w-full bg-blush-50 border border-blush-200 text-charcoal text-xs font-medium p-2 rounded-xl focus:outline-none"
+                        className={`w-full text-xs font-medium p-2 rounded-xl focus:outline-none border ${darkMode ? 'bg-[#1E1918] text-champagne border-rose-900/40' : 'bg-blush-50 text-charcoal border-blush-200'}`}
                       >
                         {availableVoices.filter(v => v && v.lang && v.lang.startsWith('en')).map(v => (
                           <option key={v.voiceURI} value={v.voiceURI}>{v.name} ({v.lang})</option>
@@ -1782,7 +2061,7 @@
                   <div className="space-y-1">
                     <div className="flex justify-between text-[10px] font-semibold text-mutedMauve uppercase">
                       <span>Speech Speed (Rate)</span>
-                      <span className="text-blush-600 font-bold font-mono">{speechRate.toFixed(2)}x</span>
+                      <span className="text-blush-600 dark:text-rose-400 font-bold font-mono">{speechRate.toFixed(2)}x</span>
                     </div>
                     <input
                       type="range"
@@ -1798,7 +2077,7 @@
                   <div className="space-y-1">
                     <div className="flex justify-between text-[10px] font-semibold text-mutedMauve uppercase">
                       <span>Voice Tone (Pitch)</span>
-                      <span className="text-blush-600 font-bold font-mono">{speechPitch.toFixed(2)}</span>
+                      <span className="text-blush-600 dark:text-rose-400 font-bold font-mono">{speechPitch.toFixed(2)}</span>
                     </div>
                     <input
                       type="range"
@@ -1814,7 +2093,7 @@
                   <div className="space-y-1">
                     <div className="flex justify-between text-[10px] font-semibold text-mutedMauve uppercase">
                       <span>Master Audio Volume</span>
-                      <span className="text-blush-600 font-bold font-mono">{Math.round(audioVolume * 100)}%</span>
+                      <span className="text-blush-600 dark:text-rose-400 font-bold font-mono">{Math.round(audioVolume * 100)}%</span>
                     </div>
                     <input
                       type="range"
@@ -1834,20 +2113,33 @@
                       speakPrompt("Voice and sound commands are fully operational in M60.", "voice", speechSettings);
                       if (hapticsEnabled) triggerHaptic([30, 50, 30]);
                     }}
-                    className="w-full py-2.5 rounded-xl bg-blush-50 border border-blush-300 text-blush-600 text-xs font-bold hover:bg-blush-100 flex items-center justify-center gap-1.5 transition-all"
+                    className={`w-full py-2.5 rounded-xl text-xs font-bold border flex items-center justify-center gap-1.5 transition-all ${darkMode ? 'bg-[#1E1918] text-rose-300 border-rose-900/40 hover:bg-rose-950' : 'bg-blush-50 border-blush-300 text-blush-600 hover:bg-blush-100'}`}
                   >
                     <span>🔊 Test Voice & Audio Output</span>
                   </button>
                 </div>
 
-                <div className="card-light p-4 rounded-3xl space-y-3">
-                  <h3 className="text-xs font-serif font-bold text-charcoal uppercase tracking-wider">
-                    ⚡ Device & Screen Controls
+                <div className={`p-4 rounded-3xl space-y-3 card-light ${darkMode ? 'bg-[#2D2726] border-rose-900/30' : 'bg-white border-blush-200'}`}>
+                  <h3 className={`text-xs font-serif font-bold uppercase tracking-wider ${darkMode ? 'text-champagne' : 'text-charcoal'}`}>
+                    ⚡ Device & Display Controls
                   </h3>
 
-                  <div className="flex items-center justify-between py-1 border-b border-blush-100 text-xs">
+                  <div className="flex items-center justify-between py-1 border-b border-blush-100 dark:border-rose-900/30 text-xs">
                     <div>
-                      <span className="font-bold text-charcoal block">Screen Always-On (Wake Lock)</span>
+                      <span className={`font-bold block ${darkMode ? 'text-champagne' : 'text-charcoal'}`}>Gym Dark Mode (OLED)</span>
+                      <span className="text-[10px] text-mutedMauve">Reduces glare under bright gym lighting</span>
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked={darkMode}
+                      onChange={e => setDarkMode(e.target.checked)}
+                      className="w-4 h-4 accent-blush-500 rounded cursor-pointer"
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between py-1 border-b border-blush-100 dark:border-rose-900/30 text-xs">
+                    <div>
+                      <span className={`font-bold block ${darkMode ? 'text-champagne' : 'text-charcoal'}`}>Screen Always-On (Wake Lock)</span>
                       <span className="text-[10px] text-mutedMauve">Prevents screen from sleeping during workouts</span>
                     </div>
                     <input
@@ -1860,7 +2152,7 @@
 
                   <div className="flex items-center justify-between py-1 text-xs">
                     <div>
-                      <span className="font-bold text-charcoal block">Haptic Vibration Pulses</span>
+                      <span className={`font-bold block ${darkMode ? 'text-champagne' : 'text-charcoal'}`}>Haptic Vibration Pulses</span>
                       <span className="text-[10px] text-mutedMauve">Tactile feedback on reps and timer alerts</span>
                     </div>
                     <input
@@ -1872,8 +2164,8 @@
                   </div>
                 </div>
 
-                <div className="card-light p-4 rounded-3xl space-y-3">
-                  <h3 className="text-xs font-serif font-bold text-charcoal uppercase tracking-wider">
+                <div className={`p-4 rounded-3xl space-y-3 card-light ${darkMode ? 'bg-[#2D2726] border-rose-900/30' : 'bg-white border-blush-200'}`}>
+                  <h3 className={`text-xs font-serif font-bold uppercase tracking-wider ${darkMode ? 'text-champagne' : 'text-charcoal'}`}>
                     💾 Data Backup & Portability
                   </h3>
                   <p className="text-[10px] text-mutedMauve">
@@ -1887,7 +2179,7 @@
                     >
                       <span>📥 Export Backup</span>
                     </button>
-                    <label className="py-2.5 rounded-xl bg-white border border-blush-200 text-blush-600 text-xs font-bold shadow-sm hover:bg-blush-50 flex items-center justify-center gap-1 cursor-pointer">
+                    <label className={`py-2.5 rounded-xl text-xs font-bold shadow-sm flex items-center justify-center gap-1 cursor-pointer border ${darkMode ? 'bg-[#1E1918] text-rose-300 border-rose-900/40 hover:bg-rose-950' : 'bg-white border-blush-200 text-blush-600 hover:bg-blush-50'}`}>
                       <span>📤 Import File</span>
                       <input type="file" accept=".json" onChange={handleImportData} className="hidden" />
                     </label>
@@ -1899,67 +2191,67 @@
             {/* TAB 6: ABOUT */}
             {tab === "about" && (
               <div className="space-y-4">
-                <div className="card-light p-4 rounded-3xl space-y-2 text-center">
+                <div className={`p-4 rounded-3xl space-y-2 text-center card-light ${darkMode ? 'bg-[#2D2726] border-rose-900/30' : 'bg-white border-blush-200'}`}>
                   <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blush-300 via-blush-400 to-roseGold text-white flex items-center justify-center mx-auto text-sm font-serif font-black shadow-sm">
                     M60
                   </div>
-                  <h2 className="text-base font-serif font-bold text-charcoal">M60</h2>
-                  <p className="text-xs text-blush-600 font-medium">Version 2.4.0 (PWA Standalone)</p>
+                  <h2 className={`text-base font-serif font-bold ${darkMode ? 'text-champagne' : 'text-charcoal'}`}>M60</h2>
+                  <p className="text-xs text-blush-600 dark:text-rose-400 font-medium">Version 2.5.0 (PWA Elite)</p>
                   <p className="text-[11px] text-mutedMauve leading-relaxed pt-1">
                     A personalized feminine metabolic strength, tempo cadence, and hormonal phasing system.
                   </p>
                 </div>
 
-                <div className="card-light p-4 rounded-3xl space-y-3 border-blush-300">
-                  <h3 className="text-xs font-serif font-bold text-charcoal uppercase tracking-wider">
+                <div className={`p-4 rounded-3xl space-y-3 card-light border-blush-300 ${darkMode ? 'bg-[#2D2726] border-rose-900/40' : 'bg-white'}`}>
+                  <h3 className={`text-xs font-serif font-bold uppercase tracking-wider ${darkMode ? 'text-champagne' : 'text-charcoal'}`}>
                     ⚖️ Mandatory Clinical & Legal Disclosures
                   </h3>
 
-                  <div className="bg-blush-50/70 p-3 rounded-2xl space-y-1 border border-blush-200 text-xs">
-                    <h4 className="font-bold text-blush-600">1. Not Medical or Healthcare Advice</h4>
-                    <p className="text-[10px] text-charcoal/80 leading-relaxed">
+                  <div className={`p-3 rounded-2xl space-y-1 border text-xs ${darkMode ? 'bg-[#1E1918] border-rose-900/30' : 'bg-blush-50/70 border-blush-200'}`}>
+                    <h4 className="font-bold text-blush-600 dark:text-rose-400">1. Not Medical or Healthcare Advice</h4>
+                    <p className={`text-[10px] leading-relaxed ${darkMode ? 'text-champagne/80' : 'text-charcoal/80'}`}>
                       M60 is designed strictly for educational, athletic conditioning, and lifestyle enhancement purposes. This application does not provide medical diagnoses, treatment plans, clinical advice, or prescriptions. Always consult a qualified physician or healthcare provider prior to undertaking any resistance exercise, caloric restriction, or nutritional adjustment.
                     </p>
                   </div>
 
-                  <div className="bg-rose-50/80 p-3 rounded-2xl space-y-1 border border-rose-200 text-xs">
-                    <h4 className="font-bold text-rose-700">2. Not a Contraceptive or Diagnostic Device</h4>
-                    <p className="text-[10px] text-rose-900/80 leading-relaxed">
+                  <div className={`p-3 rounded-2xl space-y-1 border text-xs ${darkMode ? 'bg-rose-950/40 border-rose-900/50' : 'bg-rose-50/80 border-rose-200'}`}>
+                    <h4 className="font-bold text-rose-700 dark:text-rose-300">2. Not a Contraceptive or Diagnostic Device</h4>
+                    <p className={`text-[10px] leading-relaxed ${darkMode ? 'text-rose-200/80' : 'text-rose-900/80'}`}>
                       The menstrual cycle tracking and hormonal phase estimation within M60 are intended solely for athletic training load modulation and nutritional timing. It is <strong>NOT</strong> a medical birth control method, diagnostic tool, or natural family planning contraception device.
                     </p>
                   </div>
 
-                  <div className="bg-blush-50/70 p-3 rounded-2xl space-y-1 border border-blush-200 text-xs">
-                    <h4 className="font-bold text-blush-600">3. Assumption of Physical Risk</h4>
-                    <p className="text-[10px] text-charcoal/80 leading-relaxed">
+                  <div className={`p-3 rounded-2xl space-y-1 border text-xs ${darkMode ? 'bg-[#1E1918] border-rose-900/30' : 'bg-blush-50/70 border-blush-200'}`}>
+                    <h4 className="font-bold text-blush-600 dark:text-rose-400">3. Assumption of Physical Risk</h4>
+                    <p className={`text-[10px] leading-relaxed ${darkMode ? 'text-champagne/80' : 'text-charcoal/80'}`}>
                       Participating in progressive overload strength training carries inherent risk of injury. By utilizing these workout routines, you voluntarily assume all associated risks and agree to perform movements within your safe physical capabilities.
                     </p>
                   </div>
 
-                  <div className="bg-blush-50/70 p-3 rounded-2xl space-y-1 border border-blush-200 text-xs">
-                    <h4 className="font-bold text-blush-600">4. Privacy & Data Sovereignty (POPIA / GDPR)</h4>
-                    <p className="text-[10px] text-charcoal/80 leading-relaxed">
-                      Your privacy is absolute. 100% of your biometric data, weight logs, menstrual dates, and questionnaire answers are stored exclusively in your device’s local storage. No health metrics are transmitted, sold, or stored on external cloud databases.
+                  <div className={`p-3 rounded-2xl space-y-1 border text-xs ${darkMode ? 'bg-[#1E1918] border-rose-900/30' : 'bg-blush-50/70 border-blush-200'}`}>
+                    <h4 className="font-bold text-blush-600 dark:text-rose-400">4. Privacy & Data Sovereignty (POPIA / GDPR)</h4>
+                    <p className={`text-[10px] leading-relaxed ${darkMode ? 'text-champagne/80' : 'text-charcoal/80'}`}>
+                      Your privacy is absolute. 100% of your biometric data, weight logs, menstrual dates, and questionnaire answers are stored exclusively in your device’s local IndexedDB storage. No health metrics are transmitted, sold, or stored on external cloud databases.
                     </p>
                   </div>
                 </div>
 
-                <div className="card-light p-4 rounded-3xl space-y-2.5">
-                  <h3 className="text-xs font-serif font-bold text-charcoal uppercase tracking-wider">
+                <div className={`p-4 rounded-3xl space-y-2.5 card-light ${darkMode ? 'bg-[#2D2726] border-rose-900/30' : 'bg-white border-blush-200'}`}>
+                  <h3 className={`text-xs font-serif font-bold uppercase tracking-wider ${darkMode ? 'text-champagne' : 'text-charcoal'}`}>
                     📬 Official Support & Contact
                   </h3>
-                  <div className="space-y-1.5 text-xs text-charcoal/80">
-                    <div className="flex justify-between py-1 border-b border-blush-100">
+                  <div className={`space-y-1.5 text-xs ${darkMode ? 'text-champagne/80' : 'text-charcoal/80'}`}>
+                    <div className="flex justify-between py-1 border-b border-blush-100 dark:border-rose-900/30">
                       <span className="text-mutedMauve">Support Inquiries:</span>
-                      <span className="font-bold text-blush-600">support@metabolic60.app</span>
+                      <span className="font-bold text-blush-600 dark:text-rose-400">support@metabolic60.app</span>
                     </div>
-                    <div className="flex justify-between py-1 border-b border-blush-100">
+                    <div className="flex justify-between py-1 border-b border-blush-100 dark:border-rose-900/30">
                       <span className="text-mutedMauve">Official Website:</span>
-                      <span className="font-bold text-blush-600">metabolic60.app</span>
+                      <span className="font-bold text-blush-600 dark:text-rose-400">metabolic60.app</span>
                     </div>
                     <div className="flex justify-between py-1">
                       <span className="text-mutedMauve">Medical Emergency:</span>
-                      <span className="font-bold text-rose-600">Call Local Emergency (112 / 911)</span>
+                      <span className="font-bold text-rose-600 dark:text-rose-400">Call Local Emergency (112 / 911)</span>
                     </div>
                   </div>
                 </div>
@@ -1968,12 +2260,39 @@
 
           </main>
 
+          {/* EXERCISE SWAP MODAL */}
+          {swapModalEx && (
+            <div className="fixed inset-0 bg-charcoal/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+              <div className={`rounded-3xl p-5 max-w-sm w-full space-y-3.5 card-light border-blush-300 shadow-2xl ${darkMode ? 'bg-[#2D2726] border-rose-500 text-champagne' : 'bg-white text-charcoal'}`}>
+                <div className="flex justify-between items-center border-b border-blush-100 dark:border-rose-900/30 pb-2">
+                  <h3 className="text-xs font-serif font-bold">Swap Exercise Equipment</h3>
+                  <button onClick={() => setSwapModalEx(null)} className="text-xs text-mutedMauve">✕</button>
+                </div>
+                <p className="text-[11px] text-mutedMauve">
+                  Substitute <strong>{swapModalEx.name}</strong> with a biomechanically equivalent movement:
+                </p>
+                <div className="space-y-2">
+                  {(swapModalEx.swaps || ["Alternative Sculpt Movement", "Bodyweight Variant"]).map((swName, sIdx) => (
+                    <button
+                      key={sIdx}
+                      onClick={() => substituteExercise(swapModalEx.id, swName)}
+                      className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold border text-left flex justify-between items-center transition-all ${darkMode ? 'bg-[#1E1918] border-rose-900/40 hover:bg-rose-950 text-rose-300' : 'bg-blush-50 border-blush-200 hover:bg-blush-100 text-blush-600'}`}
+                    >
+                      <span>{swName}</span>
+                      <span>🔄 Swap</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* FULL INTERACTIVE 5-SLIDE PREVIEW TOUR MODAL */}
           {showWelcomeScreen && (
-            <div className="fixed inset-0 bg-charcoal/50 backdrop-blur-md flex items-center justify-center p-4 z-50 overflow-y-auto">
-              <div className="card-light rounded-3xl p-5 max-w-sm w-full space-y-4 my-auto border-blush-300 shadow-2xl transition-all">
+            <div className="fixed inset-0 bg-charcoal/60 backdrop-blur-md flex items-center justify-center p-4 z-50 overflow-y-auto">
+              <div className={`rounded-3xl p-5 max-w-sm w-full space-y-4 my-auto border-blush-300 shadow-2xl transition-all card-light ${darkMode ? 'bg-[#2D2726] border-rose-500 text-champagne' : 'bg-white text-charcoal'}`}>
                 
-                <div className="flex items-center justify-between border-b border-blush-100 pb-2.5">
+                <div className="flex items-center justify-between border-b border-blush-100 dark:border-rose-900/30 pb-2.5">
                   <div className="flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-blush-500 animate-pulse"></span>
                     <span className="text-[10px] font-bold text-roseGold uppercase tracking-widest">
@@ -2004,7 +2323,7 @@
                       </div>
                     </div>
                     <div>
-                      <h3 className="text-base font-serif font-bold text-charcoal">Welcome to M60 ✨</h3>
+                      <h3 className="text-base font-serif font-bold">Welcome to M60 ✨</h3>
                       <p className="text-[11px] text-mutedMauve leading-relaxed mt-1">
                         A personalized athletic transformation system built around female physiology, tempo biomechanics, and hormonal rhythm.
                       </p>
@@ -2016,25 +2335,25 @@
                   <div className="space-y-3">
                     <div className="text-center">
                       <span className="text-2xl">🌸</span>
-                      <h3 className="text-sm font-serif font-bold text-charcoal mt-1">Hormonal Phasing & Auto-Load</h3>
-                      <p className="text-[10px] text-mutedMauve">Syncs strength workouts with your menstrual cycle.</p>
+                      <h3 className="text-sm font-serif font-bold mt-1">Hormonal Phasing & Auto-Load</h3>
+                      <p className="text-[10px] text-mutedMauve">Syncs strength workouts with your menstrual cycle & Luteal calorie buffers.</p>
                     </div>
                     <div className="grid grid-cols-2 gap-2 text-[10px]">
-                      <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200">
-                        <span className="font-bold text-rose-700 block">Menstrual (Days 1–5)</span>
+                      <div className="p-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800">
+                        <span className="font-bold text-rose-700 dark:text-rose-300 block">Menstrual (Days 1–5)</span>
                         <span className="text-mutedMauve">85% Load • Gentle flow & restorative tempo.</span>
                       </div>
-                      <div className="p-2.5 rounded-xl bg-pink-50 border border-pink-200">
-                        <span className="font-bold text-pink-700 block">Follicular (Days 6–13)</span>
+                      <div className="p-2.5 rounded-xl bg-pink-50 dark:bg-pink-950/40 border border-pink-200 dark:border-pink-800">
+                        <span className="font-bold text-pink-700 dark:text-pink-300 block">Follicular (Days 6–13)</span>
                         <span className="text-mutedMauve">100% Load • Peak insulin sensitivity & sculpt.</span>
                       </div>
-                      <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-200">
-                        <span className="font-bold text-amber-700 block">Ovulatory (Days 14–16)</span>
+                      <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800">
+                        <span className="font-bold text-amber-700 dark:text-amber-300 block">Ovulatory (Days 14–16)</span>
                         <span className="text-mutedMauve">105% Load • PR strength & peak power.</span>
                       </div>
-                      <div className="p-2.5 rounded-xl bg-purple-50 border border-purple-200">
-                        <span className="font-bold text-purple-700 block">Luteal (Days 17–28)</span>
-                        <span className="text-mutedMauve">90% Load • Calibrate, hydrate & burn.</span>
+                      <div className="p-2.5 rounded-xl bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800">
+                        <span className="font-bold text-purple-700 dark:text-purple-300 block">Luteal (Days 17–28)</span>
+                        <span className="text-mutedMauve">90% Load • +150 kcal buffer & steady burn.</span>
                       </div>
                     </div>
                   </div>
@@ -2044,14 +2363,14 @@
                   <div className="space-y-3">
                     <div className="text-center">
                       <span className="text-2xl">⏱️</span>
-                      <h3 className="text-sm font-serif font-bold text-charcoal mt-1">Live Voice Cadence & Metronome</h3>
-                      <p className="text-[10px] text-mutedMauve">Hands-free coaching with spoken tempo & chimes.</p>
+                      <h3 className="text-sm font-serif font-bold mt-1">Live Voice Cadence & Media Ducking</h3>
+                      <p className="text-[10px] text-mutedMauve">Spoken rep counts that duck your Spotify music seamlessly.</p>
                     </div>
 
-                    <div className="bg-blush-50/70 p-3 rounded-2xl border border-blush-200 text-center space-y-2">
+                    <div className={`p-3 rounded-2xl border text-center space-y-2 ${darkMode ? 'bg-[#1E1918] border-rose-900/40' : 'bg-blush-50/70 border-blush-200'}`}>
                       <span className="text-[9px] font-bold text-roseGold uppercase">Live Cadence Preview</span>
-                      <div className="text-2xl font-mono font-black text-charcoal">3 - 0 - 1</div>
-                      <p className="text-[10px] text-blush-600 font-bold uppercase">"Lower 3... 2... 1... Drive Up!"</p>
+                      <div className="text-2xl font-mono font-black">3 - 0 - 1</div>
+                      <p className="text-[10px] text-blush-600 dark:text-rose-400 font-bold uppercase">"Lower 3... 2... 1... Drive Up!"</p>
                       
                       <button
                         onClick={() => {
@@ -2060,7 +2379,7 @@
                           speakPrompt("Lower 3, 2, 1, drive up", "voice", speechSettings);
                           if (hapticsEnabled) triggerHaptic([20, 20, 20]);
                         }}
-                        className="w-full py-1.5 rounded-xl bg-white border border-blush-200 text-blush-600 text-[11px] font-bold shadow-sm hover:bg-blush-100"
+                        className={`w-full py-1.5 rounded-xl border text-[11px] font-bold shadow-sm ${darkMode ? 'bg-[#2D2726] border-rose-900/40 text-rose-300 hover:bg-rose-950' : 'bg-white border-blush-200 text-blush-600 hover:bg-blush-100'}`}
                       >
                         🔊 Test Voice & Chime Sample
                       </button>
@@ -2072,21 +2391,21 @@
                   <div className="space-y-3">
                     <div className="text-center">
                       <span className="text-2xl">🥗</span>
-                      <h3 className="text-sm font-serif font-bold text-charcoal mt-1">Clean Fuel & 3L Hydration</h3>
-                      <p className="text-[10px] text-mutedMauve">Tailored metabolic nutrition & supermarket tools.</p>
+                      <h3 className="text-sm font-serif font-bold mt-1">Clean Fuel & WhatsApp Grocery Export</h3>
+                      <p className="text-[10px] text-mutedMauve">7-day South African meals and 1-tap supermarket lists.</p>
                     </div>
                     <div className="space-y-1.5 text-[11px]">
-                      <div className="p-2 rounded-xl bg-blush-50/70 border border-blush-100 flex items-center justify-between">
-                        <span className="text-charcoal font-medium">✨ 7-Day South African Meal Plans</span>
-                        <span className="text-[10px] text-blush-600 font-bold">1,720 kcal</span>
+                      <div className={`p-2 rounded-xl border flex items-center justify-between ${darkMode ? 'bg-[#1E1918] border-rose-900/30' : 'bg-blush-50/70 border-blush-100'}`}>
+                        <span className="font-medium">✨ 7-Day South African Meal Plans</span>
+                        <span className="text-[10px] text-blush-600 dark:text-rose-400 font-bold">1,720 kcal</span>
                       </div>
-                      <div className="p-2 rounded-xl bg-blush-50/70 border border-blush-100 flex items-center justify-between">
-                        <span className="text-charcoal font-medium">💧 3.0 Liters Daily Water Tracker</span>
-                        <span className="text-[10px] text-blush-600 font-bold">8 Glasses</span>
+                      <div className={`p-2 rounded-xl border flex items-center justify-between ${darkMode ? 'bg-[#1E1918] border-rose-900/30' : 'bg-blush-50/70 border-blush-100'}`}>
+                        <span className="font-medium">💧 3.0 Liters Daily Water Tracker</span>
+                        <span className="text-[10px] text-blush-600 dark:text-rose-400 font-bold">8 Glasses</span>
                       </div>
-                      <div className="p-2 rounded-xl bg-blush-50/70 border border-blush-100 flex items-center justify-between">
-                        <span className="text-charcoal font-medium">🛒 Interactive Grocery Checklist</span>
-                        <span className="text-[10px] text-blush-600 font-bold">Smart Swaps</span>
+                      <div className={`p-2 rounded-xl border flex items-center justify-between ${darkMode ? 'bg-[#1E1918] border-rose-900/30' : 'bg-blush-50/70 border-blush-100'}`}>
+                        <span className="font-medium">🛒 1-Tap WhatsApp List Share</span>
+                        <span className="text-[10px] text-emerald-600 font-bold">Instant</span>
                       </div>
                     </div>
                   </div>
@@ -2096,18 +2415,18 @@
                   <div className="space-y-3 text-center">
                     <div>
                       <span className="text-2xl">👑</span>
-                      <h3 className="text-sm font-serif font-bold text-charcoal mt-1">60-Day Consistency Timeline</h3>
-                      <p className="text-[10px] text-mutedMauve">Unlock achievement trophies as you transform.</p>
+                      <h3 className="text-sm font-serif font-bold mt-1">Private Photo Vault & Offline DB</h3>
+                      <p className="text-[10px] text-mutedMauve">Encrypted IndexedDB storage with biometric privacy blur.</p>
                     </div>
-                    <div className="p-3 bg-blush-50/70 rounded-2xl border border-blush-200 flex justify-around items-center text-xl">
-                      <span>✨</span>
-                      <span>🌸</span>
+                    <div className={`p-3 rounded-2xl border flex justify-around items-center text-xl ${darkMode ? 'bg-[#1E1918] border-rose-900/40' : 'bg-blush-50/70 border-blush-200'}`}>
+                      <span>📸</span>
+                      <span>🔒</span>
                       <span>👑</span>
-                      <span>💧</span>
+                      <span>⚡</span>
                       <span>🌙</span>
                     </div>
                     <p className="text-[10px] text-mutedMauve leading-relaxed">
-                      Every workout logs total weight volume, updates your consistency map, and advances your 60-day challenge journey.
+                      All workouts, weights, and confidential progress photos remain 100% private inside your local device database.
                     </p>
                   </div>
                 )}
@@ -2124,11 +2443,11 @@
                   ))}
                 </div>
 
-                <div className="flex gap-2 pt-1 border-t border-blush-100">
+                <div className="flex gap-2 pt-1 border-t border-blush-100 dark:border-rose-900/30">
                   {tourSlide > 0 && (
                     <button
                       onClick={() => { setTourSlide(prev => prev - 1); if (hapticsEnabled) triggerHaptic(8); }}
-                      className="px-3.5 py-2.5 rounded-xl bg-blush-50 text-xs font-bold text-mutedMauve hover:text-charcoal"
+                      className={`px-3.5 py-2.5 rounded-xl text-xs font-bold ${darkMode ? 'bg-[#1E1918] text-rose-300' : 'bg-blush-50 text-mutedMauve hover:text-charcoal'}`}
                     >
                       ← Back
                     </button>
@@ -2164,14 +2483,14 @@
           {/* LIVE CADENCE METRONOME & CUES MODAL */}
           {activeModalExercise && (
             <div className="fixed inset-0 bg-charcoal/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
-              <div className="card-light rounded-3xl p-5 max-w-sm w-full space-y-4 my-auto border-blush-300 shadow-2xl">
+              <div className={`rounded-3xl p-5 max-w-sm w-full space-y-4 my-auto border-blush-300 shadow-2xl card-light ${darkMode ? 'bg-[#2D2726] border-rose-500 text-champagne' : 'bg-white text-charcoal'}`}>
                 
-                <div className="flex items-center justify-between border-b border-blush-100 pb-3">
+                <div className="flex items-center justify-between border-b border-blush-100 dark:border-rose-900/30 pb-3">
                   <div className="flex items-center gap-3">
                     <img src={activeModalExercise.img} alt={activeModalExercise.name} className="w-10 h-10 rounded-xl object-cover border border-blush-200" />
                     <div>
-                      <h3 className="text-xs font-serif font-bold text-charcoal">{activeModalExercise.name}</h3>
-                      <p className="text-[10px] text-blush-600 font-semibold">{activeModalExercise.target}</p>
+                      <h3 className="text-xs font-serif font-bold">{activeModalExercise.name}</h3>
+                      <p className="text-[10px] text-blush-600 dark:text-rose-400 font-semibold">{activeModalExercise.target}</p>
                     </div>
                   </div>
                   <button
@@ -2179,23 +2498,23 @@
                       setActiveModalExercise(null);
                       setActiveModalPacing(false);
                     }}
-                    className="w-7 h-7 rounded-full bg-blush-50 border border-blush-200 flex items-center justify-center text-xs text-mutedMauve hover:text-charcoal"
+                    className={`w-7 h-7 rounded-full border flex items-center justify-center text-xs ${darkMode ? 'bg-[#1E1918] border-rose-900/40 text-champagne' : 'bg-blush-50 border-blush-200 text-mutedMauve'}`}
                   >
                     ✕
                   </button>
                 </div>
 
-                <div className="bg-blush-50/70 p-4 rounded-2xl border border-blush-200 text-center space-y-2">
+                <div className={`p-4 rounded-2xl border text-center space-y-2 ${darkMode ? 'bg-[#1E1918] border-rose-900/40' : 'bg-blush-50/70 border-blush-200'}`}>
                   <div className="flex justify-between items-center text-[10px] font-bold text-mutedMauve uppercase">
                     <span>Sculpt Tempo</span>
-                    <span className="text-blush-600 font-mono">{activeModalExercise.tempo}</span>
+                    <span className="text-blush-600 dark:text-rose-400 font-mono">{activeModalExercise.tempo}</span>
                   </div>
 
                   <div className="py-4">
-                    <div className="text-4xl font-black font-mono text-charcoal tempo-pulse">
+                    <div className="text-4xl font-black font-mono tempo-pulse">
                       {activeModalPacing ? modalPaceCount : activeModalExercise.tempo}
                     </div>
-                    <p className="text-xs font-bold uppercase tracking-wider text-blush-600 mt-1.5">{modalPacePhase}</p>
+                    <p className="text-xs font-bold uppercase tracking-wider text-blush-600 dark:text-rose-400 mt-1.5">{modalPacePhase}</p>
                   </div>
 
                   <button
@@ -2205,18 +2524,18 @@
                       if (hapticsEnabled) triggerHaptic(15);
                     }}
                     className={`w-full py-2.5 rounded-xl font-bold text-xs transition-all shadow-sm ${
-                      activeModalPacing ? "bg-blush-600 text-white" : "bg-white text-blush-600 border border-blush-200 hover:bg-blush-50"
+                      activeModalPacing ? "bg-blush-600 text-white" : (darkMode ? 'bg-[#2D2726] text-rose-300 border border-rose-800' : 'bg-white text-blush-600 border border-blush-200 hover:bg-blush-50')
                     }`}
                   >
                     {activeModalPacing ? "Pause Cadence Guide" : "Start Live Tempo Guide"}
                   </button>
                 </div>
 
-                <div className="space-y-2 bg-white p-3.5 rounded-2xl border border-blush-100 text-xs">
-                  <p className="leading-relaxed"><strong className="text-blush-600 font-semibold">Mind-Muscle Cue:</strong> {activeModalExercise.cues}</p>
-                  <div className="space-y-1 pt-1.5 border-t border-blush-50">
+                <div className={`p-3.5 rounded-2xl border text-xs ${darkMode ? 'bg-[#1E1918] border-rose-900/30' : 'bg-white border-blush-100'}`}>
+                  <p className="leading-relaxed"><strong className="text-blush-600 dark:text-rose-400 font-semibold">Mind-Muscle Cue:</strong> {activeModalExercise.cues}</p>
+                  <div className="space-y-1 pt-1.5 border-t border-blush-50 dark:border-rose-900/30 mt-2">
                     <span className="text-[9px] font-bold uppercase text-mutedMauve">Execution Breakdown:</span>
-                    <ol className="list-decimal list-inside space-y-1 text-charcoal/80 text-[11px] leading-relaxed">
+                    <ol className={`list-decimal list-inside space-y-1 text-[11px] leading-relaxed ${darkMode ? 'text-champagne/90' : 'text-charcoal/80'}`}>
                       {activeModalExercise.execution ? activeModalExercise.execution.map((st, i) => (
                         <li key={i}>{st}</li>
                       )) : <li>Maintain core stability and strict cadence through the full range of motion.</li>}
@@ -2241,12 +2560,12 @@
           {/* 5-STEP GUIDED ONBOARDING WIZARD */}
           {showOnboardingModal && (
             <div className="fixed inset-0 bg-charcoal/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
-              <div className="card-light rounded-3xl p-5 max-w-sm w-full space-y-4 my-auto border-blush-300 shadow-2xl">
+              <div className={`rounded-3xl p-5 max-w-sm w-full space-y-4 my-auto border-blush-300 shadow-2xl card-light ${darkMode ? 'bg-[#2D2726] border-rose-500 text-champagne' : 'bg-white text-charcoal'}`}>
                 
-                <div className="flex justify-between items-center border-b border-blush-100 pb-3">
+                <div className="flex justify-between items-center border-b border-blush-100 dark:border-rose-900/30 pb-3">
                   <div>
                     <span className="text-[9px] font-bold text-roseGold uppercase tracking-widest">Personalization</span>
-                    <h3 className="text-sm font-serif font-bold text-charcoal">Step {onboardingStep} of 5</h3>
+                    <h3 className="text-sm font-serif font-bold">Step {onboardingStep} of 5</h3>
                   </div>
                   <span className="text-xs font-mono font-bold text-mutedMauve">{Math.round((onboardingStep / 5) * 100)}%</span>
                 </div>
@@ -2254,7 +2573,7 @@
                 {onboardingStep === 1 && (
                   <div className="space-y-3.5">
                     <div>
-                      <h4 className="text-base font-serif font-bold text-charcoal">Welcome, Beautiful</h4>
+                      <h4 className="text-base font-serif font-bold">Welcome, Beautiful</h4>
                       <p className="text-xs text-mutedMauve mt-0.5">Let's tailor your metabolic calibration.</p>
                     </div>
                     <div className="space-y-3">
@@ -2265,7 +2584,7 @@
                           value={tempProfile.name}
                           onChange={e => setTempProfile({ ...tempProfile, name: e.target.value })}
                           placeholder="e.g. Lindiwe"
-                          className="w-full bg-blush-50 border border-blush-200 text-charcoal rounded-xl p-3 text-xs font-bold focus:outline-none"
+                          className={`w-full text-xs font-bold p-3 rounded-xl focus:outline-none border ${darkMode ? 'bg-[#1E1918] text-champagne border-rose-900/40' : 'bg-blush-50 text-charcoal border-blush-200'}`}
                         />
                       </div>
                       <div>
@@ -2277,7 +2596,7 @@
                             const v = e.target.value;
                             setTempProfile({ ...tempProfile, age: v === '' ? '' : parseInt(v, 10) });
                           }}
-                          className="w-full bg-blush-50 border border-blush-200 text-charcoal rounded-xl p-3 text-xs font-bold focus:outline-none"
+                          className={`w-full text-xs font-bold p-3 rounded-xl focus:outline-none border ${darkMode ? 'bg-[#1E1918] text-champagne border-rose-900/40' : 'bg-blush-50 text-charcoal border-blush-200'}`}
                         />
                       </div>
                     </div>
@@ -2287,7 +2606,7 @@
                 {onboardingStep === 2 && (
                   <div className="space-y-3">
                     <div>
-                      <h4 className="text-sm font-serif font-bold text-charcoal">Select Your Somatotype</h4>
+                      <h4 className="text-sm font-serif font-bold">Select Your Somatotype</h4>
                       <p className="text-[11px] text-mutedMauve">Customizes your insulin sensitivity & carbohydrate split.</p>
                     </div>
                     <div className="space-y-2">
@@ -2300,12 +2619,14 @@
                           key={s.type}
                           onClick={() => { setTempProfile({ ...tempProfile, somatotype: s.type }); if (hapticsEnabled) triggerHaptic(10); }}
                           className={`p-2.5 rounded-2xl border cursor-pointer flex items-center gap-3 transition-all ${
-                            tempProfile.somatotype === s.type ? "bg-blush-50 border-blush-500 shadow-sm" : "bg-white border-blush-200"
+                            tempProfile.somatotype === s.type 
+                              ? (darkMode ? 'bg-rose-950/60 border-rose-500 shadow-sm' : 'bg-blush-50 border-blush-500 shadow-sm') 
+                              : (darkMode ? 'bg-[#1E1918] border-rose-900/30' : 'bg-white border-blush-200')
                           }`}
                         >
                           <img src={s.img} alt={s.type} className="w-12 h-12 rounded-xl object-cover shrink-0 border border-blush-200" />
                           <div className="flex-1">
-                            <span className="text-xs font-serif font-bold text-charcoal">{s.type}</span>
+                            <span className="text-xs font-serif font-bold">{s.type}</span>
                             <p className="text-[10px] text-mutedMauve leading-tight mt-0.5">{s.desc}</p>
                           </div>
                         </div>
@@ -2317,7 +2638,7 @@
                 {onboardingStep === 3 && (
                   <div className="space-y-3">
                     <div>
-                      <h4 className="text-sm font-serif font-bold text-charcoal">Starting Measurements</h4>
+                      <h4 className="text-sm font-serif font-bold">Starting Measurements</h4>
                       <p className="text-[11px] text-mutedMauve">Calibrates your baseline energy output equation.</p>
                     </div>
                     <div className="grid grid-cols-2 gap-2.5">
@@ -2330,7 +2651,7 @@
                             const v = e.target.value;
                             setTempProfile({ ...tempProfile, height: v === '' ? '' : parseInt(v, 10) });
                           }}
-                          className="w-full bg-blush-50 border border-blush-200 text-charcoal rounded-xl p-2.5 text-xs font-bold"
+                          className={`w-full p-2.5 text-xs font-bold rounded-xl border ${darkMode ? 'bg-[#1E1918] text-champagne border-rose-900/40' : 'bg-blush-50 text-charcoal border-blush-200'}`}
                         />
                       </div>
                       <div>
@@ -2343,7 +2664,7 @@
                             const v = e.target.value;
                             setTempProfile({ ...tempProfile, currentWeight: v === '' ? '' : parseFloat(v) });
                           }}
-                          className="w-full bg-blush-50 border border-blush-200 text-charcoal rounded-xl p-2.5 text-xs font-bold"
+                          className={`w-full p-2.5 text-xs font-bold rounded-xl border ${darkMode ? 'bg-[#1E1918] text-champagne border-rose-900/40' : 'bg-blush-50 text-charcoal border-blush-200'}`}
                         />
                       </div>
                       <div>
@@ -2356,7 +2677,7 @@
                             const v = e.target.value;
                             setTempProfile({ ...tempProfile, targetWeight: v === '' ? '' : parseFloat(v) });
                           }}
-                          className="w-full bg-blush-50 border border-blush-200 text-charcoal rounded-xl p-2.5 text-xs font-bold"
+                          className={`w-full p-2.5 text-xs font-bold rounded-xl border ${darkMode ? 'bg-[#1E1918] text-champagne border-rose-900/40' : 'bg-blush-50 text-charcoal border-blush-200'}`}
                         />
                       </div>
                       <div>
@@ -2368,7 +2689,7 @@
                             const v = e.target.value;
                             setTempProfile({ ...tempProfile, waist: v === '' ? '' : parseInt(v, 10) });
                           }}
-                          className="w-full bg-blush-50 border border-blush-200 text-charcoal rounded-xl p-2.5 text-xs font-bold"
+                          className={`w-full p-2.5 text-xs font-bold rounded-xl border ${darkMode ? 'bg-[#1E1918] text-champagne border-rose-900/40' : 'bg-blush-50 text-charcoal border-blush-200'}`}
                         />
                       </div>
                     </div>
@@ -2378,7 +2699,7 @@
                 {onboardingStep === 4 && (
                   <div className="space-y-3">
                     <div>
-                      <h4 className="text-sm font-serif font-bold text-charcoal">Your Focus Transformation Goal</h4>
+                      <h4 className="text-sm font-serif font-bold">Your Focus Transformation Goal</h4>
                       <p className="text-[11px] text-mutedMauve">Customizes training volume and progressive overload.</p>
                     </div>
                     <div className="space-y-2">
@@ -2387,7 +2708,9 @@
                           key={g}
                           onClick={() => { setTempProfile({ ...tempProfile, goal: g }); if (hapticsEnabled) triggerHaptic(8); }}
                           className={`p-3 rounded-2xl border text-xs font-bold cursor-pointer transition-all ${
-                            tempProfile.goal === g ? "bg-blush-50 border-blush-500 text-blush-600 font-serif" : "bg-white border-blush-200 text-charcoal"
+                            tempProfile.goal === g 
+                              ? (darkMode ? 'bg-rose-950/60 border-rose-500 text-rose-300 font-serif' : 'bg-blush-50 border-blush-500 text-blush-600 font-serif') 
+                              : (darkMode ? 'bg-[#1E1918] border-rose-900/30 text-champagne' : 'bg-white border-blush-200 text-charcoal')
                           }`}
                         >
                           {g}
@@ -2406,7 +2729,9 @@
                               if (hapticsEnabled) triggerHaptic(8);
                             }}
                             className={`flex-1 py-2 rounded-xl text-[11px] font-bold capitalize border transition-all ${
-                              tempProfile.experience.toLowerCase() === exp.toLowerCase() ? "bg-blush-500 text-white border-blush-500 shadow-sm" : "bg-white text-mutedMauve border-blush-200"
+                              tempProfile.experience.toLowerCase() === exp.toLowerCase() 
+                                ? "bg-blush-500 text-white border-blush-500 shadow-sm" 
+                                : (darkMode ? 'bg-[#1E1918] text-mutedMauve border-rose-900/40' : 'bg-white text-mutedMauve border-blush-200')
                             }`}
                           >
                             {exp}
@@ -2423,17 +2748,17 @@
                       M60
                     </div>
                     <div>
-                      <h4 className="text-base font-serif font-bold text-charcoal">Ready to Bloom, {tempProfile.name}!</h4>
+                      <h4 className="text-base font-serif font-bold">Ready to Bloom, {tempProfile.name}!</h4>
                       <p className="text-xs text-mutedMauve mt-1">Caloric targets & strength metrics calibrated for your {tempProfile.somatotype} structure.</p>
                     </div>
                   </div>
                 )}
 
-                <div className="flex gap-2 pt-2 border-t border-blush-100">
+                <div className="flex gap-2 pt-2 border-t border-blush-100 dark:border-rose-900/30">
                   {onboardingStep > 1 && (
                     <button
                       onClick={() => { setOnboardingStep(prev => prev - 1); if (hapticsEnabled) triggerHaptic(8); }}
-                      className="px-4 py-2.5 rounded-xl bg-blush-50 text-xs font-bold text-mutedMauve hover:text-charcoal"
+                      className={`px-4 py-2.5 rounded-xl text-xs font-bold ${darkMode ? 'bg-[#1E1918] text-rose-300' : 'bg-blush-50 text-mutedMauve hover:text-charcoal'}`}
                     >
                       Back
                     </button>
@@ -2462,11 +2787,11 @@
           {/* RESET CONFIRMATION MODAL */}
           {showResetConfirmModal && (
             <div className="fixed inset-0 bg-charcoal/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-              <div className="card-light rounded-3xl p-5 max-w-sm w-full space-y-4 border-rose-300 shadow-2xl text-center">
-                <h3 className="text-base font-serif font-bold text-charcoal">Reset All Lifestyle Data?</h3>
+              <div className={`rounded-3xl p-5 max-w-sm w-full space-y-4 border-rose-300 shadow-2xl text-center card-light ${darkMode ? 'bg-[#2D2726] text-champagne' : 'bg-white text-charcoal'}`}>
+                <h3 className="text-base font-serif font-bold">Reset All Lifestyle Data?</h3>
                 <p className="text-xs text-mutedMauve">This will clear your local workout records and restart fresh.</p>
-                <div className="flex gap-2 pt-2 border-t border-blush-100">
-                  <button onClick={() => setShowResetConfirmModal(false)} className="flex-1 py-2 rounded-xl bg-blush-50 text-xs font-bold text-charcoal">
+                <div className="flex gap-2 pt-2 border-t border-blush-100 dark:border-rose-900/30">
+                  <button onClick={() => setShowResetConfirmModal(false)} className={`flex-1 py-2 rounded-xl text-xs font-bold ${darkMode ? 'bg-[#1E1918] text-champagne' : 'bg-blush-50 text-charcoal'}`}>
                     Cancel
                   </button>
                   <button onClick={executeFullReset} className="flex-1 py-2 rounded-xl bg-rose-500 text-white text-xs font-bold">
@@ -2477,25 +2802,28 @@
             </div>
           )}
 
-          {/* BOTTOM NAVIGATION DOCK (6 TABS) */}
-          <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur border-t border-blush-200 px-2 py-2 flex justify-around items-center z-40 shadow-sm">
-            <button onClick={() => { setTab("train"); if (hapticsEnabled) triggerHaptic(10); }} className={`flex flex-col items-center gap-0.5 text-xs ${tab === "train" ? "text-blush-600 font-bold" : "text-mutedMauve"}`}>
-              <span className="text-base">🌸</span><span className="text-[9px]">Train</span>
+          {/* BOTTOM NAVIGATION DOCK (7 TABS) */}
+          <nav className={`fixed bottom-0 left-0 right-0 backdrop-blur border-t px-1 py-2 flex justify-around items-center z-40 shadow-sm ${darkMode ? 'bg-[#1E1918]/95 border-rose-900/40' : 'bg-white/95 border-blush-200'}`}>
+            <button onClick={() => { setTab("train"); if (hapticsEnabled) triggerHaptic(10); }} className={`flex flex-col items-center gap-0.5 text-xs ${tab === "train" ? (darkMode ? 'text-rose-400 font-bold' : 'text-blush-600 font-bold') : 'text-mutedMauve'}`}>
+              <span className="text-base">🌸</span><span className="text-[8px]">Train</span>
             </button>
-            <button onClick={() => { setTab("fuel"); if (hapticsEnabled) triggerHaptic(10); }} className={`flex flex-col items-center gap-0.5 text-xs ${tab === "fuel" ? "text-blush-600 font-bold" : "text-mutedMauve"}`}>
-              <span className="text-base">🥗</span><span className="text-[9px]">Fuel</span>
+            <button onClick={() => { setTab("fuel"); if (hapticsEnabled) triggerHaptic(10); }} className={`flex flex-col items-center gap-0.5 text-xs ${tab === "fuel" ? (darkMode ? 'text-rose-400 font-bold' : 'text-blush-600 font-bold') : 'text-mutedMauve'}`}>
+              <span className="text-base">🥗</span><span className="text-[8px]">Fuel</span>
             </button>
-            <button onClick={() => { setTab("progress"); if (hapticsEnabled) triggerHaptic(10); }} className={`flex flex-col items-center gap-0.5 text-xs ${tab === "progress" ? "text-blush-600 font-bold" : "text-mutedMauve"}`}>
-              <span className="text-base">🗓️</span><span className="text-[9px]">Calendar</span>
+            <button onClick={() => { setTab("progress"); if (hapticsEnabled) triggerHaptic(10); }} className={`flex flex-col items-center gap-0.5 text-xs ${tab === "progress" ? (darkMode ? 'text-rose-400 font-bold' : 'text-blush-600 font-bold') : 'text-mutedMauve'}`}>
+              <span className="text-base">🗓️</span><span className="text-[8px]">Calendar</span>
             </button>
-            <button onClick={() => { setTab("profile"); if (hapticsEnabled) triggerHaptic(10); }} className={`flex flex-col items-center gap-0.5 text-xs ${tab === "profile" ? "text-blush-600 font-bold" : "text-mutedMauve"}`}>
-              <span className="text-base">✨</span><span className="text-[9px]">Profile</span>
+            <button onClick={() => { setTab("vault"); if (hapticsEnabled) triggerHaptic(10); }} className={`flex flex-col items-center gap-0.5 text-xs ${tab === "vault" ? (darkMode ? 'text-rose-400 font-bold' : 'text-blush-600 font-bold') : 'text-mutedMauve'}`}>
+              <span className="text-base">📸</span><span className="text-[8px]">Vault</span>
             </button>
-            <button onClick={() => { setTab("settings"); if (hapticsEnabled) triggerHaptic(10); }} className={`flex flex-col items-center gap-0.5 text-xs ${tab === "settings" ? "text-blush-600 font-bold" : "text-mutedMauve"}`}>
-              <span className="text-base">⚙️</span><span className="text-[9px]">Settings</span>
+            <button onClick={() => { setTab("profile"); if (hapticsEnabled) triggerHaptic(10); }} className={`flex flex-col items-center gap-0.5 text-xs ${tab === "profile" ? (darkMode ? 'text-rose-400 font-bold' : 'text-blush-600 font-bold') : 'text-mutedMauve'}`}>
+              <span className="text-base">✨</span><span className="text-[8px]">Profile</span>
             </button>
-            <button onClick={() => { setTab("about"); if (hapticsEnabled) triggerHaptic(10); }} className={`flex flex-col items-center gap-0.5 text-xs ${tab === "about" ? "text-blush-600 font-bold" : "text-mutedMauve"}`}>
-              <span className="text-base">📜</span><span className="text-[9px]">About</span>
+            <button onClick={() => { setTab("settings"); if (hapticsEnabled) triggerHaptic(10); }} className={`flex flex-col items-center gap-0.5 text-xs ${tab === "settings" ? (darkMode ? 'text-rose-400 font-bold' : 'text-blush-600 font-bold') : 'text-mutedMauve'}`}>
+              <span className="text-base">⚙️</span><span className="text-[8px]">Settings</span>
+            </button>
+            <button onClick={() => { setTab("about"); if (hapticsEnabled) triggerHaptic(10); }} className={`flex flex-col items-center gap-0.5 text-xs ${tab === "about" ? (darkMode ? 'text-rose-400 font-bold' : 'text-blush-600 font-bold') : 'text-mutedMauve'}`}>
+              <span className="text-base">📜</span><span className="text-[8px]">About</span>
             </button>
           </nav>
 
