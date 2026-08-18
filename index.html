@@ -100,6 +100,7 @@
   <script type="text/babel">
     const { useState, useEffect, useRef } = React;
 
+    // --- Safe Storage Helpers ---
     const getStored = (key, fallback) => {
       try {
         const item = localStorage.getItem(key);
@@ -120,6 +121,7 @@
       return `${year}-${month}-${day}`;
     };
 
+    // --- Audio Synthesis Engine ---
     const playChime = (notes = [523.25, 659.25, 783.99], dur = 0.1) => {
       try {
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -177,6 +179,7 @@
       }
     };
 
+    // --- Cycle Phasing Configuration ---
     const CYCLE_MODES = {
       menstrual: { name: "Menstrual Phase (Days 1–5)", short: "Menstrual", tag: "Gentle Flow & Restore", color: "text-rose-600 border-rose-200 bg-rose-50", mod: 0.85, tip: "Hormones at baseline. Prioritize graceful movement, deep diaphragmatic breaths, and warm herbal infusions." },
       follicular: { name: "Follicular Phase (Days 6–13)", short: "Follicular", tag: "Glow & Sculpt Power", color: "text-pink-600 border-pink-200 bg-pink-50", mod: 1.0, tip: "Estrogen rising! Peak insulin sensitivity and radiant vitality. Prime time to sculpt and increase resistance." },
@@ -184,6 +187,7 @@
       luteal: { name: "Luteal Phase (Days 17–28)", short: "Luteal", tag: "Steady Burn & Calibrate", color: "text-purple-600 border-purple-200 bg-purple-50", mod: 0.9, tip: "Progesterone dominance elevates core temperature. Hydrate with 3L+ water and honor strict rest cadence." }
     };
 
+    // --- Complete Master Exercise Database ---
     const EXERCISE_DATA = {
       beginner: {
         A: [
@@ -240,102 +244,19 @@
       }
     };
 
-    const SA_MEALS = [
-      {
-        day: "Monday",
-        type: "Workout A (Glycogen Glow)",
-        target: "1,720 kcal • 150g Protein",
-        meals: [
-          { name: "Breakfast", title: "Berries & Vanilla Protein Oats", img: "https://images.unsplash.com/photo-1517673132405-a56a62b18caf?auto=format&fit=crop&w=600&q=80", desc: "1 cup Jungle Rolled Oats, 1 scoop vanilla protein, ½ cup fresh blueberries.", steps: ["Simmer oats in 1 cup almond milk for 3 mins until creamy.", "Remove from heat, gently whisk in protein powder until silky.", "Garnish with fresh blueberries and cinnamon."] },
-          { name: "Lunch", title: "Herb Chicken Breast & Roasted Patats", img: "https://images.unsplash.com/photo-1532550907401-a500c9a57435?auto=format&fit=crop&w=600&q=80", desc: "160g chicken fillet, 120g roasted sweet potato cubes, steamed green beans.", steps: ["Roast cubed sweet potatoes at 200°C with 1 tsp olive oil for 22 mins.", "Pan-sear seasoned chicken breast for 5 mins each side.", "Steam green beans 4 mins until crisp and vibrant."] },
-          { name: "Snack", title: "Greek Yogurt & Chia Glow Pot", img: "https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=600&q=80", desc: "1 cup 0% Greek yogurt, 1 tbsp chia seeds, vanilla extract.", steps: ["Spoon yogurt into glass pot, fold in chia seeds and vanilla.", "Let sit 5 mins for chia seeds to blossom."] },
-          { name: "Dinner", title: "Lean Beef Bolognese over Zoodles", img: "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=600&q=80", desc: "150g lean beef mince (90/10), baby marrows (zucchini), tomato passata, ¼ avocado.", steps: ["Brown mince with Italian herbs in a hot skillet.", "Add tomato passata and simmer on low for 8 mins.", "Toss spiralized baby marrows in the pan for 2 mins.", "Serve with sliced avocado."] }
-        ]
-      },
-      {
-        day: "Tuesday",
-        type: "Restorative Recovery",
-        target: "1,640 kcal • 144g Protein",
-        meals: [
-          { name: "Breakfast", title: "Savory Egg & Spinach Cups w/ Avocado", img: "https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=600&q=80", desc: "2 whole eggs + 2 whites baked with morogo/spinach, ½ avocado.", steps: ["Whisk eggs with chopped spinach and bell peppers.", "Bake in muffin tins at 180°C for 20 mins.", "Serve warm with fresh avocado."] },
-          { name: "Lunch", title: "Lucky Star Pilchard Protein Bowl", img: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80", desc: "½ tin pilchards in tomato sauce, mixed greens, steamed gem squash.", steps: ["Steam gem squash halves for 15 mins.", "Warm pilchards and flake over fresh salad greens and squash."] },
-          { name: "Snack", title: "Hard-Boiled Egg & Raw Almonds", img: "https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=600&q=80", desc: "1 boiled egg, 15 raw almonds, sliced salted cucumber.", steps: ["Boil egg 8 mins; serve with almonds and sea-salted cucumber."] },
-          { name: "Dinner", title: "Lemon Baked Cape Hake & Cauliflower", img: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=600&q=80", desc: "180g Cape Hake fillet, cauliflower florets, 1 tbsp olive oil, lemon.", steps: ["Roast cauliflower florets in olive oil at 200°C for 20 mins.", "Bake hake fillet alongside for 12 mins with lemon slices."] }
-        ]
-      },
-      {
-        day: "Wednesday",
-        type: "Workout B (Glycogen Glow)",
-        target: "1,730 kcal • 152g Protein",
-        meals: [
-          { name: "Breakfast", title: "Rooibos Vanilla Protein Smoothie", img: "https://images.unsplash.com/photo-1590301157890-4810ed352733?auto=format&fit=crop&w=600&q=80", desc: "1 cup chilled rooibos tea, 1 scoop protein, berries, ½ banana, chia.", steps: ["Brew rooibos tea and chill.", "Blend with protein, frozen berries, banana, and chia seeds until smooth."] },
-          { name: "Lunch", title: "Slow-Cooker Lean Beef over Brown Rice", img: "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=600&q=80", desc: "140g tender lean beef stew, ½ cup brown basmati rice, steamed broccoli.", steps: ["Simmer beef in bone broth with carrots and onions.", "Serve over warm brown basmati rice with steamed broccoli."] },
-          { name: "Snack", title: "Cottage Cheese & Sliced Green Apple", img: "https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=600&q=80", desc: "½ cup low-fat cottage cheese, ½ green apple sliced, cinnamon.", steps: ["Top cottage cheese with crisp green apple slices and cinnamon."] },
-          { name: "Dinner", title: "Pan-Grilled Chicken & Roasted Butternut", img: "https://images.unsplash.com/photo-1532550907401-a500c9a57435?auto=format&fit=crop&w=600&q=80", desc: "160g chicken fillet, 100g butternut cubes, sautéed Swiss chard.", steps: ["Roast butternut cubes at 200°C for 25 mins.", "Pan-sear chicken with herbs; sauté Swiss chard for 3 mins."] }
-        ]
-      },
-      {
-        day: "Thursday",
-        type: "Active Mobility Flow",
-        target: "1,650 kcal • 148g Protein",
-        meals: [
-          { name: "Breakfast", title: "Morogo & Feta Scrambled Eggs", img: "https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=600&q=80", desc: "3 whole eggs, tomatoes, onions, Swiss chard, 30g feta.", steps: ["Sauté onions and chopped morogo in 1 tsp olive oil.", "Scramble eggs gently; crumble feta over top."] },
-          { name: "Lunch", title: "Chicken Caesar Romaine Wraps", img: "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80", desc: "150g grilled chicken, romaine leaves, parmesan, light Caesar.", steps: ["Wrap grilled chicken strips in crisp romaine leaves with light dressing."] },
-          { name: "Snack", title: "Tuna in Spring Water & Cucumber", img: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80", desc: "1 tin tuna, lemon juice, sliced cucumbers.", steps: ["Flake tuna into a bowl with lemon and cracked pepper; serve with cucumber."] },
-          { name: "Dinner", title: "Grilled Ostrich Steak & Mediterranean Veg", img: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80", desc: "160g ostrich steak, baby marrows, bell peppers, red onion.", steps: ["Roast vegetables at 200°C; sear ostrich steak 2.5 mins per side in a smoking hot pan."] }
-        ]
-      },
-      {
-        day: "Friday",
-        type: "Workout C (Metabolic Glow)",
-        target: "1,740 kcal • 154g Protein",
-        meals: [
-          { name: "Breakfast", title: "Spiced Jungle Protein Oats", img: "https://images.unsplash.com/photo-1517673132405-a56a62b18caf?auto=format&fit=crop&w=600&q=80", desc: "⅓ cup oats, 1 scoop vanilla protein, 1 tbsp flaxseed, fresh berries.", steps: ["Simmer oats with nutmeg for 3 mins.", "Stir in protein and flaxseed; top with berries."] },
-          { name: "Lunch", title: "Chicken Breast & Sweet Potato Mash", img: "https://images.unsplash.com/photo-1532550907401-a500c9a57435?auto=format&fit=crop&w=600&q=80", desc: "160g chicken breast, 120g mashed sweet potato, steamed green beans.", steps: ["Boil peeled sweet potatoes and mash with sea salt.", "Sear chicken fillets with garlic herbs; serve with green beans."] },
-          { name: "Snack", title: "Greek Yogurt & Raw Walnuts", img: "https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=600&q=80", desc: "1 cup 0% Greek yogurt, 10 raw walnut halves.", steps: ["Spoon cold yogurt into a bowl and top with crushed walnuts."] },
-          { name: "Dinner", title: "Savory Lean Mince over Cauliflower Mash", img: "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=600&q=80", desc: "150g extra-lean beef mince, cumin, peppers, cauliflower mash.", steps: ["Blend steamed cauliflower into a creamy mash.", "Brown seasoned mince with diced peppers; serve over mash."] }
-        ]
-      },
-      {
-        day: "Saturday",
-        type: "Zone 2 Cardio Radiance",
-        target: "1,670 kcal • 146g Protein",
-        meals: [
-          { name: "Breakfast", title: "Poached Eggs on Seeded Rye Toast", img: "https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=600&q=80", desc: "2 poached eggs, 1 slice toasted seeded rye bread, sliced tomatoes.", steps: ["Poach 2 eggs for 3.5 mins in simmering water.", "Serve over toasted rye bread with sliced fresh tomatoes."] },
-          { name: "Lunch", title: "Mediterranean Chopped Chicken Salad", img: "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80", desc: "150g chicken breast, cucumber, cherry tomatoes, olives, 30g feta.", steps: ["Toss grilled chicken, tomatoes, cucumber, olives, and feta with lemon dressing."] },
-          { name: "Snack", title: "Savory Egg & Spinach Cups", img: "https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=600&q=80", desc: "2 prepped egg cups.", steps: ["Enjoy 2 pre-baked egg muffin cups as a convenient protein snack."] },
-          { name: "Dinner", title: "Baked Cape Hake & Herb Green Beans", img: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=600&q=80", desc: "180g hake fillet, garlic butter, parsley, green beans.", steps: ["Bake hake fillet at 190°C for 14 mins with garlic, butter, and parsley."] }
-        ]
-      },
-      {
-        day: "Sunday",
-        type: "Rest & Nourish Batch Prep",
-        target: "1,660 kcal • 150g Protein",
-        meals: [
-          { name: "Breakfast", title: "Sunday Scramble w/ Mushrooms & Chard", img: "https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=600&q=80", desc: "2 whole eggs + 2 whites, mushrooms, Swiss chard.", steps: ["Sauté sliced mushrooms and Swiss chard; scramble eggs gently until set."] },
-          { name: "Lunch", title: "Lean Beef Potjie Stew w/ Steamed Cabbage", img: "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=600&q=80", desc: "140g slow-cooked beef stew, shredded steamed cabbage ribbons.", steps: ["Reheat slow-cooked beef stew; serve over tender steamed cabbage."] },
-          { name: "Snack", title: "Warm Bone Broth & Boiled Egg", img: "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=600&q=80", desc: "1 cup beef bone broth, 1 boiled egg, black pepper.", steps: ["Warm bone broth in a mug with cracked pepper; enjoy with 1 boiled egg."] },
-          { name: "Dinner", title: "Grilled Lean Beef Patties & Rocket Salad", img: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80", desc: "150g lean beef patties, sautéed button mushrooms, fresh rocket.", steps: ["Pan-sear patties 4 mins each side; serve with mushrooms and rocket with lemon."] }
-        ]
-      }
-    ];
-
-    const GROCERY_CATEGORIES = {
-      "Lean Proteins": ["Skinless Chicken Breast fillets (bulk)", "Extra-Lean Beef Mince (90/10)", "Frozen Cape Hake Fillets", "Free-Range Eggs (Tray of 30)", "Liquid Egg Whites", "0% Greek Yogurt", "Low-Fat Cottage Cheese", "Vanilla Whey/Plant Protein Powder", "Tinned Tuna in Spring Water"],
-      "Glowing Carbs": ["Sweet Potatoes (*Patats*)", "Jungle Rolled Oats", "Brown Basmati Rice", "100% Seeded Rye Bread", "Quinoa", "Butternut Squash"],
-      "Fresh Produce": ["Swiss Chard / Morogo", "Baby Marrows (Zucchini)", "Fresh Green Beans", "Gem Squash", "Broccoli & Cauliflower", "Baby Spinach & Rocket", "Fresh Lemons & Blueberries"],
-      "Healthy Fats": ["Ripe Avocados", "Raw Almonds & Walnuts", "Chia Seeds & Ground Flaxseed", "Cold-Pressed Olive Oil", "Sugar-Free Peanut Butter"]
-    };
-
-    const SUBSTITUTIONS = {
-      "Lean Proteins": ["Chicken breast", "Turkey mince", "Cape Hake / Kingklip", "Extra-lean Beef mince", "Ostrich steaks", "Tinned Tuna", "Free-Range Eggs"],
-      "Glowing Carbs": ["Sweet Potato (*patats*)", "Butternut", "Rolled Oats", "Brown Rice", "100% Seeded Rye Bread"],
-      "Fibrous Greens": ["Swiss Chard / Morogo", "Zucchini", "Green Beans", "Gem Squash", "Broccoli", "Spinach"],
-      "Healthy Fats": ["Avocado", "Raw Almonds", "Chia Seeds", "Olive Oil", "Sugar-Free Peanut Butter"]
+    const getInitialTab = () => {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const tabParam = params.get('tab');
+        if (['train', 'fuel', 'progress', 'profile', 'about'].includes(tabParam)) {
+          return tabParam;
+        }
+      } catch (e) {}
+      return "train";
     };
 
     function App() {
-      const [tab, setTab] = useState("train");
+      const [tab, setTab] = useState(getInitialTab);
       const [difficulty, setDifficulty] = useState(() => getStored("m60_diff", "intermediate"));
       const [workoutDay, setWorkoutDay] = useState(() => getStored("m60_day", "A"));
       const [focusedId, setFocusedId] = useState("i_a1");
@@ -1738,7 +1659,7 @@
                         />
                       </div>
                       <div>
-                        <label className="block text-[9px] font-bold text-mutedMauve uppercase mb-1">Target Goal (kg)</label>
+                        <label className="block text-[9px] font-bold text-mutedMauve uppercase mb-1">Target Weight (kg)</label>
                         <input
                           type="number"
                           step="0.1"
@@ -1894,7 +1815,6 @@
     ReactDOM.createRoot(document.getElementById('root')).render(<App />);
   </script>
 
-  <!-- PWA Service Worker Registration -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
