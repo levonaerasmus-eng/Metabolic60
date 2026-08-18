@@ -95,7 +95,6 @@
   <script type="text/babel">
     const { useState, useEffect, useRef, Component } = React;
 
-    // --- Safety Error Boundary ---
     class ErrorBoundary extends Component {
       constructor(props) {
         super(props);
@@ -155,7 +154,6 @@
       }
     };
 
-    // --- IndexedDB Async Engine ---
     const DB_NAME = 'm60_elite_db';
     const STORE_NAME = 'user_data';
 
@@ -195,7 +193,6 @@
       } catch (e) {}
     };
 
-    // --- Audio & Web Speech Engine ---
     let sharedAudioCtx = null;
     let activeUtterance = null;
 
@@ -302,7 +299,6 @@
       }
     };
 
-    // --- Master Data Structures ---
     const CYCLE_MODES = {
       menstrual: { name: "Menstrual Phase (Days 1–5)", short: "Menstrual", tag: "Gentle Flow & Restore", color: "text-rose-600 border-rose-200 bg-rose-50 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800", mod: 0.85, tip: "Hormones at baseline. Prioritize graceful movement, deep belly breaths, and warm herbal infusions." },
       follicular: { name: "Follicular Phase (Days 6–13)", short: "Follicular", tag: "Glow & Sculpt Power", color: "text-pink-600 border-pink-200 bg-pink-50 dark:bg-pink-950/40 dark:text-pink-300 dark:border-pink-800", mod: 1.0, tip: "Estrogen rising! Peak insulin sensitivity and radiant vitality. Prime time to sculpt and increase resistance." },
@@ -328,7 +324,7 @@
         C: [
           { id: "b_c1", name: "Step-Up Elevation", target: "Glutes & Legs", primary: "glutes", sets: 3, reps: 8, rest: 60, tempo: "2-0-1", ecc: 2, pause: 0, conc: 1, defaultKg: 0, img: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Power through the top heel; step down with light grace.", execution: ["Place full foot on step.", "Drive through heel to stand tall.", "Lower under control."], swaps: ["Bulgarian Split Squats", "Reverse Lunges"] },
           { id: "b_c2", name: "Romanian Deadlift", target: "Hamstrings & Glutes", primary: "hamstrings", sets: 3, reps: 10, rest: 60, tempo: "3-0-1", ecc: 3, pause: 0, conc: 1, defaultKg: 4.0, img: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=600&q=80", cues: "Hinge hips back like closing a door behind you.", execution: ["Hinge at hips with soft knees and long spine.", "Lower weights along shins until hamstrings stretch.", "Drive hips forward to stand tall."], swaps: ["Good Mornings", "Banded Hamstring Pulls"] },
-          { id: "b_c3", name: "Prone Y-Raises", target: "Deltoids & Posture", primary: "shoulders", sets: 3, reps: 12, rest: 45, tempo: "2-1-1", ecc: 2, pause: 1, conc: 1, defaultKg: 0, img: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=600&q=80", cues: "Thumbs point to ceiling. Squeeze lower shoulder blades down and back.", execution: ["Lie face down on a mat with arms in a wide Y shape.", "Rotate hands so thumbs point straight up.", "Elevate arms 10cm off floor without arching lower back.", "Lower gently back to mat."], swaps: ["Seated Band Pull-Aparts", "Prone W-Raises"] }
+          { id: "b_c3", name: "Prone Y-Raises", target: "Deltoids & Back Posture", primary: "shoulders", sets: 3, reps: 12, rest: 45, tempo: "2-1-1", ecc: 2, pause: 1, conc: 1, defaultKg: 0, img: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=600&q=80", cues: "Thumbs point to ceiling. Squeeze lower shoulder blades down and back.", execution: ["Lie face down on a mat with arms in a wide Y shape.", "Rotate hands so thumbs point straight up.", "Elevate arms 10cm off floor without arching lower back.", "Lower gently back to mat."], swaps: ["Seated Band Pull-Aparts", "Prone W-Raises"] }
         ]
       },
       intermediate: {
@@ -550,6 +546,10 @@
       const [privacyBlur, setPrivacyBlur] = useState(true);
       const [selectedCalendarDate, setSelectedCalendarDate] = useState(null);
 
+      // --- Live Workout Stopwatch Timer State ---
+      const [sessionSeconds, setSessionSeconds] = useState(0);
+      const [isSessionActive, setIsSessionActive] = useState(true);
+
       const defaultProfile = {
         onboardingCompleted: false,
         name: "Lindiwe",
@@ -632,6 +632,17 @@
         };
         loadIDBState();
       }, []);
+
+      // Live Session Stopwatch Timer Effect
+      useEffect(() => {
+        let timer = null;
+        if (isSessionActive) {
+          timer = setInterval(() => {
+            setSessionSeconds(prev => prev + 1);
+          }, 1000);
+        }
+        return () => clearInterval(timer);
+      }, [isSessionActive]);
 
       // Dark Mode Class Toggle on Root Body
       useEffect(() => {
@@ -753,7 +764,6 @@
 
       const speechSettings = { rate: speechRate, pitch: speechPitch, volume: audioVolume, voiceURI: selectedVoiceURI };
 
-      // Rest Timer Engine with Push Notification Trigger
       useEffect(() => {
         let timer = null;
         if (isResting && restSec > 0) {
@@ -773,7 +783,6 @@
                 if (hapticsEnabled) triggerHaptic([40, 60, 40]);
                 setIsResting(false);
 
-                // Trigger Web Push Notification if permitted
                 if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
                   try {
                     new Notification("M60 Rest Complete ✨", {
@@ -790,7 +799,6 @@
         return () => clearInterval(timer);
       }, [isResting, restSec, audioMode, speechSettings, audioVolume, hapticsEnabled]);
 
-      // Global Metronome Engine
       useEffect(() => {
         let timer = null;
         if (tempoRunning) {
@@ -806,7 +814,6 @@
         return () => clearInterval(timer);
       }, [tempoRunning, audioVolume, hapticsEnabled]);
 
-      // Live Cadence Engine with Spoken Audio Prompts
       useEffect(() => {
         let timer = null;
         if (activeModalExercise && activeModalPacing) {
@@ -959,7 +966,6 @@
         playBeepTone(659.25, 0.06, audioVolume);
       };
 
-      // 1-Tap WhatsApp Grocery Export
       const exportGroceryToWhatsApp = () => {
         let text = "🛒 *M60 Supermarket Grocery List*\n\n";
         let hasItems = false;
@@ -979,7 +985,6 @@
         window.open(`https://wa.me/?text=${encoded}`, '_blank');
       };
 
-      // In-Workout Exercise Swapping
       const substituteExercise = (oldExId, newExName) => {
         const listCopy = [...currentList];
         const idx = listCopy.findIndex(e => e.id === oldExId);
@@ -989,7 +994,6 @@
             name: newExName,
             id: oldExId + '_swap_' + Date.now()
           };
-          // Update database transiently
           EXERCISE_DATA[safeDiffKey][safeDayKey] = listCopy;
           setFocusedId(listCopy[idx].id);
         }
@@ -1034,6 +1038,7 @@
         
         const nextDay = workoutDay === "A" ? "B" : workoutDay === "B" ? "C" : "A";
         setWorkoutDay(nextDay);
+        setSessionSeconds(0);
         if (tierData[nextDay] && tierData[nextDay][0]) {
           setFocusedId(tierData[nextDay][0].id);
         }
@@ -1113,6 +1118,12 @@
             }
           };
         }
+      };
+
+      const formatTime = (secs) => {
+        const mins = Math.floor(secs / 60);
+        const remSecs = secs % 60;
+        return `${String(mins).padStart(2, '0')}:${String(remSecs).padStart(2, '0')}`;
       };
 
       const safeHistory = Array.isArray(history) ? history.filter(h => h && typeof h === 'object') : [];
@@ -1214,6 +1225,23 @@
                   <p className={`text-[11px] p-2.5 rounded-2xl leading-relaxed border ${darkMode ? 'bg-[#1E1918] text-champagne/90 border-rose-900/30' : 'bg-white/80 text-charcoal/80 border-blush-100'}`}>
                     🌸 <strong>{cycle.info.tag}:</strong> {cycle.info.tip}
                   </p>
+                </div>
+
+                {/* LIVE WORKOUT STOPWATCH BAR */}
+                <div className={`p-3.5 rounded-2xl flex items-center justify-between card-light border ${darkMode ? 'bg-[#2D2726] border-rose-500/50' : 'bg-white border-blush-400'}`}>
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-lg">⏱️</span>
+                    <div>
+                      <span className="text-[9px] font-bold text-roseGold uppercase tracking-wider">Session Stopwatch</span>
+                      <p className={`text-sm font-black font-mono ${darkMode ? 'text-champagne' : 'text-charcoal'}`}>{formatTime(sessionSeconds)}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setIsSessionActive(!isSessionActive)}
+                    className={`text-[10px] font-bold px-3 py-1.5 rounded-xl border ${isSessionActive ? (darkMode ? 'bg-rose-950 text-rose-300 border-rose-800' : 'bg-blush-100 text-blush-600 border-blush-200') : 'bg-emerald-600 text-white border-emerald-700'}`}
+                  >
+                    {isSessionActive ? "Pause Timer" : "Resume Timer"}
+                  </button>
                 </div>
 
                 <div className={`p-3.5 rounded-2xl flex items-center justify-between card-light ${darkMode ? 'bg-[#2D2726] border-rose-900/30' : 'bg-white border-blush-200'}`}>
@@ -2287,211 +2315,16 @@
             </div>
           )}
 
-          {/* FULL INTERACTIVE 5-SLIDE PREVIEW TOUR MODAL */}
-          {showWelcomeScreen && (
-            <div className="fixed inset-0 bg-charcoal/60 backdrop-blur-md flex items-center justify-center p-4 z-50 overflow-y-auto">
-              <div className={`rounded-3xl p-5 max-w-sm w-full space-y-4 my-auto border-blush-300 shadow-2xl transition-all card-light ${darkMode ? 'bg-[#2D2726] border-rose-500 text-champagne' : 'bg-white text-charcoal'}`}>
-                
-                <div className="flex items-center justify-between border-b border-blush-100 dark:border-rose-900/30 pb-2.5">
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-blush-500 animate-pulse"></span>
-                    <span className="text-[10px] font-bold text-roseGold uppercase tracking-widest">
-                      Interactive Feature Tour • {tourSlide + 1}/5
-                    </span>
-                  </div>
-                  <button
-                    onClick={() => {
-                      setShowWelcomeScreen(false);
-                      if (!userProfile.onboardingCompleted) startOnboardingWizard();
-                    }}
-                    className="w-6 h-6 rounded-full bg-blush-50 border border-blush-200 flex items-center justify-center text-xs text-mutedMauve hover:text-charcoal"
-                  >
-                    ✕
-                  </button>
-                </div>
-
-                {tourSlide === 0 && (
-                  <div className="space-y-3 text-center">
-                    <div className="relative rounded-2xl overflow-hidden border border-blush-200 bg-blush-50 aspect-video shadow-sm flex items-center justify-center">
-                      <img
-                        src="https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=800&q=80"
-                        alt="M60 Athletic Woman"
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-charcoal/60 via-transparent to-transparent flex items-end p-3">
-                        <span className="text-white text-xs font-serif font-bold">Feminine Strength & Metabolic Sync</span>
-                      </div>
-                    </div>
-                    <div>
-                      <h3 className="text-base font-serif font-bold">Welcome to M60 ✨</h3>
-                      <p className="text-[11px] text-mutedMauve leading-relaxed mt-1">
-                        A personalized athletic transformation system built around female physiology, tempo biomechanics, and hormonal rhythm.
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {tourSlide === 1 && (
-                  <div className="space-y-3">
-                    <div className="text-center">
-                      <span className="text-2xl">🌸</span>
-                      <h3 className="text-sm font-serif font-bold mt-1">Hormonal Phasing & Auto-Load</h3>
-                      <p className="text-[10px] text-mutedMauve">Syncs strength workouts with your menstrual cycle & Luteal calorie buffers.</p>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2 text-[10px]">
-                      <div className="p-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800">
-                        <span className="font-bold text-rose-700 dark:text-rose-300 block">Menstrual (Days 1–5)</span>
-                        <span className="text-mutedMauve">85% Load • Gentle flow & restorative tempo.</span>
-                      </div>
-                      <div className="p-2.5 rounded-xl bg-pink-50 dark:bg-pink-950/40 border border-pink-200 dark:border-pink-800">
-                        <span className="font-bold text-pink-700 dark:text-pink-300 block">Follicular (Days 6–13)</span>
-                        <span className="text-mutedMauve">100% Load • Peak insulin sensitivity & sculpt.</span>
-                      </div>
-                      <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800">
-                        <span className="font-bold text-amber-700 dark:text-amber-300 block">Ovulatory (Days 14–16)</span>
-                        <span className="text-mutedMauve">105% Load • PR strength & peak power.</span>
-                      </div>
-                      <div className="p-2.5 rounded-xl bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800">
-                        <span className="font-bold text-purple-700 dark:text-purple-300 block">Luteal (Days 17–28)</span>
-                        <span className="text-mutedMauve">90% Load • +150 kcal buffer & steady burn.</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {tourSlide === 2 && (
-                  <div className="space-y-3">
-                    <div className="text-center">
-                      <span className="text-2xl">⏱️</span>
-                      <h3 className="text-sm font-serif font-bold mt-1">Live Voice Cadence & Media Ducking</h3>
-                      <p className="text-[10px] text-mutedMauve">Spoken rep counts that duck your Spotify music seamlessly.</p>
-                    </div>
-
-                    <div className={`p-3 rounded-2xl border text-center space-y-2 ${darkMode ? 'bg-[#1E1918] border-rose-900/40' : 'bg-blush-50/70 border-blush-200'}`}>
-                      <span className="text-[9px] font-bold text-roseGold uppercase">Live Cadence Preview</span>
-                      <div className="text-2xl font-mono font-black">3 - 0 - 1</div>
-                      <p className="text-[10px] text-blush-600 dark:text-rose-400 font-bold uppercase">"Lower 3... 2... 1... Drive Up!"</p>
-                      
-                      <button
-                        onClick={() => {
-                          unlockAudioAndSpeech();
-                          playChime([523.25, 659.25, 783.99], 0.15, audioVolume);
-                          speakPrompt("Lower 3, 2, 1, drive up", "voice", speechSettings);
-                          if (hapticsEnabled) triggerHaptic([20, 20, 20]);
-                        }}
-                        className={`w-full py-1.5 rounded-xl border text-[11px] font-bold shadow-sm ${darkMode ? 'bg-[#2D2726] border-rose-900/40 text-rose-300 hover:bg-rose-950' : 'bg-white border-blush-200 text-blush-600 hover:bg-blush-100'}`}
-                      >
-                        🔊 Test Voice & Chime Sample
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {tourSlide === 3 && (
-                  <div className="space-y-3">
-                    <div className="text-center">
-                      <span className="text-2xl">🥗</span>
-                      <h3 className="text-sm font-serif font-bold mt-1">Clean Fuel & WhatsApp Grocery Export</h3>
-                      <p className="text-[10px] text-mutedMauve">7-day South African meals and 1-tap supermarket lists.</p>
-                    </div>
-                    <div className="space-y-1.5 text-[11px]">
-                      <div className={`p-2 rounded-xl border flex items-center justify-between ${darkMode ? 'bg-[#1E1918] border-rose-900/30' : 'bg-blush-50/70 border-blush-100'}`}>
-                        <span className="font-medium">✨ 7-Day South African Meal Plans</span>
-                        <span className="text-[10px] text-blush-600 dark:text-rose-400 font-bold">1,720 kcal</span>
-                      </div>
-                      <div className={`p-2 rounded-xl border flex items-center justify-between ${darkMode ? 'bg-[#1E1918] border-rose-900/30' : 'bg-blush-50/70 border-blush-100'}`}>
-                        <span className="font-medium">💧 3.0 Liters Daily Water Tracker</span>
-                        <span className="text-[10px] text-blush-600 dark:text-rose-400 font-bold">8 Glasses</span>
-                      </div>
-                      <div className={`p-2 rounded-xl border flex items-center justify-between ${darkMode ? 'bg-[#1E1918] border-rose-900/30' : 'bg-blush-50/70 border-blush-100'}`}>
-                        <span className="font-medium">🛒 1-Tap WhatsApp List Share</span>
-                        <span className="text-[10px] text-emerald-600 font-bold">Instant</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {tourSlide === 4 && (
-                  <div className="space-y-3 text-center">
-                    <div>
-                      <span className="text-2xl">👑</span>
-                      <h3 className="text-sm font-serif font-bold mt-1">Private Photo Vault & Offline DB</h3>
-                      <p className="text-[10px] text-mutedMauve">Encrypted IndexedDB storage with biometric privacy blur.</p>
-                    </div>
-                    <div className={`p-3 rounded-2xl border flex justify-around items-center text-xl ${darkMode ? 'bg-[#1E1918] border-rose-900/40' : 'bg-blush-50/70 border-blush-200'}`}>
-                      <span>📸</span>
-                      <span>🔒</span>
-                      <span>👑</span>
-                      <span>⚡</span>
-                      <span>🌙</span>
-                    </div>
-                    <p className="text-[10px] text-mutedMauve leading-relaxed">
-                      All workouts, weights, and confidential progress photos remain 100% private inside your local device database.
-                    </p>
-                  </div>
-                )}
-
-                <div className="flex justify-center items-center gap-1.5 pt-1">
-                  {[0, 1, 2, 3, 4].map(idx => (
-                    <button
-                      key={idx}
-                      onClick={() => { setTourSlide(idx); if (hapticsEnabled) triggerHaptic(8); }}
-                      className={`h-1.5 rounded-full transition-all ${
-                        tourSlide === idx ? "w-6 bg-blush-500" : "w-1.5 bg-blush-200"
-                      }`}
-                    />
-                  ))}
-                </div>
-
-                <div className="flex gap-2 pt-1 border-t border-blush-100 dark:border-rose-900/30">
-                  {tourSlide > 0 && (
-                    <button
-                      onClick={() => { setTourSlide(prev => prev - 1); if (hapticsEnabled) triggerHaptic(8); }}
-                      className={`px-3.5 py-2.5 rounded-xl text-xs font-bold ${darkMode ? 'bg-[#1E1918] text-rose-300' : 'bg-blush-50 text-mutedMauve hover:text-charcoal'}`}
-                    >
-                      ← Back
-                    </button>
-                  )}
-                  {tourSlide < 4 ? (
-                    <button
-                      onClick={() => { setTourSlide(prev => prev + 1); if (hapticsEnabled) triggerHaptic(12); }}
-                      className="flex-1 py-2.5 rounded-xl bg-blush-500 text-white text-xs font-bold shadow-sm hover:bg-blush-600"
-                    >
-                      Next Feature →
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => {
-                        setShowWelcomeScreen(false);
-                        if (!userProfile.onboardingCompleted) startOnboardingWizard();
-                        else {
-                          playChime([523.25, 659.25, 783.99], 0.2, audioVolume);
-                          if (hapticsEnabled) triggerHaptic([40, 60, 40]);
-                        }
-                      }}
-                      className="flex-1 py-3 rounded-xl bg-gradient-to-r from-blush-400 via-blush-500 to-roseGold text-white text-xs font-bold shadow-md"
-                    >
-                      {userProfile.onboardingCompleted ? "Close & Start Training ✨" : "Begin Personalization Setup →"}
-                    </button>
-                  )}
-                </div>
-
-              </div>
-            </div>
-          )}
-
-          {/* LIVE CADENCE METRONOME & CUES MODAL */}
+          {/* LIVE CADENCE METRONOME & LARGE VISUAL BANNER CUES MODAL */}
           {activeModalExercise && (
-            <div className="fixed inset-0 bg-charcoal/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
+            <div className="fixed inset-0 bg-charcoal/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
               <div className={`rounded-3xl p-5 max-w-sm w-full space-y-4 my-auto border-blush-300 shadow-2xl card-light ${darkMode ? 'bg-[#2D2726] border-rose-500 text-champagne' : 'bg-white text-charcoal'}`}>
                 
-                <div className="flex items-center justify-between border-b border-blush-100 dark:border-rose-900/30 pb-3">
-                  <div className="flex items-center gap-3">
-                    <img src={activeModalExercise.img} alt={activeModalExercise.name} className="w-10 h-10 rounded-xl object-cover border border-blush-200" />
-                    <div>
-                      <h3 className="text-xs font-serif font-bold">{activeModalExercise.name}</h3>
-                      <p className="text-[10px] text-blush-600 dark:text-rose-400 font-semibold">{activeModalExercise.target}</p>
-                    </div>
+                {/* Modal Header & Close Button */}
+                <div className="flex items-center justify-between border-b border-blush-100 dark:border-rose-900/30 pb-2">
+                  <div>
+                    <span className="text-[9px] font-bold text-roseGold uppercase tracking-widest">Exercise Form Guide</span>
+                    <h3 className="text-sm font-serif font-bold">{activeModalExercise.name}</h3>
                   </div>
                   <button
                     onClick={() => {
@@ -2504,17 +2337,32 @@
                   </button>
                 </div>
 
+                {/* LARGE VISUAL REFERENCE BANNER */}
+                <div className="relative rounded-2xl overflow-hidden border border-blush-200 dark:border-rose-900/40 aspect-video shadow-sm bg-charcoal/10">
+                  <img
+                    src={activeModalExercise.img}
+                    alt={activeModalExercise.name}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-charcoal/80 via-transparent to-transparent flex items-end p-3">
+                    <div className="text-white">
+                      <span className="text-[9px] font-bold uppercase tracking-wider bg-blush-500 px-2 py-0.5 rounded-full">{activeModalExercise.target}</span>
+                      <p className="text-xs font-serif font-bold mt-1">Proper Form & Posture Preview</p>
+                    </div>
+                  </div>
+                </div>
+
                 <div className={`p-4 rounded-2xl border text-center space-y-2 ${darkMode ? 'bg-[#1E1918] border-rose-900/40' : 'bg-blush-50/70 border-blush-200'}`}>
                   <div className="flex justify-between items-center text-[10px] font-bold text-mutedMauve uppercase">
                     <span>Sculpt Tempo</span>
                     <span className="text-blush-600 dark:text-rose-400 font-mono">{activeModalExercise.tempo}</span>
                   </div>
 
-                  <div className="py-4">
-                    <div className="text-4xl font-black font-mono tempo-pulse">
+                  <div className="py-2">
+                    <div className="text-3xl font-black font-mono tempo-pulse">
                       {activeModalPacing ? modalPaceCount : activeModalExercise.tempo}
                     </div>
-                    <p className="text-xs font-bold uppercase tracking-wider text-blush-600 dark:text-rose-400 mt-1.5">{modalPacePhase}</p>
+                    <p className="text-xs font-bold uppercase tracking-wider text-blush-600 dark:text-rose-400 mt-1">{modalPacePhase}</p>
                   </div>
 
                   <button
@@ -2780,24 +2628,6 @@
                   )}
                 </div>
 
-              </div>
-            </div>
-          )}
-
-          {/* RESET CONFIRMATION MODAL */}
-          {showResetConfirmModal && (
-            <div className="fixed inset-0 bg-charcoal/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-              <div className={`rounded-3xl p-5 max-w-sm w-full space-y-4 border-rose-300 shadow-2xl text-center card-light ${darkMode ? 'bg-[#2D2726] text-champagne' : 'bg-white text-charcoal'}`}>
-                <h3 className="text-base font-serif font-bold">Reset All Lifestyle Data?</h3>
-                <p className="text-xs text-mutedMauve">This will clear your local workout records and restart fresh.</p>
-                <div className="flex gap-2 pt-2 border-t border-blush-100 dark:border-rose-900/30">
-                  <button onClick={() => setShowResetConfirmModal(false)} className={`flex-1 py-2 rounded-xl text-xs font-bold ${darkMode ? 'bg-[#1E1918] text-champagne' : 'bg-blush-50 text-charcoal'}`}>
-                    Cancel
-                  </button>
-                  <button onClick={executeFullReset} className="flex-1 py-2 rounded-xl bg-rose-500 text-white text-xs font-bold">
-                    Reset
-                  </button>
-                </div>
               </div>
             </div>
           )}
