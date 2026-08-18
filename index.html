@@ -306,13 +306,14 @@
       luteal: { name: "Luteal Phase (Days 17–28)", short: "Luteal", tag: "Steady Burn & Calibrate", color: "text-purple-600 border-purple-200 bg-purple-50 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-800", mod: 0.9, tip: "Progesterone dominance elevates core temperature. Hydrate with 3L+ water and honor strict rest cadence." }
     };
 
+    // --- Verified Anatomically Correct Visual Exercise Database ---
     const EXERCISE_DATA = {
       beginner: {
         A: [
-          { id: "b_a1", name: "Elegance Box Squats", target: "Glutes & Quads", primary: "quads", sets: 3, reps: 10, rest: 60, tempo: "3-0-1", ecc: 3, pause: 0, conc: 1, defaultKg: 0, img: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Crown tall, chest proud. Sit hips backward like settling onto fragile glass; drive through mid-foot and heels to rise.", execution: ["Stand 10cm in front of a chair with feet shoulder-width apart and toes turned out 15°.", "Inhale into lower belly, bracing core as hips hinge backward.", "Lower for 3 steady seconds until glutes lightly kiss the seat.", "Exhale and drive through the floor to stand tall."], swaps: ["Bodyweight Goblet Squats", "Incline Wall Sit"] },
-          { id: "b_a2", name: "Incline Push-Ups", target: "Chest & Sculpted Arms", primary: "chest", sets: 3, reps: 8, rest: 60, tempo: "2-0-1", ecc: 2, pause: 0, conc: 1, defaultKg: 0, img: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=600&q=80", cues: "Shoulders drawn down away from ears. Body moves like a solid board with elbows at a 45° arrow angle.", execution: ["Place hands slightly wider than shoulder-width on a sturdy counter.", "Lower chest toward the ledge for 2 seconds with elbows at 45°.", "Press away powerfully while maintaining core support."], swaps: ["Kneeling Floor Push-Ups", "Dumbbell Floor Press"] },
+          { id: "b_a1", name: "Elegance Box Squats", target: "Glutes & Quads", primary: "quads", sets: 3, reps: 10, rest: 60, tempo: "3-0-1", ecc: 3, pause: 0, conc: 1, defaultKg: 0, img: "https://images.unsplash.com/photo-1566241142559-40e1dab266c6?auto=format&fit=crop&w=600&q=80", cues: "Crown tall, chest proud. Sit hips backward like settling onto fragile glass; drive through mid-foot and heels to rise.", execution: ["Stand 10cm in front of a chair with feet shoulder-width apart and toes turned out 15°.", "Inhale into lower belly, bracing core as hips hinge backward.", "Lower for 3 steady seconds until glutes lightly kiss the seat.", "Exhale and drive through the floor to stand tall."], swaps: ["Bodyweight Goblet Squats", "Incline Wall Sit"] },
+          { id: "b_a2", name: "Incline Push-Ups", target: "Chest & Sculpted Arms", primary: "chest", sets: 3, reps: 8, rest: 60, tempo: "2-0-1", ecc: 2, pause: 0, conc: 1, defaultKg: 0, img: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=600&q=80", cues: "Shoulders drawn down away from ears. Body moves like a solid board with elbows at a 45° arrow angle.", execution: ["Place hands slightly wider than shoulder-width on a sturdy counter.", "Lower chest toward the ledge for 2 seconds with elbows at 45°.", "Press away powerfully while maintaining core support."], swaps: ["Kneeling Floor Push-Ups", "Dumbbell Floor Press"] },
           { id: "b_a3", name: "Glute Sculpt Bridge", target: "Gluteus Maximus", primary: "glutes", sets: 3, reps: 12, rest: 45, tempo: "2-2-1", ecc: 2, pause: 2, conc: 1, defaultKg: 0, img: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80", cues: "Ribs knit down toward pelvis. Drive through heels and hold a 2-second peak glute contraction at top.", execution: ["Lie on back with knees bent at 90°.", "Drive through heels to lift hips in line with knees.", "Squeeze glutes for 2 full seconds at peak.", "Lower with control."], swaps: ["Banded Glute Bridges", "Bodyweight Hip Thrusts"] },
-          { id: "b_a4", name: "Seated Shoulder Sculpt", target: "Deltoids & Posture", primary: "shoulders", sets: 3, reps: 10, rest: 60, tempo: "2-0-1", ecc: 2, pause: 0, conc: 1, defaultKg: 3.0, img: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=600&q=80", cues: "Sit tall with vertical spine. Press dumbbells upward without letting lower back arch.", execution: ["Sit tall with core engaged and feet grounded.", "Press weights straight up overhead without shrugging.", "Lower back to chin height over 2 seconds."], swaps: ["Standing Band Press", "Lateral Raises"] },
+          { id: "b_a4", name: "Seated Shoulder Sculpt", target: "Deltoids & Posture", primary: "shoulders", sets: 3, reps: 10, rest: 60, tempo: "2-0-1", ecc: 2, pause: 0, conc: 1, defaultKg: 3.0, img: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=600&q=80", cues: "Sit tall with vertical spine. Press dumbbells upward without letting lower back arch.", execution: ["Sit tall with core engaged and feet grounded.", "Press weights straight up overhead without shrugging.", "Lower back to chin height over 2 seconds."], swaps: ["Standing Band Press", "Lateral Raises"] },
           { id: "b_a5", name: "Core Deadbugs", target: "Deep Transverse Core", primary: "core", sets: 3, reps: 8, rest: 45, tempo: "2-1-2", ecc: 2, pause: 1, conc: 2, defaultKg: 0, img: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=600&q=80", cues: "Zero daylight beneath lower back. Glue spine to mat as opposite arm and leg slowly reach away.", execution: ["Lie flat with arms extended upward and knees at 90°.", "Press lower back firmly into the mat.", "Slowly extend opposite arm and leg out hover-height.", "Return to center with deep abdominal control."], swaps: ["Bird Dog Hold", "Modified Plank Hold"] }
         ],
         B: [
@@ -323,16 +324,16 @@
         ],
         C: [
           { id: "b_c1", name: "Step-Up Elevation", target: "Glutes & Legs", primary: "glutes", sets: 3, reps: 8, rest: 60, tempo: "2-0-1", ecc: 2, pause: 0, conc: 1, defaultKg: 0, img: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Power through the top heel; step down with light grace.", execution: ["Place full foot on step.", "Drive through heel to stand tall.", "Lower under control."], swaps: ["Bulgarian Split Squats", "Reverse Lunges"] },
-          { id: "b_c2", name: "Romanian Deadlift", target: "Hamstrings & Glutes", primary: "hamstrings", sets: 3, reps: 10, rest: 60, tempo: "3-0-1", ecc: 3, pause: 0, conc: 1, defaultKg: 4.0, img: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=600&q=80", cues: "Hinge hips back like closing a door behind you.", execution: ["Hinge at hips with soft knees and long spine.", "Lower weights along shins until hamstrings stretch.", "Drive hips forward to stand tall."], swaps: ["Good Mornings", "Banded Hamstring Pulls"] },
-          { id: "b_c3", name: "Prone Y-Raises", target: "Deltoids & Back Posture", primary: "shoulders", sets: 3, reps: 12, rest: 45, tempo: "2-1-1", ecc: 2, pause: 1, conc: 1, defaultKg: 0, img: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=600&q=80", cues: "Thumbs point to ceiling. Squeeze lower shoulder blades down and back.", execution: ["Lie face down on a mat with arms in a wide Y shape.", "Rotate hands so thumbs point straight up.", "Elevate arms 10cm off floor without arching lower back.", "Lower gently back to mat."], swaps: ["Seated Band Pull-Aparts", "Prone W-Raises"] }
+          { id: "b_c2", name: "Romanian Deadlift", target: "Hamstrings & Glutes", primary: "hamstrings", sets: 3, reps: 10, rest: 60, tempo: "3-0-1", ecc: 3, pause: 0, conc: 1, defaultKg: 4.0, img: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=600&q=80", cues: "Hinge hips back like closing a door behind you.", execution: ["Hinge at hips with soft knees and long spine.", "Lower weights along shins until hamstrings stretch.", "Drive hips forward to stand tall."], swaps: ["Good Mornings", "Banded Hamstring Pulls"] },
+          { id: "b_c3", name: "Prone Y-Raises", target: "Deltoids & Posture", primary: "shoulders", sets: 3, reps: 12, rest: 45, tempo: "2-1-1", ecc: 2, pause: 1, conc: 1, defaultKg: 0, img: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=600&q=80", cues: "Thumbs point to ceiling. Squeeze lower shoulder blades down and back.", execution: ["Lie face down on a mat with arms in a wide Y shape.", "Rotate hands so thumbs point straight up.", "Elevate arms 10cm off floor without arching lower back.", "Lower gently back to mat."], swaps: ["Seated Band Pull-Aparts", "Prone W-Raises"] }
         ]
       },
       intermediate: {
         A: [
-          { id: "i_a1", name: "Dumbbell Goblet Squats", target: "Glutes & Quads", primary: "quads", sets: 3, reps: 12, rest: 60, tempo: "3-0-1", ecc: 3, pause: 0, conc: 1, defaultKg: 7.5, img: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Hold weight close to chest; descend with deep control.", execution: ["Cup dumbbell head vertically at chest.", "Descend 3s until hips break parallel.", "Drive through heels to stand."], swaps: ["Barbell Front Squats", "Dumbbell Sumo Squats"] },
+          { id: "i_a1", name: "Dumbbell Goblet Squats", target: "Glutes & Quads", primary: "quads", sets: 3, reps: 12, rest: 60, tempo: "3-0-1", ecc: 3, pause: 0, conc: 1, defaultKg: 7.5, img: "https://images.unsplash.com/photo-1566241142559-40e1dab266c6?auto=format&fit=crop&w=600&q=80", cues: "Hold weight close to chest; descend with deep control.", execution: ["Cup dumbbell head vertically at chest.", "Descend 3s until hips break parallel.", "Drive through heels to stand."], swaps: ["Barbell Front Squats", "Dumbbell Sumo Squats"] },
           { id: "i_a2", name: "Dumbbell Floor Press", target: "Chest & Triceps", primary: "chest", sets: 3, reps: 12, rest: 60, tempo: "2-0-1", ecc: 2, pause: 0, conc: 1, defaultKg: 5.0, img: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=600&q=80", cues: "Upper arms tap floor lightly at 45°.", execution: ["Lie on mat with knees bent.", "Lower weights until triceps kiss floor.", "Press back up in arc over chest."], swaps: ["Incline Push-Ups", "Dumbbell Bench Press"] },
-          { id: "i_a3", name: "DB Romanian Deadlift", target: "Hamstrings & Glute Lift", primary: "hamstrings", sets: 3, reps: 12, rest: 60, tempo: "3-1-1", ecc: 3, pause: 1, conc: 1, defaultKg: 7.5, img: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=600&q=80", cues: "Hinge hips straight back; skim dumbbells along shins.", execution: ["Keep spine long and lats locked in place.", "Push hips back for 3 seconds into a deep stretch.", "Drive hips forward into glute contraction."], swaps: ["Single-Leg Romanian Deadlifts", "Barbell RDLs"] },
-          { id: "i_a4", name: "Seated DB Shoulder Press", target: "Deltoid Cap", primary: "shoulders", sets: 3, reps: 10, rest: 60, tempo: "2-0-1", ecc: 2, pause: 0, conc: 1, defaultKg: 4.0, img: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=600&q=80", cues: "Brace core to protect lower back. Drive dumbbells overhead smoothly.", execution: ["Sit tall with core braced.", "Press weights overhead in a fluid motion.", "Lower under control over 2 seconds."], swaps: ["Arnold Press", "Pike Push-Ups"] },
+          { id: "i_a3", name: "DB Romanian Deadlift", target: "Hamstrings & Glute Lift", primary: "hamstrings", sets: 3, reps: 12, rest: 60, tempo: "3-1-1", ecc: 3, pause: 1, conc: 1, defaultKg: 7.5, img: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=600&q=80", cues: "Hinge hips straight back; skim dumbbells along shins.", execution: ["Keep spine long and lats locked in place.", "Push hips back for 3 seconds into a deep stretch.", "Drive hips forward into glute contraction."], swaps: ["Single-Leg Romanian Deadlifts", "Barbell RDLs"] },
+          { id: "i_a4", name: "Seated DB Shoulder Press", target: "Deltoid Cap", primary: "shoulders", sets: 3, reps: 10, rest: 60, tempo: "2-0-1", ecc: 2, pause: 0, conc: 1, defaultKg: 4.0, img: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=600&q=80", cues: "Brace core to protect lower back. Drive dumbbells overhead smoothly.", execution: ["Sit tall with core braced.", "Press weights overhead in a fluid motion.", "Lower under control over 2 seconds."], swaps: ["Arnold Press", "Pike Push-Ups"] },
           { id: "i_a5", name: "Lateral Deltoid Raises", target: "Shoulder Definition", primary: "shoulders", sets: 3, reps: 12, rest: 45, tempo: "2-1-1", ecc: 2, pause: 1, conc: 1, defaultKg: 2.5, img: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=600&q=80", cues: "Lead with elbows in the scapular plane. Pause at parallel.", execution: ["Stand with slight forward hip hinge.", "Raise arms out to sides in a wide arc.", "Hold peak contraction for 1 second.", "Lower smoothly over 2 seconds."], swaps: ["Cable Lateral Raises", "Upright Rows"] }
         ],
         B: [
@@ -349,7 +350,7 @@
       },
       advanced: {
         A: [
-          { id: "a_a1", name: "1.5-Rep DB Goblet Squats", target: "Glutes & Quads", primary: "quads", sets: 4, reps: 12, rest: 45, tempo: "3-1-1", ecc: 3, pause: 1, conc: 1, defaultKg: 10.0, img: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=600&q=80", cues: "Squat deep, rise halfway, return to bottom, explode up.", execution: ["Descend 3s to full depth.", "Rise halfway, pause 1s, sink back to bottom.", "Drive through heels to stand."], swaps: ["Pause Squats", "Barbell Back Squats"] },
+          { id: "a_a1", name: "1.5-Rep DB Goblet Squats", target: "Glutes & Quads", primary: "quads", sets: 4, reps: 12, rest: 45, tempo: "3-1-1", ecc: 3, pause: 1, conc: 1, defaultKg: 10.0, img: "https://images.unsplash.com/photo-1566241142559-40e1dab266c6?auto=format&fit=crop&w=600&q=80", cues: "Squat deep, rise halfway, return to bottom, explode up.", execution: ["Descend 3s to full depth.", "Rise halfway, pause 1s, sink back to bottom.", "Drive through heels to stand."], swaps: ["Pause Squats", "Barbell Back Squats"] },
           { id: "a_a2", name: "Superset: DB RDL + Floor Press", target: "Hamstrings & Chest", primary: "hamstrings", sets: 4, reps: 12, rest: 45, tempo: "2-0-1", ecc: 2, pause: 0, conc: 1, defaultKg: 9.0, img: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=600&q=80", cues: "Seamless transition. RDLs straight into floor press.", execution: ["Perform 12 strict DB RDLs.", "Drop straight down into 12 DB floor chest presses.", "Rest 45s after both movements."], swaps: ["Barbell Complex", "Dumbbell Circuit"] }
         ],
         B: [
@@ -546,9 +547,10 @@
       const [privacyBlur, setPrivacyBlur] = useState(true);
       const [selectedCalendarDate, setSelectedCalendarDate] = useState(null);
 
-      // --- Live Workout Stopwatch Timer State ---
+      // --- Interactive "3-2-1 Start Workout" Timer State ---
       const [sessionSeconds, setSessionSeconds] = useState(0);
-      const [isSessionActive, setIsSessionActive] = useState(true);
+      const [isSessionActive, setIsSessionActive] = useState(false);
+      const [countdownVal, setCountdownVal] = useState(null); // null, 3, 2, 1
 
       const defaultProfile = {
         onboardingCompleted: false,
@@ -643,6 +645,35 @@
         }
         return () => clearInterval(timer);
       }, [isSessionActive]);
+
+      // Interactive 3-2-1 Countdown Trigger Effect
+      useEffect(() => {
+        let timer = null;
+        if (countdownVal !== null && countdownVal > 0) {
+          timer = setTimeout(() => {
+            playBeepTone(520, 0.1, audioVolume);
+            if (hapticsEnabled) triggerHaptic(15);
+            speakPrompt(String(countdownVal), audioMode, speechSettings);
+            setCountdownVal(prev => prev - 1);
+          }, 1000);
+        } else if (countdownVal === 0) {
+          playChime([659.25, 880.00], 0.2, audioVolume);
+          speakPrompt("Workout started. Let's go!", audioMode, speechSettings);
+          if (hapticsEnabled) triggerHaptic([30, 50, 30]);
+          setIsSessionActive(true);
+          setSessionSeconds(0);
+          setCountdownVal(null);
+        }
+        return () => clearTimeout(timer);
+      }, [countdownVal, audioMode, audioVolume, hapticsEnabled]);
+
+      const triggerStartWorkoutCountdown = () => {
+        unlockAudioAndSpeech();
+        setCountdownVal(3);
+        playBeepTone(440, 0.1, audioVolume);
+        speakPrompt("3", audioMode, speechSettings);
+        if (hapticsEnabled) triggerHaptic(15);
+      };
 
       // Dark Mode Class Toggle on Root Body
       useEffect(() => {
@@ -778,7 +809,7 @@
                 if (hapticsEnabled) triggerHaptic(10);
               }
               if (prev === 1) {
-                playChime([523.25, 659.25, 783.99, 1046.50], 0.3, audioVolume);
+                playChime([523.25, 659.25, 783.99], 0.3, audioVolume);
                 speakPrompt("Rest complete. Start next set", audioMode, speechSettings);
                 if (hapticsEnabled) triggerHaptic([40, 60, 40]);
                 setIsResting(false);
@@ -1038,6 +1069,7 @@
         
         const nextDay = workoutDay === "A" ? "B" : workoutDay === "B" ? "C" : "A";
         setWorkoutDay(nextDay);
+        setIsSessionActive(false);
         setSessionSeconds(0);
         if (tierData[nextDay] && tierData[nextDay][0]) {
           setFocusedId(tierData[nextDay][0].id);
@@ -1227,21 +1259,39 @@
                   </p>
                 </div>
 
-                {/* LIVE WORKOUT STOPWATCH BAR */}
-                <div className={`p-3.5 rounded-2xl flex items-center justify-between card-light border ${darkMode ? 'bg-[#2D2726] border-rose-500/50' : 'bg-white border-blush-400'}`}>
-                  <div className="flex items-center gap-2.5">
-                    <span className="text-lg">⏱️</span>
-                    <div>
-                      <span className="text-[9px] font-bold text-roseGold uppercase tracking-wider">Session Stopwatch</span>
-                      <p className={`text-sm font-black font-mono ${darkMode ? 'text-champagne' : 'text-charcoal'}`}>{formatTime(sessionSeconds)}</p>
+                {/* INTERACTIVE "3-2-1 START WORKOUT" TIMER BAR */}
+                <div className={`p-4 rounded-3xl card-light border flex flex-col items-center text-center space-y-2.5 ${darkMode ? 'bg-[#2D2726] border-rose-500/50' : 'bg-white border-blush-400'}`}>
+                  <div className="flex items-center justify-between w-full">
+                    <div className="text-left">
+                      <span className="text-[9px] font-bold text-roseGold uppercase tracking-wider">Workout Session Timer</span>
+                      <p className={`text-xl font-black font-mono ${darkMode ? 'text-champagne' : 'text-charcoal'}`}>{formatTime(sessionSeconds)}</p>
                     </div>
+                    <span className={`text-[10px] font-bold px-3 py-1 rounded-full ${isSessionActive ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/10 text-amber-600 border border-amber-500/30'}`}>
+                      {isSessionActive ? "● Active Session" : "○ Paused"}
+                    </span>
                   </div>
-                  <button
-                    onClick={() => setIsSessionActive(!isSessionActive)}
-                    className={`text-[10px] font-bold px-3 py-1.5 rounded-xl border ${isSessionActive ? (darkMode ? 'bg-rose-950 text-rose-300 border-rose-800' : 'bg-blush-100 text-blush-600 border-blush-200') : 'bg-emerald-600 text-white border-emerald-700'}`}
-                  >
-                    {isSessionActive ? "Pause Timer" : "Resume Timer"}
-                  </button>
+
+                  <div className="w-full pt-1 flex gap-2">
+                    {countdownVal === null ? (
+                      <button
+                        onClick={triggerStartWorkoutCountdown}
+                        className="flex-1 py-3 rounded-2xl bg-gradient-to-r from-blush-400 to-blush-600 text-white font-bold text-xs shadow-md flex items-center justify-center gap-1.5 transition-all hover:scale-[1.01]"
+                      >
+                        <span>▶ Tap to Start Workout (3-2-1 Countdown)</span>
+                      </button>
+                    ) : (
+                      <div className="flex-1 py-3 rounded-2xl bg-rose-500 text-white font-black text-sm tracking-widest animate-pulse">
+                        COUNTDOWN: {countdownVal}
+                      </div>
+                    )}
+
+                    <button
+                      onClick={() => setIsSessionActive(!isSessionActive)}
+                      className={`px-4 py-3 rounded-2xl border text-xs font-bold ${isSessionActive ? (darkMode ? 'bg-[#1E1918] text-rose-300 border-rose-900/40' : 'bg-blush-50 text-blush-600 border-blush-200') : 'bg-emerald-600 text-white border-emerald-700'}`}
+                    >
+                      {isSessionActive ? "Pause" : "Resume"}
+                    </button>
+                  </div>
                 </div>
 
                 <div className={`p-3.5 rounded-2xl flex items-center justify-between card-light ${darkMode ? 'bg-[#2D2726] border-rose-900/30' : 'bg-white border-blush-200'}`}>
