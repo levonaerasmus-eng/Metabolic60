@@ -100,14 +100,14 @@
   <script type="text/babel">
     const { useState, useEffect, useRef, Component } = React;
 
-    // --- Error Boundary to Guard Against Blank Screen Crashes ---
+    // --- Error Boundary to Guard Against Uncaught Runtime Crashes ---
     class ErrorBoundary extends Component {
       constructor(props) {
         super(props);
-        this.state = { hasError: false, error: null };
+        this.state = { hasError: false };
       }
-      static getDerivedStateFromError(error) {
-        return { hasError: true, error };
+      static getDerivedStateFromError() {
+        return { hasError: true };
       }
       componentDidCatch(error, info) {
         console.error("M60 Runtime Error:", error, info);
@@ -119,9 +119,9 @@
               <div className="w-14 h-14 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center text-2xl">
                 ⚠️
               </div>
-              <h2 className="text-base font-serif font-bold text-charcoal">Something needs a quick reset</h2>
+              <h2 className="text-base font-serif font-bold text-charcoal">Quick App Reset</h2>
               <p className="text-xs text-mutedMauve">
-                A data format error occurred. Tap below to clear cached state and relaunch M60 smoothly.
+                A corrupted cache setting was detected. Tap below to clear local temporary storage and relaunch cleanly.
               </p>
               <button
                 onClick={() => {
@@ -160,7 +160,7 @@
       return `${year}-${month}-${day}`;
     };
 
-    // --- Audio & Speech Synthesis Engine ---
+    // --- Global Audio & Speech Synthesis Engine ---
     let sharedAudioCtx = null;
     let activeUtterance = null;
 
@@ -435,53 +435,6 @@
       } catch (e) {}
       return "train";
     };
-
-    function FeminineBodyMap({ activeMuscle, exerciseName }) {
-      const isTarget = (m) => activeMuscle === m;
-
-      return (
-        <div className="card-light rounded-3xl p-4 space-y-3">
-          <div className="flex justify-between items-center">
-            <div>
-              <p className="text-[10px] font-bold text-roseGold uppercase tracking-wider">Target Biomechanics</p>
-              <h3 className="text-sm font-serif font-bold text-charcoal">{exerciseName || "Movement"}</h3>
-            </div>
-            <div className="flex items-center gap-1.5 bg-blush-50 px-3 py-1 rounded-full border border-blush-200">
-              <span className="w-2 h-2 rounded-full bg-blush-500 animate-pulse"></span>
-              <span className="text-[11px] font-semibold text-blush-600 capitalize">{activeMuscle || "Full Body"} Focus</span>
-            </div>
-          </div>
-
-          <div className="bg-blush-50/60 rounded-2xl p-4 border border-blush-100 flex items-center justify-around">
-            <div className="flex flex-col items-center">
-              <span className="text-[9px] font-semibold uppercase tracking-wider text-mutedMauve mb-1">Anterior (Front)</span>
-              <svg viewBox="0 0 100 200" className="w-20 h-40 drop-shadow-sm">
-                <circle cx="50" cy="18" r="9" fill="#E49B90" opacity="0.5" />
-                <rect x="46" y="27" width="8" height="6" fill="#E49B90" opacity="0.5" />
-                <path d="M 28 35 Q 50 32 72 35 L 77 48 L 23 48 Z" fill={isTarget("shoulders") ? "#D97365" : "#F6DDD9"} className={isTarget("shoulders") ? "muscle-glow" : ""} />
-                <rect x="30" y="47" width="40" height="18" rx="4" fill={isTarget("chest") ? "#D97365" : "#FBF0EE"} className={isTarget("chest") ? "muscle-glow" : ""} />
-                <rect x="34" y="68" width="32" height="26" rx="5" fill={isTarget("core") ? "#D97365" : "#FBF0EE"} className={isTarget("core") ? "muscle-glow" : ""} />
-                <rect x="18" y="50" width="8" height="42" rx="4" fill="#F6DDD9" />
-                <rect x="74" y="50" width="8" height="42" rx="4" fill="#F6DDD9" />
-                <path d="M 28 98 L 46 98 L 43 145 L 26 145 Z" fill={isTarget("quads") ? "#D97365" : "#FBF0EE"} className={isTarget("quads") ? "muscle-glow" : ""} />
-                <path d="M 54 98 L 72 98 L 74 145 L 57 145 Z" fill={isTarget("quads") ? "#D97365" : "#FBF0EE"} className={isTarget("quads") ? "muscle-glow" : ""} />
-              </svg>
-            </div>
-            <div className="w-[1px] h-32 bg-blush-200"></div>
-            <div className="flex flex-col items-center">
-              <span className="text-[9px] font-semibold uppercase tracking-wider text-mutedMauve mb-1">Posterior (Back)</span>
-              <svg viewBox="0 0 100 200" className="w-20 h-40 drop-shadow-sm">
-                <circle cx="50" cy="18" r="9" fill="#E49B90" opacity="0.5" />
-                <path d="M 26 35 Q 50 32 74 35 L 70 68 L 30 68 Z" fill={isTarget("lats") || isTarget("back") ? "#D97365" : "#FBF0EE"} className={isTarget("lats") || isTarget("back") ? "muscle-glow" : ""} />
-                <rect x="28" y="90" width="44" height="24" rx="7" fill={isTarget("glutes") ? "#D97365" : "#FBF0EE"} className={isTarget("glutes") ? "muscle-glow" : ""} />
-                <path d="M 28 116 L 46 116 L 43 145 L 26 145 Z" fill={isTarget("hamstrings") ? "#D97365" : "#FBF0EE"} className={isTarget("hamstrings") ? "muscle-glow" : ""} />
-                <path d="M 54 116 L 72 116 L 74 145 L 57 145 Z" fill={isTarget("hamstrings") ? "#D97365" : "#FBF0EE"} className={isTarget("hamstrings") ? "muscle-glow" : ""} />
-              </svg>
-            </div>
-          </div>
-        </div>
-      );
-    }
 
     function App() {
       const [tab, setTab] = useState(getInitialTab);
@@ -1328,7 +1281,7 @@
                   </button>
                 </div>
 
-                {/* Recipes Subtab */}
+                {/* Recipes View */}
                 {fuelSubTab === "meals" && (
                   <div className="space-y-3">
                     <div className="flex gap-1.5 overflow-x-auto pb-1">
@@ -1395,7 +1348,7 @@
                   </div>
                 )}
 
-                {/* Grocery Checklist Subtab */}
+                {/* Grocery Checklist View */}
                 {fuelSubTab === "checklist" && (
                   <div className="card-light p-4 rounded-3xl space-y-3.5">
                     <div className="flex justify-between items-center pb-1 border-b border-blush-100">
@@ -1442,7 +1395,7 @@
                   </div>
                 )}
 
-                {/* Swaps Subtab */}
+                {/* Swaps View */}
                 {fuelSubTab === "swaps" && (
                   <div className="card-light p-4 rounded-3xl space-y-3">
                     <h3 className="text-xs font-serif font-bold text-charcoal uppercase tracking-wider">Lifestyle Substitution Matrix</h3>
@@ -1557,7 +1510,7 @@
                   <div className="space-y-1.5 pt-1">
                     <div className="flex justify-between text-[10px] font-semibold text-mutedMauve">
                       <span>Phase 2: Glute Lift & Waist Taper (Days 31–60)</span>
-                      <span className="text-roseGold">{Math.max(0, Math.min(30, safeHistory.length - 30))} / 30</span>
+                      <span className="text-roseGold">{Math.max(0, Math.min(30, history.length - 30))} / 30</span>
                     </div>
                     <div className="grid grid-cols-10 gap-1 bg-blush-50/60 p-2.5 rounded-2xl border border-blush-100">
                       {Array.from({ length: 30 }).map((_, i) => {
@@ -2487,7 +2440,7 @@
             </div>
           )}
 
-          {/* BOTTOM NAVIGATION DOCK (6 TABS) */}
+          {/* BOTTOM NAVIGATION DOCK (6 EQUAL TABS) */}
           <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur border-t border-blush-200 px-2 py-2 flex justify-around items-center z-40 shadow-sm">
             <button onClick={() => { setTab("train"); if (hapticsEnabled) triggerHaptic(10); }} className={`flex flex-col items-center gap-0.5 text-xs ${tab === "train" ? "text-blush-600 font-bold" : "text-mutedMauve"}`}>
               <span className="text-base">🌸</span><span className="text-[9px]">Train</span>
