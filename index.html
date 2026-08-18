@@ -100,78 +100,49 @@
   <script type="text/babel">
     const { useState, useEffect, useRef, Component } = React;
 
-    // --- Error Boundary to Guard Against Uncaught Runtime Crashes ---
-    class ErrorBoundary extends Component {
-      constructor(props) {
-        super(props);
-        this.state = { hasError: false };
-      }
-      static getDerivedStateFromError() {
-        return { hasError: true };
-      }
-      componentDidCatch(error, info) {
-        console.error("M60 Runtime Error:", error, info);
-      }
-      render() {
-        if (this.state.hasError) {
-          return (
-            <div className="min-h-screen max-w-md mx-auto p-6 flex flex-col items-center justify-center text-center space-y-4">
-              <div className="w-14 h-14 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center text-2xl">
-                ⚠️
-              </div>
-              <h2 className="text-base font-serif font-bold text-charcoal">Quick App Reset</h2>
-              <p className="text-xs text-mutedMauve">
-                A corrupted cache setting was detected. Tap below to clear local temporary storage and relaunch cleanly.
-              </p>
-              <button
-                onClick={() => {
-                  try { localStorage.clear(); } catch(e) {}
-                  window.location.reload();
-                }}
-                className="w-full py-3 rounded-2xl bg-blush-500 text-white font-bold text-xs shadow-md"
-              >
-                ✨ Clear Cache & Relaunch App
-              </button>
-            </div>
-          );
-        }
-        return this.props.children;
-      }
-    }
-
-    // --- Safe Storage Engine ---
-    const getStored = (key, fallback) => {
+    // --- Defensive Storage Sanitizer ---
+    const getSafeStored = (key, fallback) => {
       try {
         const item = localStorage.getItem(key);
-        return (item && item !== "undefined" && item !== "null") ? JSON.parse(item) : fallback;
-      } catch {
+        if (!item || item === "undefined" || item === "null") return fallback;
+        const parsed = JSON.parse(item);
+        if (Array.isArray(fallback) && !Array.isArray(parsed)) return fallback;
+        if (typeof fallback === "object" && !Array.isArray(fallback) && (typeof parsed !== "object" || Array.isArray(parsed) || parsed === null)) return fallback;
+        return parsed;
+      } catch (e) {
         return fallback;
       }
     };
 
-    const setStored = (key, val) => {
-      try { localStorage.setItem(key, JSON.stringify(val)); } catch {}
+    const setSafeStored = (key, val) => {
+      try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {}
     };
 
     const getLocalDateStr = (d = new Date()) => {
-      const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
+      try {
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      } catch (e) {
+        return "2026-08-18";
+      }
     };
 
-    // --- Global Audio & Speech Synthesis Engine ---
+    // --- Audio Synthesis Engine ---
     let sharedAudioCtx = null;
     let activeUtterance = null;
 
     const getAudioContext = () => {
-      if (!sharedAudioCtx && typeof window !== 'undefined') {
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        if (AudioCtx) sharedAudioCtx = new AudioCtx();
-      }
-      if (sharedAudioCtx && sharedAudioCtx.state === 'suspended') {
-        sharedAudioCtx.resume();
-      }
+      try {
+        if (!sharedAudioCtx && typeof window !== 'undefined') {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) sharedAudioCtx = new AudioCtx();
+        }
+        if (sharedAudioCtx && sharedAudioCtx.state === 'suspended') {
+          sharedAudioCtx.resume().catch(() => {});
+        }
+      } catch (e) {}
       return sharedAudioCtx;
     };
 
@@ -187,7 +158,7 @@
           osc.start();
           osc.stop(ctx.currentTime + 0.01);
         }
-        if ('speechSynthesis' in window && window.speechSynthesis.paused) {
+        if (typeof window !== 'undefined' && 'speechSynthesis' in window && window.speechSynthesis && window.speechSynthesis.paused) {
           window.speechSynthesis.resume();
         }
       } catch (e) {}
@@ -209,7 +180,7 @@
           osc.type = 'sine';
           osc.frequency.value = freq;
           const startTime = ctx.currentTime + (idx * 0.07);
-          gain.gain.setValueAtTime(0.04 * (vol || 1.0), startTime);
+          gain.gain.setValueAtTime(0.04 * (Number(vol) || 1.0), startTime);
           gain.gain.exponentialRampToValueAtTime(0.0001, startTime + dur);
           osc.connect(gain);
           gain.connect(ctx.destination);
@@ -226,7 +197,7 @@
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
         osc.frequency.value = freq;
-        gain.gain.setValueAtTime(0.035 * (vol || 1.0), ctx.currentTime);
+        gain.gain.setValueAtTime(0.035 * (Number(vol) || 1.0), ctx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
         osc.connect(gain);
         gain.connect(ctx.destination);
@@ -237,17 +208,17 @@
 
     const speakPrompt = (text, audioMode, settings = {}) => {
       if (audioMode !== "voice") return;
-      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window && window.speechSynthesis) {
         try {
           window.speechSynthesis.resume();
           const utterance = new SpeechSynthesisUtterance(text);
-          utterance.rate = settings.rate || 1.05;
-          utterance.pitch = settings.pitch || 1.15;
-          utterance.volume = settings.volume !== undefined ? settings.volume : 1.0;
+          utterance.rate = Number(settings.rate) || 1.05;
+          utterance.pitch = Number(settings.pitch) || 1.15;
+          utterance.volume = settings.volume !== undefined ? Number(settings.volume) : 1.0;
 
           if (settings.voiceURI) {
-            const voices = window.speechSynthesis.getVoices();
-            const chosen = voices.find(v => v.voiceURI === settings.voiceURI);
+            const voices = window.speechSynthesis.getVoices() || [];
+            const chosen = voices.find(v => v && v.voiceURI === settings.voiceURI);
             if (chosen) utterance.voice = chosen;
           }
 
@@ -265,15 +236,14 @@
       }
     };
 
-    // --- Cycle Phasing Configuration ---
+    // --- Master Data Structures ---
     const CYCLE_MODES = {
-      menstrual: { name: "Menstrual Phase (Days 1–5)", short: "Menstrual", tag: "Gentle Flow & Restore", color: "text-rose-600 border-rose-200 bg-rose-50", mod: 0.85, tip: "Hormones at baseline. Prioritize graceful movement, deep diaphragmatic breaths, and warm herbal infusions." },
+      menstrual: { name: "Menstrual Phase (Days 1–5)", short: "Menstrual", tag: "Gentle Flow & Restore", color: "text-rose-600 border-rose-200 bg-rose-50", mod: 0.85, tip: "Hormones at baseline. Prioritize graceful movement, deep belly breaths, and warm herbal infusions." },
       follicular: { name: "Follicular Phase (Days 6–13)", short: "Follicular", tag: "Glow & Sculpt Power", color: "text-pink-600 border-pink-200 bg-pink-50", mod: 1.0, tip: "Estrogen rising! Peak insulin sensitivity and radiant vitality. Prime time to sculpt and increase resistance." },
       ovulatory: { name: "Ovulatory Phase (Days 14–16)", short: "Ovulatory", tag: "Radiant Strength & PRs", color: "text-amber-600 border-amber-200 bg-amber-50", mod: 1.05, tip: "Peak confidence & energy output. Push your physical personal bests with clean, controlled form." },
       luteal: { name: "Luteal Phase (Days 17–28)", short: "Luteal", tag: "Steady Burn & Calibrate", color: "text-purple-600 border-purple-200 bg-purple-50", mod: 0.9, tip: "Progesterone dominance elevates core temperature. Hydrate with 3L+ water and honor strict rest cadence." }
     };
 
-    // --- Master Exercise Database ---
     const EXERCISE_DATA = {
       beginner: {
         A: [
@@ -330,7 +300,6 @@
       }
     };
 
-    // --- Complete 7-Day Master Meal Plan ---
     const SA_MEALS = [
       {
         day: "Monday",
@@ -436,33 +405,80 @@
       return "train";
     };
 
+    function FeminineBodyMap({ activeMuscle, exerciseName }) {
+      const isTarget = (m) => activeMuscle === m;
+
+      return (
+        <div className="card-light rounded-3xl p-4 space-y-3">
+          <div className="flex justify-between items-center">
+            <div>
+              <p className="text-[10px] font-bold text-roseGold uppercase tracking-wider">Target Biomechanics</p>
+              <h3 className="text-sm font-serif font-bold text-charcoal">{exerciseName || "Movement"}</h3>
+            </div>
+            <div className="flex items-center gap-1.5 bg-blush-50 px-3 py-1 rounded-full border border-blush-200">
+              <span className="w-2 h-2 rounded-full bg-blush-500 animate-pulse"></span>
+              <span className="text-[11px] font-semibold text-blush-600 capitalize">{activeMuscle || "Full Body"} Focus</span>
+            </div>
+          </div>
+
+          <div className="bg-blush-50/60 rounded-2xl p-4 border border-blush-100 flex items-center justify-around">
+            <div className="flex flex-col items-center">
+              <span className="text-[9px] font-semibold uppercase tracking-wider text-mutedMauve mb-1">Anterior (Front)</span>
+              <svg viewBox="0 0 100 200" className="w-20 h-40 drop-shadow-sm">
+                <circle cx="50" cy="18" r="9" fill="#E49B90" opacity="0.5" />
+                <rect x="46" y="27" width="8" height="6" fill="#E49B90" opacity="0.5" />
+                <path d="M 28 35 Q 50 32 72 35 L 77 48 L 23 48 Z" fill={isTarget("shoulders") ? "#D97365" : "#F6DDD9"} className={isTarget("shoulders") ? "muscle-glow" : ""} />
+                <rect x="30" y="47" width="40" height="18" rx="4" fill={isTarget("chest") ? "#D97365" : "#FBF0EE"} className={isTarget("chest") ? "muscle-glow" : ""} />
+                <rect x="34" y="68" width="32" height="26" rx="5" fill={isTarget("core") ? "#D97365" : "#FBF0EE"} className={isTarget("core") ? "muscle-glow" : ""} />
+                <rect x="18" y="50" width="8" height="42" rx="4" fill="#F6DDD9" />
+                <rect x="74" y="50" width="8" height="42" rx="4" fill="#F6DDD9" />
+                <path d="M 28 98 L 46 98 L 43 145 L 26 145 Z" fill={isTarget("quads") ? "#D97365" : "#FBF0EE"} className={isTarget("quads") ? "muscle-glow" : ""} />
+                <path d="M 54 98 L 72 98 L 74 145 L 57 145 Z" fill={isTarget("quads") ? "#D97365" : "#FBF0EE"} className={isTarget("quads") ? "muscle-glow" : ""} />
+              </svg>
+            </div>
+            <div className="w-[1px] h-32 bg-blush-200"></div>
+            <div className="flex flex-col items-center">
+              <span className="text-[9px] font-semibold uppercase tracking-wider text-mutedMauve mb-1">Posterior (Back)</span>
+              <svg viewBox="0 0 100 200" className="w-20 h-40 drop-shadow-sm">
+                <circle cx="50" cy="18" r="9" fill="#E49B90" opacity="0.5" />
+                <path d="M 26 35 Q 50 32 74 35 L 70 68 L 30 68 Z" fill={isTarget("lats") || isTarget("back") ? "#D97365" : "#FBF0EE"} className={isTarget("lats") || isTarget("back") ? "muscle-glow" : ""} />
+                <rect x="28" y="90" width="44" height="24" rx="7" fill={isTarget("glutes") ? "#D97365" : "#FBF0EE"} className={isTarget("glutes") ? "muscle-glow" : ""} />
+                <path d="M 28 116 L 46 116 L 43 145 L 26 145 Z" fill={isTarget("hamstrings") ? "#D97365" : "#FBF0EE"} className={isTarget("hamstrings") ? "muscle-glow" : ""} />
+                <path d="M 54 116 L 72 116 L 74 145 L 57 145 Z" fill={isTarget("hamstrings") ? "#D97365" : "#FBF0EE"} className={isTarget("hamstrings") ? "muscle-glow" : ""} />
+              </svg>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     function App() {
       const [tab, setTab] = useState(getInitialTab);
       const [difficulty, setDifficulty] = useState(() => {
-        const d = getStored("m60_diff", "intermediate");
+        const d = getSafeStored("m60_diff", "intermediate");
         return (d && typeof d === 'string') ? d.toLowerCase() : "intermediate";
       });
-      const [workoutDay, setWorkoutDay] = useState(() => getStored("m60_day", "A"));
+      const [workoutDay, setWorkoutDay] = useState(() => getSafeStored("m60_day", "A"));
       const [focusedId, setFocusedId] = useState("i_a1");
       
       // Audio & Speech Settings State
-      const [audioMode, setAudioMode] = useState(() => getStored("m60_audio_mode", "voice"));
-      const [speechRate, setSpeechRate] = useState(() => getStored("m60_speech_rate", 1.05));
-      const [speechPitch, setSpeechPitch] = useState(() => getStored("m60_speech_pitch", 1.15));
-      const [audioVolume, setAudioVolume] = useState(() => getStored("m60_audio_vol", 1.0));
-      const [selectedVoiceURI, setSelectedVoiceURI] = useState(() => getStored("m60_voice_uri", ""));
+      const [audioMode, setAudioMode] = useState(() => getSafeStored("m60_audio_mode", "voice"));
+      const [speechRate, setSpeechRate] = useState(() => getSafeStored("m60_speech_rate", 1.05));
+      const [speechPitch, setSpeechPitch] = useState(() => getSafeStored("m60_speech_pitch", 1.15));
+      const [audioVolume, setAudioVolume] = useState(() => getSafeStored("m60_audio_vol", 1.0));
+      const [selectedVoiceURI, setSelectedVoiceURI] = useState(() => getSafeStored("m60_voice_uri", ""));
       const [availableVoices, setAvailableVoices] = useState([]);
       const [wakeLockActive, setWakeLockActive] = useState(false);
-      const [hapticsEnabled, setHapticsEnabled] = useState(() => getStored("m60_haptics", true));
+      const [hapticsEnabled, setHapticsEnabled] = useState(() => getSafeStored("m60_haptics", true));
 
       const [activeModalExercise, setActiveModalExercise] = useState(null);
       const [activeModalPacing, setActiveModalPacing] = useState(false);
       const [modalPacePhase, setModalPacePhase] = useState("Ready");
       const [modalPaceCount, setModalPaceCount] = useState(3);
 
-      const [weights, setWeights] = useState(() => getStored("m60_weights", {}));
-      const [completedSets, setCompletedSets] = useState(() => getStored("m60_sets", {}));
-      const [history, setHistory] = useState(() => getStored("m60_history", []));
+      const [weights, setWeights] = useState(() => getSafeStored("m60_weights", {}));
+      const [completedSets, setCompletedSets] = useState(() => getSafeStored("m60_sets", {}));
+      const [history, setHistory] = useState(() => getSafeStored("m60_history", []));
       const [selectedCalendarDate, setSelectedCalendarDate] = useState(null);
 
       const defaultProfile = {
@@ -480,7 +496,7 @@
       };
 
       const [userProfile, setUserProfile] = useState(() => {
-        const stored = getStored("m60_user_profile", null);
+        const stored = getSafeStored("m60_user_profile", null);
         return (stored && typeof stored === 'object') ? { ...defaultProfile, ...stored } : defaultProfile;
       });
 
@@ -495,10 +511,10 @@
       const [fuelSubTab, setFuelSubTab] = useState("meals");
       const [mealDayIdx, setMealDayIdx] = useState(0);
       const [expandedMealIdx, setExpandedMealIdx] = useState(null);
-      const [checkedGroceries, setCheckedGroceries] = useState(() => getStored("m60_grocery", {}));
+      const [checkedGroceries, setCheckedGroceries] = useState(() => getSafeStored("m60_grocery", {}));
 
       const todayDateStr = getLocalDateStr();
-      const [waterGlasses, setWaterGlasses] = useState(() => getStored(`m60_water_${todayDateStr}`, 0));
+      const [waterGlasses, setWaterGlasses] = useState(() => getSafeStored(`m60_water_${todayDateStr}`, 0));
 
       const [restSec, setRestSec] = useState(0);
       const [targetRestSec, setTargetRestSec] = useState(60);
@@ -509,25 +525,25 @@
       const [tempoCount, setTempoCount] = useState(3);
       const [tempoPhase, setTempoPhase] = useState("Lower (3s)");
 
-      const [periodStart, setPeriodStart] = useState(() => getStored("m60_pstart", "2026-08-01"));
-      const [cycleLen, setCycleLen] = useState(() => getStored("m60_clen", 28));
+      const [periodStart, setPeriodStart] = useState(() => getSafeStored("m60_pstart", "2026-08-01"));
+      const [cycleLen, setCycleLen] = useState(() => getSafeStored("m60_clen", 28));
 
       // Query Device Voices
       useEffect(() => {
         const loadVoices = () => {
-          if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+          if (typeof window !== 'undefined' && 'speechSynthesis' in window && window.speechSynthesis) {
             const vList = window.speechSynthesis.getVoices();
             if (Array.isArray(vList) && vList.length > 0) {
               setAvailableVoices(vList);
               if (!selectedVoiceURI) {
-                const preferred = vList.find(v => (v.lang && v.lang.startsWith('en') && (v.name.includes('Female') || v.name.includes('Samantha') || v.name.includes('Victoria')))) || vList[0];
+                const preferred = vList.find(v => (v && v.lang && v.lang.startsWith('en') && (v.name.includes('Female') || v.name.includes('Samantha') || v.name.includes('Victoria')))) || vList[0];
                 if (preferred) setSelectedVoiceURI(preferred.voiceURI);
               }
             }
           }
         };
         loadVoices();
-        if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        if (typeof window !== 'undefined' && 'speechSynthesis' in window && window.speechSynthesis) {
           window.speechSynthesis.onvoiceschanged = loadVoices;
         }
       }, []);
@@ -570,22 +586,22 @@
 
       const metabolicTargets = calcMetabolicTargets(userProfile);
 
-      useEffect(() => { setStored("m60_diff", difficulty); }, [difficulty]);
-      useEffect(() => { setStored("m60_day", workoutDay); }, [workoutDay]);
-      useEffect(() => { setStored("m60_weights", weights); }, [weights]);
-      useEffect(() => { setStored("m60_sets", completedSets); }, [completedSets]);
-      useEffect(() => { setStored("m60_history", history); }, [history]);
-      useEffect(() => { setStored("m60_grocery", checkedGroceries); }, [checkedGroceries]);
-      useEffect(() => { setStored(`m60_water_${todayDateStr}`, waterGlasses); }, [waterGlasses, todayDateStr]);
-      useEffect(() => { setStored("m60_pstart", periodStart); }, [periodStart]);
-      useEffect(() => { setStored("m60_clen", cycleLen); }, [cycleLen]);
-      useEffect(() => { setStored("m60_user_profile", userProfile); }, [userProfile]);
-      useEffect(() => { setStored("m60_audio_mode", audioMode); }, [audioMode]);
-      useEffect(() => { setStored("m60_speech_rate", speechRate); }, [speechRate]);
-      useEffect(() => { setStored("m60_speech_pitch", speechPitch); }, [speechPitch]);
-      useEffect(() => { setStored("m60_audio_vol", audioVolume); }, [audioVolume]);
-      useEffect(() => { setStored("m60_voice_uri", selectedVoiceURI); }, [selectedVoiceURI]);
-      useEffect(() => { setStored("m60_haptics", hapticsEnabled); }, [hapticsEnabled]);
+      useEffect(() => { setSafeStored("m60_diff", difficulty); }, [difficulty]);
+      useEffect(() => { setSafeStored("m60_day", workoutDay); }, [workoutDay]);
+      useEffect(() => { setSafeStored("m60_weights", weights); }, [weights]);
+      useEffect(() => { setSafeStored("m60_sets", completedSets); }, [completedSets]);
+      useEffect(() => { setSafeStored("m60_history", history); }, [history]);
+      useEffect(() => { setSafeStored("m60_grocery", checkedGroceries); }, [checkedGroceries]);
+      useEffect(() => { setSafeStored(`m60_water_${todayDateStr}`, waterGlasses); }, [waterGlasses, todayDateStr]);
+      useEffect(() => { setSafeStored("m60_pstart", periodStart); }, [periodStart]);
+      useEffect(() => { setSafeStored("m60_clen", cycleLen); }, [cycleLen]);
+      useEffect(() => { setSafeStored("m60_user_profile", userProfile); }, [userProfile]);
+      useEffect(() => { setSafeStored("m60_audio_mode", audioMode); }, [audioMode]);
+      useEffect(() => { setSafeStored("m60_speech_rate", speechRate); }, [speechRate]);
+      useEffect(() => { setSafeStored("m60_speech_pitch", speechPitch); }, [speechPitch]);
+      useEffect(() => { setSafeStored("m60_audio_vol", audioVolume); }, [audioVolume]);
+      useEffect(() => { setSafeStored("m60_voice_uri", selectedVoiceURI); }, [selectedVoiceURI]);
+      useEffect(() => { setSafeStored("m60_haptics", hapticsEnabled); }, [hapticsEnabled]);
 
       const speechSettings = { rate: speechRate, pitch: speechPitch, volume: audioVolume, voiceURI: selectedVoiceURI };
 
@@ -826,7 +842,7 @@
       const completeOnboarding = () => {
         const finalized = { ...tempProfile, onboardingCompleted: true };
         setUserProfile(finalized);
-        setStored("m60_user_profile", finalized);
+        setSafeStored("m60_user_profile", finalized);
         setShowOnboardingModal(false);
         setShowWelcomeScreen(false);
         if (window.confetti) window.confetti({ particleCount: 150, spread: 90 });
@@ -1221,7 +1237,6 @@
             {tab === "fuel" && (
               <div className="space-y-4">
                 
-                {/* 3L Hydration Tracker */}
                 <div className="card-light p-4 rounded-3xl space-y-2.5">
                   <div className="flex justify-between items-center">
                     <div>
@@ -1253,7 +1268,6 @@
                   </div>
                 </div>
 
-                {/* Sub-tabs */}
                 <div className="card-light p-1 rounded-2xl flex gap-1 text-xs font-semibold">
                   <button
                     onClick={() => { setFuelSubTab("meals"); if (hapticsEnabled) triggerHaptic(8); }}
@@ -1281,7 +1295,6 @@
                   </button>
                 </div>
 
-                {/* Recipes View */}
                 {fuelSubTab === "meals" && (
                   <div className="space-y-3">
                     <div className="flex gap-1.5 overflow-x-auto pb-1">
@@ -1348,7 +1361,6 @@
                   </div>
                 )}
 
-                {/* Grocery Checklist View */}
                 {fuelSubTab === "checklist" && (
                   <div className="card-light p-4 rounded-3xl space-y-3.5">
                     <div className="flex justify-between items-center pb-1 border-b border-blush-100">
@@ -1395,7 +1407,6 @@
                   </div>
                 )}
 
-                {/* Swaps View */}
                 {fuelSubTab === "swaps" && (
                   <div className="card-light p-4 rounded-3xl space-y-3">
                     <h3 className="text-xs font-serif font-bold text-charcoal uppercase tracking-wider">Lifestyle Substitution Matrix</h3>
@@ -1514,7 +1525,7 @@
                     </div>
                     <div className="grid grid-cols-10 gap-1 bg-blush-50/60 p-2.5 rounded-2xl border border-blush-100">
                       {Array.from({ length: 30 }).map((_, i) => {
-                        const isDone = (i + 30) < safeHistory.length;
+                        const isDone = (i + 30) < history.length;
                         return (
                           <div
                             key={i + 30}
@@ -1735,7 +1746,7 @@
                         onChange={e => setSelectedVoiceURI(e.target.value)}
                         className="w-full bg-blush-50 border border-blush-200 text-charcoal text-xs font-medium p-2 rounded-xl focus:outline-none"
                       >
-                        {availableVoices.filter(v => v.lang && v.lang.startsWith('en')).map(v => (
+                        {availableVoices.filter(v => v && v.lang && v.lang.startsWith('en')).map(v => (
                           <option key={v.voiceURI} value={v.voiceURI}>{v.name} ({v.lang})</option>
                         ))}
                       </select>
@@ -2440,7 +2451,7 @@
             </div>
           )}
 
-          {/* BOTTOM NAVIGATION DOCK (6 EQUAL TABS) */}
+          {/* BOTTOM NAVIGATION DOCK */}
           <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur border-t border-blush-200 px-2 py-2 flex justify-around items-center z-40 shadow-sm">
             <button onClick={() => { setTab("train"); if (hapticsEnabled) triggerHaptic(10); }} className={`flex flex-col items-center gap-0.5 text-xs ${tab === "train" ? "text-blush-600 font-bold" : "text-mutedMauve"}`}>
               <span className="text-base">🌸</span><span className="text-[9px]">Train</span>
