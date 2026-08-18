@@ -1,4 +1,4 @@
-const CACHE_NAME = 'm60-pwa-cache-v3';
+const CACHE_NAME = 'm60-pwa-cache-v4';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -8,7 +8,7 @@ const ASSETS_TO_CACHE = [
   'https://unpkg.com/react-dom@18/umd/react-dom.production.min.js',
   'https://unpkg.com/@babel/standalone/babel.min.js',
   'https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js',
-  'https://cdn-icons-png.flaticon.com/512/2964/2964514.png'
+  'https://cdn-icons-png.flaticon.com/512/3048/3048398.png'
 ];
 
 self.addEventListener('install', (event) => {
