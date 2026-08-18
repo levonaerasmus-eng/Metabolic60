@@ -1,7 +1,7 @@
 {
-  "id": "metabolic60-pwa-app",
-  "name": "metabolic60 • Feminine Metabolic Transformation",
-  "short_name": "metabolic60",
+  "id": "m60-pwa-app",
+  "name": "M60 • Feminine Metabolic Transformation",
+  "short_name": "M60",
   "description": "Feminine Metabolic Strength, Tempo Cadence & Hormonal Lifestyle Sync",
   "lang": "en",
   "dir": "ltr",
@@ -25,7 +25,6 @@
   ],
   "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7",
   "prefer_related_applications": false,
-  "related_applications": [],
   "launch_handler": {
     "client_mode": "navigate-existing"
   },
@@ -35,24 +34,16 @@
   "note_taking": {
     "new_note_url": "./index.html?tab=train&action=new_note"
   },
-  "scope_extensions": [
-    {
-      "origin": "https://images.unsplash.com"
-    },
-    {
-      "origin": "https://cdn.coverr.co"
-    }
-  ],
   "protocol_handlers": [
     {
-      "protocol": "web+metabolic60",
+      "protocol": "web+m60",
       "url": "./index.html?workout=%s"
     }
   ],
   "file_handlers": [
     {
       "action": "./index.html",
-      "name": "metabolic60 Workout Backup",
+      "name": "M60 Workout Backup",
       "accept": {
         "application/json": [".json"],
         "text/plain": [".txt"]
@@ -76,7 +67,7 @@
       "url": "./index.html?tab=train",
       "icons": [
         {
-          "src": "https://cdn-icons-png.flaticon.com/512/2964/2964514.png",
+          "src": "https://cdn-icons-png.flaticon.com/512/3048/3048398.png",
           "sizes": "512x512",
           "type": "image/png",
           "purpose": "any maskable"
@@ -90,7 +81,7 @@
       "url": "./index.html?tab=fuel",
       "icons": [
         {
-          "src": "https://cdn-icons-png.flaticon.com/512/2964/2964514.png",
+          "src": "https://cdn-icons-png.flaticon.com/512/3048/3048398.png",
           "sizes": "512x512",
           "type": "image/png",
           "purpose": "any maskable"
@@ -104,7 +95,7 @@
       "url": "./index.html?tab=progress",
       "icons": [
         {
-          "src": "https://cdn-icons-png.flaticon.com/512/2964/2964514.png",
+          "src": "https://cdn-icons-png.flaticon.com/512/3048/3048398.png",
           "sizes": "512x512",
           "type": "image/png",
           "purpose": "any maskable"
@@ -115,7 +106,7 @@
   "widgets": [
     {
       "name": "Today's Metabolic Workout",
-      "short_name": "Workout Widget",
+      "short_name": "M60 Widget",
       "description": "Glanceable view of your daily workout and cycle phase",
       "tag": "m60-workout-widget",
       "template": "widget-template",
@@ -127,12 +118,12 @@
           "src": "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=640&q=80",
           "sizes": "640x1136",
           "type": "image/jpeg",
-          "label": "Workout Widget Preview"
+          "label": "M60 Workout Widget Preview"
         }
       ],
       "icons": [
         {
-          "src": "https://cdn-icons-png.flaticon.com/512/2964/2964514.png",
+          "src": "https://cdn-icons-png.flaticon.com/512/3048/3048398.png",
           "sizes": "512x512",
           "type": "image/png"
         }
@@ -141,7 +132,7 @@
   ],
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/2964/2964514.png",
+      "src": "https://cdn-icons-png.flaticon.com/512/3048/3048398.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
@@ -153,14 +144,14 @@
       "sizes": "640x1136",
       "type": "image/jpeg",
       "form_factor": "narrow",
-      "label": "metabolic60 Workout & Biomechanics Dashboard"
+      "label": "M60 Workout & Biomechanics Dashboard"
     },
     {
       "src": "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=1280&q=80",
       "sizes": "1280x720",
       "type": "image/jpeg",
       "form_factor": "wide",
-      "label": "metabolic60 Lifestyle & Hormonal Phasing"
+      "label": "M60 Lifestyle & Hormonal Phasing"
     }
   ]
 }
