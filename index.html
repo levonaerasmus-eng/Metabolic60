@@ -14,16 +14,16 @@
   <meta name="apple-mobile-web-app-title" content="M60" />
   <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3048/3048398.png" />
 
-  <!-- Google Fonts: Inter & Playfair Display -->
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- React 18 & Babel -->
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <!-- React 18 & Babel UMD for robust in-browser compiling -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <!-- Canvas Confetti -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
@@ -95,12 +95,47 @@
   </style>
 </head>
 <body class="bg-[#FAF6F4] text-charcoal antialiased">
-  <div id="root"></div>
+  <div id="root">
+    <div style="display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;color:#D97365;">
+      ✨ Loading M60 Complete Transformation System...
+    </div>
+  </div>
 
   <script type="text/babel">
     const { useState, useEffect, useRef, Component } = React;
 
-    // --- Defensive Storage Sanitizer ---
+    // --- Safety Error Boundary ---
+    class ErrorBoundary extends Component {
+      constructor(props) {
+        super(props);
+        this.state = { hasError: false };
+      }
+      static getDerivedStateFromError() {
+        return { hasError: true };
+      }
+      componentDidCatch(error, info) {
+        console.error("M60 Runtime Error:", error, info);
+      }
+      render() {
+        if (this.state.hasError) {
+          return (
+            <div className="min-h-screen max-w-md mx-auto p-6 flex flex-col items-center justify-center text-center space-y-4">
+              <div className="w-14 h-14 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center text-2xl">⚠️</div>
+              <h2 className="text-base font-serif font-bold text-charcoal">Quick App Reset</h2>
+              <p className="text-xs text-mutedMauve">A temporary cache collision occurred. Tap below to relaunch cleanly.</p>
+              <button
+                onClick={() => { try { localStorage.clear(); } catch(e){} window.location.reload(); }}
+                className="w-full py-3 rounded-2xl bg-blush-500 text-white font-bold text-xs shadow-md"
+              >
+                ✨ Clear Cache & Relaunch App
+              </button>
+            </div>
+          );
+        }
+        return this.props.children;
+      }
+    }
+
     const getSafeStored = (key, fallback) => {
       try {
         const item = localStorage.getItem(key);
@@ -129,7 +164,7 @@
       }
     };
 
-    // --- Audio Synthesis Engine ---
+    // --- Audio & Speech Synthesis Engine ---
     let sharedAudioCtx = null;
     let activeUtterance = null;
 
@@ -461,7 +496,6 @@
       const [workoutDay, setWorkoutDay] = useState(() => getSafeStored("m60_day", "A"));
       const [focusedId, setFocusedId] = useState("i_a1");
       
-      // Audio & Speech Settings State
       const [audioMode, setAudioMode] = useState(() => getSafeStored("m60_audio_mode", "voice"));
       const [speechRate, setSpeechRate] = useState(() => getSafeStored("m60_speech_rate", 1.05));
       const [speechPitch, setSpeechPitch] = useState(() => getSafeStored("m60_speech_pitch", 1.15));
@@ -528,7 +562,6 @@
       const [periodStart, setPeriodStart] = useState(() => getSafeStored("m60_pstart", "2026-08-01"));
       const [cycleLen, setCycleLen] = useState(() => getSafeStored("m60_clen", 28));
 
-      // Query Device Voices
       useEffect(() => {
         const loadVoices = () => {
           if (typeof window !== 'undefined' && 'speechSynthesis' in window && window.speechSynthesis) {
@@ -548,7 +581,6 @@
         }
       }, []);
 
-      // Screen Wake Lock Engine
       useEffect(() => {
         let wakeLockObj = null;
         const requestWakeLock = async () => {
@@ -605,7 +637,6 @@
 
       const speechSettings = { rate: speechRate, pitch: speechPitch, volume: audioVolume, voiceURI: selectedVoiceURI };
 
-      // Rest Timer Engine
       useEffect(() => {
         let timer = null;
         if (isResting && restSec > 0) {
@@ -632,7 +663,6 @@
         return () => clearInterval(timer);
       }, [isResting, restSec, audioMode, speechSettings, audioVolume, hapticsEnabled]);
 
-      // Global Metronome Engine
       useEffect(() => {
         let timer = null;
         if (tempoRunning) {
@@ -648,7 +678,6 @@
         return () => clearInterval(timer);
       }, [tempoRunning, audioVolume, hapticsEnabled]);
 
-      // Live Cadence Engine with Spoken Audio Prompts
       useEffect(() => {
         let timer = null;
         if (activeModalExercise && activeModalPacing) {
@@ -691,7 +720,6 @@
         return () => clearInterval(timer);
       }, [activeModalExercise, activeModalPacing, audioMode, speechSettings, audioVolume, hapticsEnabled]);
 
-      // Safe Cycle Calculation
       const calcCycle = () => {
         try {
           const start = new Date(periodStart || "2026-08-01");
@@ -714,8 +742,6 @@
       };
 
       const cycle = calcCycle();
-
-      // Safe Exercise List Resolution
       const safeDiffKey = (difficulty && typeof difficulty === 'string') ? difficulty.toLowerCase() : "intermediate";
       const tierData = EXERCISE_DATA[safeDiffKey] || EXERCISE_DATA.intermediate;
       const safeDayKey = (workoutDay && ["A", "B", "C"].includes(workoutDay)) ? workoutDay : "A";
@@ -1525,7 +1551,7 @@
                     </div>
                     <div className="grid grid-cols-10 gap-1 bg-blush-50/60 p-2.5 rounded-2xl border border-blush-100">
                       {Array.from({ length: 30 }).map((_, i) => {
-                        const isDone = (i + 30) < history.length;
+                        const isDone = (i + 30) < safeHistory.length;
                         return (
                           <div
                             key={i + 30}
@@ -2415,7 +2441,7 @@
                   {onboardingStep < 5 ? (
                     <button
                       onClick={() => { setOnboardingStep(prev => prev + 1); if (hapticsEnabled) triggerHaptic(12); }}
-                      className="flex-1 py-2.5 rounded-xl bg-blush-500 text-white text-xs font-bold shadow-sm hover:bg-blush-600"
+                      className="flex-1 py-2.5 rounded-xl bg-blush-500 text-white text-xs font-bold shadow-sm"
                     >
                       Continue →
                     </button>
@@ -2451,7 +2477,7 @@
             </div>
           )}
 
-          {/* BOTTOM NAVIGATION DOCK */}
+          {/* BOTTOM NAVIGATION DOCK (6 TABS) */}
           <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur border-t border-blush-200 px-2 py-2 flex justify-around items-center z-40 shadow-sm">
             <button onClick={() => { setTab("train"); if (hapticsEnabled) triggerHaptic(10); }} className={`flex flex-col items-center gap-0.5 text-xs ${tab === "train" ? "text-blush-600 font-bold" : "text-mutedMauve"}`}>
               <span className="text-base">🌸</span><span className="text-[9px]">Train</span>
