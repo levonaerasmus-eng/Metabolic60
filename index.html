@@ -5,6 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>metabolic60 • Feminine Metabolic Transformation</title>
 
+  <!-- PWA Meta Tags -->
+  <link rel="manifest" href="./manifest.json" />
+  <meta name="theme-color" content="#FAF6F4" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="metabolic60" />
+  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2964/2964514.png" />
+
   <!-- Google Fonts: Inter & Playfair Display -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -368,7 +377,7 @@
             cues: "All power originates from the top heel. Step down like a feather without bouncing off trailing foot.", 
             execution: [
               "Place entire right foot securely onto a low, sturdy step or bench.",
-              "Lean torso forward slightly from hips to engage the glute.",
+              "Lean torso forward slightly from hips to align weight over working glute.",
               "Drive exclusively through your elevated right heel to lift your body tall.",
               "Step trailing foot down softly over 2 seconds, keeping your working heel planted on top."
             ] 
@@ -811,66 +820,6 @@
       }
     };
 
-    // --- Feminine Dual-Silhouette Body Map ---
-    function FeminineBodyMap({ activeMuscle, exerciseName }) {
-      const isTarget = (m) => activeMuscle === m;
-
-      return (
-        <div className="card-light rounded-3xl p-4 space-y-3">
-          <div className="flex justify-between items-center">
-            <div>
-              <p className="text-[10px] font-bold text-roseGold uppercase tracking-wider">Target Biomechanics</p>
-              <h3 className="text-sm font-serif font-bold text-charcoal">{exerciseName}</h3>
-            </div>
-            <div className="flex items-center gap-1.5 bg-blush-50 px-3 py-1 rounded-full border border-blush-200">
-              <span className="w-2 h-2 rounded-full bg-blush-500 animate-pulse"></span>
-              <span className="text-[11px] font-semibold text-blush-600 capitalize">{activeMuscle} Focus</span>
-            </div>
-          </div>
-
-          <div className="bg-blush-50/60 rounded-2xl p-4 border border-blush-100 flex items-center justify-around">
-            {/* FRONT SILHOUETTE */}
-            <div className="flex flex-col items-center">
-              <span className="text-[9px] font-semibold uppercase tracking-wider text-mutedMauve mb-1">Anterior (Front)</span>
-              <svg viewBox="0 0 100 200" className="w-24 h-48 drop-shadow-sm">
-                <circle cx="50" cy="18" r="9" fill="#E49B90" opacity="0.5" />
-                <rect x="46" y="27" width="8" height="6" fill="#E49B90" opacity="0.5" />
-                <path d="M 28 35 Q 50 32 72 35 L 77 48 L 23 48 Z" fill={isTarget("shoulders") ? "#D97365" : "#F6DDD9"} className={isTarget("shoulders") ? "muscle-glow" : ""} />
-                <rect x="30" y="47" width="40" height="18" rx="4" fill={isTarget("chest") ? "#D97365" : "#FBF0EE"} className={isTarget("chest") ? "muscle-glow" : ""} />
-                <rect x="34" y="68" width="32" height="26" rx="5" fill={isTarget("core") ? "#D97365" : "#FBF0EE"} className={isTarget("core") ? "muscle-glow" : ""} />
-                <rect x="18" y="50" width="8" height="42" rx="4" fill="#F6DDD9" />
-                <rect x="74" y="50" width="8" height="42" rx="4" fill="#F6DDD9" />
-                <path d="M 28 98 L 46 98 L 43 145 L 26 145 Z" fill={isTarget("quads") ? "#D97365" : "#FBF0EE"} className={isTarget("quads") ? "muscle-glow" : ""} />
-                <path d="M 54 98 L 72 98 L 74 145 L 57 145 Z" fill={isTarget("quads") ? "#D97365" : "#FBF0EE"} className={isTarget("quads") ? "muscle-glow" : ""} />
-                <rect x="27" y="150" width="13" height="32" rx="4" fill="#F6DDD9" />
-                <rect x="60" y="150" width="13" height="32" rx="4" fill="#F6DDD9" />
-              </svg>
-            </div>
-
-            <div className="w-[1px] h-36 bg-blush-200"></div>
-
-            {/* BACK SILHOUETTE */}
-            <div className="flex flex-col items-center">
-              <span className="text-[9px] font-semibold uppercase tracking-wider text-mutedMauve mb-1">Posterior (Back)</span>
-              <svg viewBox="0 0 100 200" className="w-24 h-48 drop-shadow-sm">
-                <circle cx="50" cy="18" r="9" fill="#E49B90" opacity="0.5" />
-                <rect x="46" y="27" width="8" height="6" fill="#E49B90" opacity="0.5" />
-                <path d="M 26 35 Q 50 32 74 35 L 70 68 L 30 68 Z" fill={isTarget("lats") || isTarget("back") ? "#D97365" : "#FBF0EE"} className={isTarget("lats") || isTarget("back") ? "muscle-glow" : ""} />
-                <rect x="34" y="70" width="32" height="18" rx="3" fill={isTarget("back") ? "#D97365" : "#FBF0EE"} className={isTarget("back") ? "muscle-glow" : ""} />
-                <rect x="18" y="50" width="8" height="42" rx="4" fill="#F6DDD9" />
-                <rect x="74" y="50" width="8" height="42" rx="4" fill="#F6DDD9" />
-                <rect x="28" y="90" width="44" height="24" rx="7" fill={isTarget("glutes") ? "#D97365" : "#FBF0EE"} className={isTarget("glutes") ? "muscle-glow" : ""} />
-                <path d="M 28 116 L 46 116 L 43 145 L 26 145 Z" fill={isTarget("hamstrings") ? "#D97365" : "#FBF0EE"} className={isTarget("hamstrings") ? "muscle-glow" : ""} />
-                <path d="M 54 116 L 72 116 L 74 145 L 57 145 Z" fill={isTarget("hamstrings") ? "#D97365" : "#FBF0EE"} className={isTarget("hamstrings") ? "muscle-glow" : ""} />
-                <rect x="27" y="150" width="13" height="32" rx="4" fill="#F6DDD9" />
-                <rect x="60" y="150" width="13" height="32" rx="4" fill="#F6DDD9" />
-              </svg>
-            </div>
-          </div>
-        </div>
-      );
-    }
-
     // --- Complete 7-Day Master Meal Plan (No Prices) ---
     const SA_MEALS = [
       {
@@ -967,7 +916,7 @@
       "Healthy Fats": ["Avocado", "Raw Almonds", "Chia Seeds", "Olive Oil", "Sugar-Free Peanut Butter"]
     };
 
-    // --- Main Application Engine ---
+    // --- Main Application Component ---
     function App() {
       const [tab, setTab] = useState("train"); // train, fuel, progress, profile
       const [difficulty, setDifficulty] = useState(() => getStored("m60_diff", "intermediate"));
@@ -1262,42 +1211,6 @@
         setFocusedId(EXERCISE_DATA[difficulty][nextDay][0].id);
       };
 
-      // Onboarding Handlers
-      const completeOnboarding = () => {
-        const finalized = { ...tempProfile, onboardingCompleted: true };
-        setUserProfile(finalized);
-        setStored("m60_user_profile", finalized);
-        setShowOnboardingModal(false);
-        setShowWelcomeScreen(false);
-        if (window.confetti) window.confetti({ particleCount: 150, spread: 90 });
-        triggerHaptic([50, 50, 50]);
-      };
-
-      const startOnboardingWizard = () => {
-        setTempProfile({ ...userProfile });
-        setOnboardingStep(1);
-        setShowOnboardingModal(true);
-      };
-
-      // Full App Reset
-      const executeFullReset = () => {
-        try {
-          localStorage.clear();
-        } catch (e) {}
-
-        setUserProfile(defaultProfile);
-        setWeights({});
-        setCompletedSets({});
-        setHistory([]);
-        setCheckedGroceries({});
-        setWaterGlasses(0);
-        setDifficulty("intermediate");
-        setWorkoutDay("A");
-        setShowResetConfirmModal(false);
-        setShowWelcomeScreen(true);
-        triggerHaptic([100, 50, 100]);
-      };
-
       // Milestone Badges
       const totalHistoricalTonnage = history.reduce((sum, h) => sum + (h.tonnage || 0), 0) + liveSessionVolume;
       const badges = [
@@ -1518,7 +1431,7 @@
                 {/* 7. FEMININE BODY HEATMAP */}
                 <FeminineBodyMap activeMuscle={activeEx.primary} exerciseName={activeEx.name} />
 
-                {/* 8. INTERACTIVE EXERCISE CARDS (Tap opens Cadence & Cues Modal) */}
+                {/* 8. INTERACTIVE EXERCISE CARDS */}
                 <div className="space-y-3">
                   {currentList.map(ex => {
                     const isCurrent = focusedId === ex.id;
@@ -2142,8 +2055,17 @@
                   </button>
                 </div>
 
-                <div className="space-y-1.5 bg-white p-3 rounded-2xl border border-blush-100 text-xs">
-                  <p><strong className="text-blush-600">Mind-Muscle Cue:</strong> {activeModalExercise.cues}</p>
+                {/* Mind-Muscle Cues & Execution Steps */}
+                <div className="space-y-2 bg-white p-3.5 rounded-2xl border border-blush-100 text-xs">
+                  <p className="leading-relaxed"><strong className="text-blush-600 font-semibold">Mind-Muscle Cue:</strong> {activeModalExercise.cues}</p>
+                  <div className="space-y-1 pt-1.5 border-t border-blush-50">
+                    <span className="text-[9px] font-bold uppercase text-mutedMauve">Execution Breakdown:</span>
+                    <ol className="list-decimal list-inside space-y-1 text-charcoal/80 text-[11px] leading-relaxed">
+                      {activeModalExercise.execution ? activeModalExercise.execution.map((st, i) => (
+                        <li key={i}>{st}</li>
+                      )) : <li>Maintain core stability and strict cadence through the full range of motion.</li>}
+                    </ol>
+                  </div>
                 </div>
 
                 <button
@@ -2152,7 +2074,7 @@
                     setActiveModalExercise(null);
                     setActiveModalPacing(false);
                   }}
-                  className="w-full py-2.5 rounded-xl bg-blush-500 text-white text-xs font-bold shadow-sm"
+                  className="w-full py-2.5 rounded-xl bg-blush-500 text-white text-xs font-bold shadow-sm hover:bg-blush-600 transition-all"
                 >
                   Start Rest Interval ({activeModalExercise.rest}s)
                 </button>
@@ -2313,7 +2235,7 @@
                         />
                       </div>
                       <div>
-                        <label className="block text-[9px] font-bold text-mutedMauve uppercase mb-1">Target Goal (kg)</label>
+                        <label className="block text-[9px] font-bold text-mutedMauve uppercase mb-1">Target Weight (kg)</label>
                         <input
                           type="number"
                           step="0.1"
@@ -2346,7 +2268,7 @@
                   <div className="space-y-3">
                     <div>
                       <h4 className="text-sm font-serif font-bold text-charcoal">Your Focus Transformation Goal</h4>
-                      <p className="text-[11px] text-mutedMauve">Customizes your training density and progressive pacing.</p>
+                      <p className="text-[11px] text-mutedMauve">Customizes training volume and progressive overload.</p>
                     </div>
                     <div className="space-y-2">
                       {["Fat Loss & Metabolic Reset", "Glute Lift & Waist Taper", "Full Body Recomposition & Tone"].map(g => (
@@ -2354,12 +2276,32 @@
                           key={g}
                           onClick={() => { setTempProfile({ ...tempProfile, goal: g }); triggerHaptic(8); }}
                           className={`p-3 rounded-2xl border text-xs font-bold cursor-pointer transition-all ${
-                            tempProfile.goal === g ? "bg-blush-50 border-blush-500 text-blush-600" : "bg-white border-blush-200 text-charcoal"
+                            tempProfile.goal === g ? "bg-blush-50 border-blush-500 text-blush-600 font-serif" : "bg-white border-blush-200 text-charcoal"
                           }`}
                         >
                           {g}
                         </div>
                       ))}
+                    </div>
+                    <div className="pt-2">
+                      <label className="block text-[9px] font-bold text-mutedMauve uppercase mb-1">Experience Level</label>
+                      <div className="flex gap-2">
+                        {["Beginner", "Intermediate", "Advanced"].map(exp => (
+                          <button
+                            key={exp}
+                            onClick={() => {
+                              setTempProfile({ ...tempProfile, experience: exp });
+                              setDifficulty(exp.toLowerCase());
+                              triggerHaptic(8);
+                            }}
+                            className={`flex-1 py-2 rounded-xl text-[11px] font-bold capitalize border transition-all ${
+                              tempProfile.experience.toLowerCase() === exp.toLowerCase() ? "bg-blush-500 text-white border-blush-500 shadow-sm" : "bg-white text-mutedMauve border-blush-200"
+                            }`}
+                          >
+                            {exp}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 )}
@@ -2396,7 +2338,7 @@
                   ) : (
                     <button
                       onClick={completeOnboarding}
-                      className="flex-1 py-3 rounded-xl bg-gradient-to-r from-blush-400 to-blush-500 text-white text-xs font-bold shadow-md"
+                      className="flex-1 py-3 rounded-xl bg-gradient-to-r from-blush-400 via-blush-500 to-roseGold text-white text-xs font-bold shadow-md"
                     >
                       Launch metabolic60 ✨
                     </button>
@@ -2470,6 +2412,17 @@
     }
 
     ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+
+  <!-- PWA Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then((reg) => console.log('Service Worker registered:', reg.scope))
+          .catch((err) => console.error('Service Worker registration failed:', err));
+      });
+    }
   </script>
 </body>
 </html>
