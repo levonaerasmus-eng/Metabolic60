@@ -98,13 +98,52 @@
   <div id="root"></div>
 
   <script type="text/babel">
-    const { useState, useEffect, useRef } = React;
+    const { useState, useEffect, useRef, Component } = React;
 
-    // --- Safe Local Storage Engine ---
+    // --- Error Boundary to Guard Against Blank Screen Crashes ---
+    class ErrorBoundary extends Component {
+      constructor(props) {
+        super(props);
+        this.state = { hasError: false, error: null };
+      }
+      static getDerivedStateFromError(error) {
+        return { hasError: true, error };
+      }
+      componentDidCatch(error, info) {
+        console.error("M60 Runtime Error:", error, info);
+      }
+      render() {
+        if (this.state.hasError) {
+          return (
+            <div className="min-h-screen max-w-md mx-auto p-6 flex flex-col items-center justify-center text-center space-y-4">
+              <div className="w-14 h-14 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center text-2xl">
+                ⚠️
+              </div>
+              <h2 className="text-base font-serif font-bold text-charcoal">Something needs a quick reset</h2>
+              <p className="text-xs text-mutedMauve">
+                A data format error occurred. Tap below to clear cached state and relaunch M60 smoothly.
+              </p>
+              <button
+                onClick={() => {
+                  try { localStorage.clear(); } catch(e) {}
+                  window.location.reload();
+                }}
+                className="w-full py-3 rounded-2xl bg-blush-500 text-white font-bold text-xs shadow-md"
+              >
+                ✨ Clear Cache & Relaunch App
+              </button>
+            </div>
+          );
+        }
+        return this.props.children;
+      }
+    }
+
+    // --- Safe Storage Engine ---
     const getStored = (key, fallback) => {
       try {
         const item = localStorage.getItem(key);
-        return (item && item !== "undefined") ? JSON.parse(item) : fallback;
+        return (item && item !== "undefined" && item !== "null") ? JSON.parse(item) : fallback;
       } catch {
         return fallback;
       }
@@ -121,7 +160,7 @@
       return `${year}-${month}-${day}`;
     };
 
-    // --- Global Audio & Speech Engine ---
+    // --- Audio & Speech Synthesis Engine ---
     let sharedAudioCtx = null;
     let activeUtterance = null;
 
@@ -170,7 +209,7 @@
           osc.type = 'sine';
           osc.frequency.value = freq;
           const startTime = ctx.currentTime + (idx * 0.07);
-          gain.gain.setValueAtTime(0.04 * vol, startTime);
+          gain.gain.setValueAtTime(0.04 * (vol || 1.0), startTime);
           gain.gain.exponentialRampToValueAtTime(0.0001, startTime + dur);
           osc.connect(gain);
           gain.connect(ctx.destination);
@@ -187,7 +226,7 @@
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
         osc.frequency.value = freq;
-        gain.gain.setValueAtTime(0.035 * vol, ctx.currentTime);
+        gain.gain.setValueAtTime(0.035 * (vol || 1.0), ctx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
         osc.connect(gain);
         gain.connect(ctx.destination);
@@ -291,6 +330,101 @@
       }
     };
 
+    // --- Complete 7-Day Master Meal Plan ---
+    const SA_MEALS = [
+      {
+        day: "Monday",
+        type: "Workout A (Glycogen Glow)",
+        target: "1,720 kcal • 150g Protein",
+        meals: [
+          { name: "Breakfast", title: "Berries & Vanilla Protein Oats", img: "https://images.unsplash.com/photo-1517673132405-a56a62b18caf?auto=format&fit=crop&w=600&q=80", desc: "1 cup Jungle Rolled Oats, 1 scoop vanilla protein, ½ cup fresh blueberries.", steps: ["Simmer oats in 1 cup almond milk for 3 mins until creamy.", "Remove from heat, gently whisk in protein powder until silky.", "Garnish with fresh blueberries and cinnamon."] },
+          { name: "Lunch", title: "Herb Chicken Breast & Roasted Patats", img: "https://images.unsplash.com/photo-1532550907401-a500c9a57435?auto=format&fit=crop&w=600&q=80", desc: "160g chicken fillet, 120g roasted sweet potato cubes, steamed green beans.", steps: ["Roast cubed sweet potatoes at 200°C with 1 tsp olive oil for 22 mins.", "Pan-sear seasoned chicken breast for 5 mins each side.", "Steam green beans 4 mins until crisp and vibrant."] },
+          { name: "Snack", title: "Greek Yogurt & Chia Glow Pot", img: "https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=600&q=80", desc: "1 cup 0% Greek yogurt, 1 tbsp chia seeds, vanilla extract.", steps: ["Spoon yogurt into glass pot, fold in chia seeds and vanilla.", "Let sit 5 mins for chia seeds to blossom."] },
+          { name: "Dinner", title: "Lean Beef Bolognese over Zoodles", img: "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=600&q=80", desc: "150g lean beef mince (90/10), baby marrows (zucchini), tomato passata, ¼ avocado.", steps: ["Brown mince with Italian herbs in a hot skillet.", "Add tomato passata and simmer on low for 8 mins.", "Toss spiralized baby marrows in the pan for 2 mins.", "Serve with sliced avocado."] }
+        ]
+      },
+      {
+        day: "Tuesday",
+        type: "Restorative Recovery",
+        target: "1,640 kcal • 144g Protein",
+        meals: [
+          { name: "Breakfast", title: "Savory Egg & Spinach Cups w/ Avocado", img: "https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=600&q=80", desc: "2 whole eggs + 2 whites baked with morogo/spinach, ½ avocado.", steps: ["Whisk eggs with chopped spinach and bell peppers.", "Bake in muffin tins at 180°C for 20 mins.", "Serve warm with fresh avocado."] },
+          { name: "Lunch", title: "Lucky Star Pilchard Protein Bowl", img: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80", desc: "½ tin pilchards in tomato sauce, mixed greens, steamed gem squash.", steps: ["Steam gem squash halves for 15 mins.", "Warm pilchards and flake over fresh salad greens and squash."] },
+          { name: "Snack", title: "Hard-Boiled Egg & Raw Almonds", img: "https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=600&q=80", desc: "1 boiled egg, 15 raw almonds, sliced salted cucumber.", steps: ["Boil egg 8 mins; serve with almonds and sea-salted cucumber."] },
+          { name: "Dinner", title: "Lemon Baked Cape Hake & Cauliflower", img: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=600&q=80", desc: "180g Cape Hake fillet, cauliflower florets, 1 tbsp olive oil, lemon.", steps: ["Roast cauliflower florets in olive oil at 200°C for 20 mins.", "Bake hake fillet alongside for 12 mins with lemon slices."] }
+        ]
+      },
+      {
+        day: "Wednesday",
+        type: "Workout B (Glycogen Glow)",
+        target: "1,730 kcal • 152g Protein",
+        meals: [
+          { name: "Breakfast", title: "Rooibos Vanilla Protein Smoothie", img: "https://images.unsplash.com/photo-1590301157890-4810ed352733?auto=format&fit=crop&w=600&q=80", desc: "1 cup chilled rooibos tea, 1 scoop protein, berries, ½ banana, chia.", steps: ["Brew rooibos tea and chill.", "Blend with protein, frozen berries, banana, and chia seeds until smooth."] },
+          { name: "Lunch", title: "Slow-Cooker Lean Beef over Brown Rice", img: "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=600&q=80", desc: "140g tender lean beef stew, ½ cup brown basmati rice, steamed broccoli.", steps: ["Simmer beef in bone broth with carrots and onions.", "Serve over warm brown basmati rice with steamed broccoli."] },
+          { name: "Snack", title: "Cottage Cheese & Sliced Green Apple", img: "https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=600&q=80", desc: "½ cup low-fat cottage cheese, ½ green apple sliced, cinnamon.", steps: ["Top cottage cheese with crisp green apple slices and cinnamon."] },
+          { name: "Dinner", title: "Pan-Grilled Chicken & Roasted Butternut", img: "https://images.unsplash.com/photo-1532550907401-a500c9a57435?auto=format&fit=crop&w=600&q=80", desc: "160g chicken fillet, 100g butternut cubes, sautéed Swiss chard.", steps: ["Roast butternut cubes at 200°C for 25 mins.", "Pan-sear chicken with herbs; sauté Swiss chard for 3 mins."] }
+        ]
+      },
+      {
+        day: "Thursday",
+        type: "Active Mobility Flow",
+        target: "1,650 kcal • 148g Protein",
+        meals: [
+          { name: "Breakfast", title: "Morogo & Feta Scrambled Eggs", img: "https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=600&q=80", desc: "3 whole eggs, tomatoes, onions, Swiss chard, 30g feta.", steps: ["Sauté onions and chopped morogo in 1 tsp olive oil.", "Scramble eggs gently; crumble feta over top."] },
+          { name: "Lunch", title: "Chicken Caesar Romaine Wraps", img: "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80", desc: "150g grilled chicken, romaine leaves, parmesan, light Caesar.", steps: ["Wrap grilled chicken strips in crisp romaine leaves with light dressing."] },
+          { name: "Snack", title: "Tuna in Spring Water & Cucumber", img: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80", desc: "1 tin tuna, lemon juice, sliced cucumbers.", steps: ["Flake tuna into a bowl with lemon and cracked pepper; serve with cucumber."] },
+          { name: "Dinner", title: "Grilled Ostrich Steak & Mediterranean Veg", img: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80", desc: "160g ostrich steak, baby marrows, bell peppers, red onion.", steps: ["Roast vegetables at 200°C; sear ostrich steak 2.5 mins per side in a smoking hot pan."] }
+        ]
+      },
+      {
+        day: "Friday",
+        type: "Workout C (Metabolic Glow)",
+        target: "1,740 kcal • 154g Protein",
+        meals: [
+          { name: "Breakfast", title: "Spiced Jungle Protein Oats", img: "https://images.unsplash.com/photo-1517673132405-a56a62b18caf?auto=format&fit=crop&w=600&q=80", desc: "⅓ cup oats, 1 scoop vanilla protein, 1 tbsp flaxseed, fresh berries.", steps: ["Simmer oats with nutmeg for 3 mins.", "Stir in protein and flaxseed; top with berries."] },
+          { name: "Lunch", title: "Chicken Breast & Sweet Potato Mash", img: "https://images.unsplash.com/photo-1532550907401-a500c9a57435?auto=format&fit=crop&w=600&q=80", desc: "160g chicken breast, 120g mashed sweet potato, steamed green beans.", steps: ["Boil peeled sweet potatoes and mash with sea salt.", "Sear chicken fillets with garlic herbs; serve with green beans."] },
+          { name: "Snack", title: "Greek Yogurt & Raw Walnuts", img: "https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=600&q=80", desc: "1 cup 0% Greek yogurt, 10 raw walnut halves.", steps: ["Spoon cold yogurt into a bowl and top with crushed walnuts."] },
+          { name: "Dinner", title: "Savory Lean Mince over Cauliflower Mash", img: "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=600&q=80", desc: "150g extra-lean beef mince, cumin, peppers, cauliflower mash.", steps: ["Blend steamed cauliflower into a creamy mash.", "Brown seasoned mince with diced peppers; serve over mash."] }
+        ]
+      },
+      {
+        day: "Saturday",
+        type: "Zone 2 Cardio Radiance",
+        target: "1,670 kcal • 146g Protein",
+        meals: [
+          { name: "Breakfast", title: "Poached Eggs on Seeded Rye Toast", img: "https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=600&q=80", desc: "2 poached eggs, 1 slice toasted seeded rye bread, sliced tomatoes.", steps: ["Poach 2 eggs for 3.5 mins in simmering water.", "Serve over toasted rye bread with sliced fresh tomatoes."] },
+          { name: "Lunch", title: "Mediterranean Chopped Chicken Salad", img: "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80", desc: "150g chicken breast, cucumber, cherry tomatoes, olives, 30g feta.", steps: ["Toss grilled chicken, tomatoes, cucumber, olives, and feta with lemon dressing."] },
+          { name: "Snack", title: "Savory Egg & Spinach Cups", img: "https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=600&q=80", desc: "2 prepped egg cups.", steps: ["Enjoy 2 pre-baked egg muffin cups as a convenient protein snack."] },
+          { name: "Dinner", title: "Baked Cape Hake & Herb Green Beans", img: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=600&q=80", desc: "180g hake fillet, garlic butter, parsley, green beans.", steps: ["Bake hake fillet at 190°C for 14 mins with garlic, butter, and parsley."] }
+        ]
+      },
+      {
+        day: "Sunday",
+        type: "Rest & Nourish Batch Prep",
+        target: "1,660 kcal • 150g Protein",
+        meals: [
+          { name: "Breakfast", title: "Sunday Scramble w/ Mushrooms & Chard", img: "https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=600&q=80", desc: "2 whole eggs + 2 whites, mushrooms, Swiss chard.", steps: ["Sauté sliced mushrooms and Swiss chard; scramble eggs gently until set."] },
+          { name: "Lunch", title: "Lean Beef Potjie Stew w/ Steamed Cabbage", img: "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=600&q=80", desc: "140g slow-cooked beef stew, shredded steamed cabbage ribbons.", steps: ["Reheat slow-cooked beef stew; serve over tender steamed cabbage."] },
+          { name: "Snack", title: "Warm Bone Broth & Boiled Egg", img: "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=600&q=80", desc: "1 cup beef bone broth, 1 boiled egg, black pepper.", steps: ["Warm bone broth in a mug with cracked pepper; enjoy with 1 boiled egg."] },
+          { name: "Dinner", title: "Grilled Lean Beef Patties & Rocket Salad", img: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80", desc: "150g lean beef patties, sautéed button mushrooms, fresh rocket.", steps: ["Pan-sear patties 4 mins each side; serve with mushrooms and rocket with lemon."] }
+        ]
+      }
+    ];
+
+    const GROCERY_CATEGORIES = {
+      "Lean Proteins": ["Skinless Chicken Breast fillets (bulk)", "Extra-Lean Beef Mince (90/10)", "Frozen Cape Hake Fillets", "Free-Range Eggs (Tray of 30)", "Liquid Egg Whites", "0% Greek Yogurt", "Low-Fat Cottage Cheese", "Vanilla Whey/Plant Protein Powder", "Tinned Tuna in Spring Water"],
+      "Glowing Carbs": ["Sweet Potatoes (*Patats*)", "Jungle Rolled Oats", "Brown Basmati Rice", "100% Seeded Rye Bread", "Quinoa", "Butternut Squash"],
+      "Fresh Produce": ["Swiss Chard / Morogo", "Baby Marrows (Zucchini)", "Fresh Green Beans", "Gem Squash", "Broccoli & Cauliflower", "Baby Spinach & Rocket", "Fresh Lemons & Blueberries"],
+      "Healthy Fats": ["Ripe Avocados", "Raw Almonds & Walnuts", "Chia Seeds & Ground Flaxseed", "Cold-Pressed Olive Oil", "Sugar-Free Peanut Butter"]
+    };
+
+    const SUBSTITUTIONS = {
+      "Lean Proteins": ["Chicken breast", "Turkey mince", "Cape Hake / Kingklip", "Extra-lean Beef mince", "Ostrich steaks", "Tinned Tuna", "Free-Range Eggs"],
+      "Glowing Carbs": ["Sweet Potato (*patats*)", "Butternut", "Rolled Oats", "Brown Rice", "100% Seeded Rye Bread"],
+      "Fibrous Greens": ["Swiss Chard / Morogo", "Zucchini", "Green Beans", "Gem Squash", "Broccoli", "Spinach"],
+      "Healthy Fats": ["Avocado", "Raw Almonds", "Chia Seeds", "Olive Oil", "Sugar-Free Peanut Butter"]
+    };
+
     const getInitialTab = () => {
       try {
         const params = new URLSearchParams(window.location.search);
@@ -302,12 +436,63 @@
       return "train";
     };
 
+    function FeminineBodyMap({ activeMuscle, exerciseName }) {
+      const isTarget = (m) => activeMuscle === m;
+
+      return (
+        <div className="card-light rounded-3xl p-4 space-y-3">
+          <div className="flex justify-between items-center">
+            <div>
+              <p className="text-[10px] font-bold text-roseGold uppercase tracking-wider">Target Biomechanics</p>
+              <h3 className="text-sm font-serif font-bold text-charcoal">{exerciseName || "Movement"}</h3>
+            </div>
+            <div className="flex items-center gap-1.5 bg-blush-50 px-3 py-1 rounded-full border border-blush-200">
+              <span className="w-2 h-2 rounded-full bg-blush-500 animate-pulse"></span>
+              <span className="text-[11px] font-semibold text-blush-600 capitalize">{activeMuscle || "Full Body"} Focus</span>
+            </div>
+          </div>
+
+          <div className="bg-blush-50/60 rounded-2xl p-4 border border-blush-100 flex items-center justify-around">
+            <div className="flex flex-col items-center">
+              <span className="text-[9px] font-semibold uppercase tracking-wider text-mutedMauve mb-1">Anterior (Front)</span>
+              <svg viewBox="0 0 100 200" className="w-20 h-40 drop-shadow-sm">
+                <circle cx="50" cy="18" r="9" fill="#E49B90" opacity="0.5" />
+                <rect x="46" y="27" width="8" height="6" fill="#E49B90" opacity="0.5" />
+                <path d="M 28 35 Q 50 32 72 35 L 77 48 L 23 48 Z" fill={isTarget("shoulders") ? "#D97365" : "#F6DDD9"} className={isTarget("shoulders") ? "muscle-glow" : ""} />
+                <rect x="30" y="47" width="40" height="18" rx="4" fill={isTarget("chest") ? "#D97365" : "#FBF0EE"} className={isTarget("chest") ? "muscle-glow" : ""} />
+                <rect x="34" y="68" width="32" height="26" rx="5" fill={isTarget("core") ? "#D97365" : "#FBF0EE"} className={isTarget("core") ? "muscle-glow" : ""} />
+                <rect x="18" y="50" width="8" height="42" rx="4" fill="#F6DDD9" />
+                <rect x="74" y="50" width="8" height="42" rx="4" fill="#F6DDD9" />
+                <path d="M 28 98 L 46 98 L 43 145 L 26 145 Z" fill={isTarget("quads") ? "#D97365" : "#FBF0EE"} className={isTarget("quads") ? "muscle-glow" : ""} />
+                <path d="M 54 98 L 72 98 L 74 145 L 57 145 Z" fill={isTarget("quads") ? "#D97365" : "#FBF0EE"} className={isTarget("quads") ? "muscle-glow" : ""} />
+              </svg>
+            </div>
+            <div className="w-[1px] h-32 bg-blush-200"></div>
+            <div className="flex flex-col items-center">
+              <span className="text-[9px] font-semibold uppercase tracking-wider text-mutedMauve mb-1">Posterior (Back)</span>
+              <svg viewBox="0 0 100 200" className="w-20 h-40 drop-shadow-sm">
+                <circle cx="50" cy="18" r="9" fill="#E49B90" opacity="0.5" />
+                <path d="M 26 35 Q 50 32 74 35 L 70 68 L 30 68 Z" fill={isTarget("lats") || isTarget("back") ? "#D97365" : "#FBF0EE"} className={isTarget("lats") || isTarget("back") ? "muscle-glow" : ""} />
+                <rect x="28" y="90" width="44" height="24" rx="7" fill={isTarget("glutes") ? "#D97365" : "#FBF0EE"} className={isTarget("glutes") ? "muscle-glow" : ""} />
+                <path d="M 28 116 L 46 116 L 43 145 L 26 145 Z" fill={isTarget("hamstrings") ? "#D97365" : "#FBF0EE"} className={isTarget("hamstrings") ? "muscle-glow" : ""} />
+                <path d="M 54 116 L 72 116 L 74 145 L 57 145 Z" fill={isTarget("hamstrings") ? "#D97365" : "#FBF0EE"} className={isTarget("hamstrings") ? "muscle-glow" : ""} />
+              </svg>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     function App() {
       const [tab, setTab] = useState(getInitialTab);
-      const [difficulty, setDifficulty] = useState(() => getStored("m60_diff", "intermediate"));
+      const [difficulty, setDifficulty] = useState(() => {
+        const d = getStored("m60_diff", "intermediate");
+        return (d && typeof d === 'string') ? d.toLowerCase() : "intermediate";
+      });
       const [workoutDay, setWorkoutDay] = useState(() => getStored("m60_day", "A"));
       const [focusedId, setFocusedId] = useState("i_a1");
       
+      // Audio & Speech Settings State
       const [audioMode, setAudioMode] = useState(() => getStored("m60_audio_mode", "voice"));
       const [speechRate, setSpeechRate] = useState(() => getStored("m60_speech_rate", 1.05));
       const [speechPitch, setSpeechPitch] = useState(() => getStored("m60_speech_pitch", 1.15));
@@ -343,7 +528,7 @@
 
       const [userProfile, setUserProfile] = useState(() => {
         const stored = getStored("m60_user_profile", null);
-        return stored ? { ...defaultProfile, ...stored } : defaultProfile;
+        return (stored && typeof stored === 'object') ? { ...defaultProfile, ...stored } : defaultProfile;
       });
 
       const [showWelcomeScreen, setShowWelcomeScreen] = useState(!userProfile.onboardingCompleted);
@@ -374,14 +559,17 @@
       const [periodStart, setPeriodStart] = useState(() => getStored("m60_pstart", "2026-08-01"));
       const [cycleLen, setCycleLen] = useState(() => getStored("m60_clen", 28));
 
+      // Query Device Voices
       useEffect(() => {
         const loadVoices = () => {
           if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
             const vList = window.speechSynthesis.getVoices();
-            setAvailableVoices(vList);
-            if (!selectedVoiceURI && vList.length > 0) {
-              const preferred = vList.find(v => (v.lang.startsWith('en') && (v.name.includes('Female') || v.name.includes('Samantha') || v.name.includes('Victoria')))) || vList[0];
-              setSelectedVoiceURI(preferred.voiceURI);
+            if (Array.isArray(vList) && vList.length > 0) {
+              setAvailableVoices(vList);
+              if (!selectedVoiceURI) {
+                const preferred = vList.find(v => (v.lang && v.lang.startsWith('en') && (v.name.includes('Female') || v.name.includes('Samantha') || v.name.includes('Victoria')))) || vList[0];
+                if (preferred) setSelectedVoiceURI(preferred.voiceURI);
+              }
             }
           }
         };
@@ -391,6 +579,7 @@
         }
       }, []);
 
+      // Screen Wake Lock Engine
       useEffect(() => {
         let wakeLockObj = null;
         const requestWakeLock = async () => {
@@ -407,16 +596,17 @@
       }, [wakeLockActive]);
 
       const calcMetabolicTargets = (p) => {
-        const w = Number(p.currentWeight) || 75;
-        const h = Number(p.height) || 165;
-        const a = Number(p.age) || 30;
+        const safeP = (p && typeof p === 'object') ? p : defaultProfile;
+        const w = Number(safeP.currentWeight) || 75;
+        const h = Number(safeP.height) || 165;
+        const a = Number(safeP.age) || 30;
         const bmr = Math.round(10 * w + 6.25 * h - 5 * a - 161);
         const tdee = Math.round(bmr * 1.375);
         const deficitCals = Math.max(1450, tdee - 350);
         
         let pRatio = 0.40, cRatio = 0.30, fRatio = 0.30;
-        if (p.somatotype === "Ectomorph") { pRatio = 0.30; cRatio = 0.50; fRatio = 0.20; }
-        else if (p.somatotype === "Mesomorph") { pRatio = 0.35; cRatio = 0.40; fRatio = 0.25; }
+        if (safeP.somatotype === "Ectomorph") { pRatio = 0.30; cRatio = 0.50; fRatio = 0.20; }
+        else if (safeP.somatotype === "Mesomorph") { pRatio = 0.35; cRatio = 0.40; fRatio = 0.25; }
 
         const pGrams = Math.round((deficitCals * pRatio) / 4);
         const cGrams = Math.round((deficitCals * cRatio) / 4);
@@ -446,6 +636,7 @@
 
       const speechSettings = { rate: speechRate, pitch: speechPitch, volume: audioVolume, voiceURI: selectedVoiceURI };
 
+      // Rest Timer Engine
       useEffect(() => {
         let timer = null;
         if (isResting && restSec > 0) {
@@ -472,6 +663,7 @@
         return () => clearInterval(timer);
       }, [isResting, restSec, audioMode, speechSettings, audioVolume, hapticsEnabled]);
 
+      // Global Metronome Engine
       useEffect(() => {
         let timer = null;
         if (tempoRunning) {
@@ -487,6 +679,7 @@
         return () => clearInterval(timer);
       }, [tempoRunning, audioVolume, hapticsEnabled]);
 
+      // Live Cadence Engine with Spoken Audio Prompts
       useEffect(() => {
         let timer = null;
         if (activeModalExercise && activeModalPacing) {
@@ -529,37 +722,65 @@
         return () => clearInterval(timer);
       }, [activeModalExercise, activeModalPacing, audioMode, speechSettings, audioVolume, hapticsEnabled]);
 
+      // Safe Cycle Calculation
       const calcCycle = () => {
-        const start = new Date(periodStart);
-        start.setHours(0, 0, 0, 0);
-        const now = new Date();
-        now.setHours(0, 0, 0, 0);
-        const diff = Math.floor((now - start) / (1000 * 60 * 60 * 24));
-        const day = ((diff % cycleLen) + cycleLen) % cycleLen + 1;
-        let phase = "follicular";
-        if (day <= 5) phase = "menstrual";
-        else if (day <= 13) phase = "follicular";
-        else if (day <= 16) phase = "ovulatory";
-        else phase = "luteal";
-        return { day, phase, info: CYCLE_MODES[phase] };
+        try {
+          const start = new Date(periodStart || "2026-08-01");
+          start.setHours(0, 0, 0, 0);
+          const now = new Date();
+          now.setHours(0, 0, 0, 0);
+          const validCycleLen = Number(cycleLen) || 28;
+          let diff = Math.floor((now - start) / (1000 * 60 * 60 * 24));
+          if (isNaN(diff)) diff = 0;
+          const day = ((diff % validCycleLen) + validCycleLen) % validCycleLen + 1;
+          let phase = "follicular";
+          if (day <= 5) phase = "menstrual";
+          else if (day <= 13) phase = "follicular";
+          else if (day <= 16) phase = "ovulatory";
+          else phase = "luteal";
+          return { day, phase, info: CYCLE_MODES[phase] || CYCLE_MODES.follicular };
+        } catch (e) {
+          return { day: 1, phase: "follicular", info: CYCLE_MODES.follicular };
+        }
       };
 
       const cycle = calcCycle();
-      const currentList = EXERCISE_DATA[difficulty][workoutDay] || EXERCISE_DATA.intermediate.A;
-      const activeEx = currentList.find(e => e.id === focusedId) || currentList[0];
 
-      const currentLoadMod = cycle.info.mod;
+      // Safe Exercise List Resolution
+      const safeDiffKey = (difficulty && typeof difficulty === 'string') ? difficulty.toLowerCase() : "intermediate";
+      const tierData = EXERCISE_DATA[safeDiffKey] || EXERCISE_DATA.intermediate;
+      const safeDayKey = (workoutDay && ["A", "B", "C"].includes(workoutDay)) ? workoutDay : "A";
+      const currentList = tierData[safeDayKey] || tierData.A || EXERCISE_DATA.intermediate.A;
+
+      const activeEx = currentList.find(e => e && e.id === focusedId) || currentList[0] || {
+        id: "fallback",
+        name: "Movement",
+        target: "Sculpt",
+        primary: "quads",
+        sets: 3,
+        reps: 10,
+        rest: 60,
+        tempo: "3-0-1",
+        defaultKg: 0,
+        img: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=600&q=80",
+        cues: "Focus on mind-muscle connection and controlled posture.",
+        execution: ["Perform with controlled tempo."]
+      };
+
+      const currentLoadMod = (cycle && cycle.info && cycle.info.mod) ? cycle.info.mod : 1.0;
       const liveSessionVolume = currentList.reduce((sum, ex) => {
-        const loggedKg = (Number(weights[ex.id]) || ex.defaultKg) * currentLoadMod;
+        if (!ex) return sum;
+        const loggedKg = (Number(weights[ex.id]) || ex.defaultKg || 0) * currentLoadMod;
         let done = 0;
         for (let s = 0; s < ex.sets; s++) {
           if (completedSets[`${ex.id}_s_${s}`]) done++;
         }
-        return sum + Math.round(done * ex.reps * loggedKg);
+        return sum + Math.round(done * (ex.reps || 10) * loggedKg);
       }, 0);
 
-      const totalSetsCount = currentList.reduce((sum, ex) => sum + ex.sets, 0);
+      const totalSetsCount = currentList.reduce((sum, ex) => sum + (ex ? ex.sets : 0), 0);
       const completedSetsCount = currentList.reduce((sum, ex) => {
+        if (!ex) return sum;
         let done = 0;
         for (let s = 0; s < ex.sets; s++) {
           if (completedSets[`${ex.id}_s_${s}`]) done++;
@@ -589,6 +810,7 @@
 
           if (allSetsDone) {
             const nextIncompleteEx = currentList.find(otherEx => {
+              if (!otherEx) return false;
               for (let s = 0; s < otherEx.sets; s++) {
                 if (!updated[`${otherEx.id}_s_${s}`]) return true;
               }
@@ -630,12 +852,12 @@
           date: new Date().toLocaleDateString("en-ZA", { month: "short", day: "numeric" }),
           fullDate: localDateStr,
           day: workoutDay,
-          difficulty,
+          difficulty: safeDiffKey,
           tonnage: liveSessionVolume,
           sets: completedSetsCount,
           timestamp: Date.now()
         };
-        setHistory([entry, ...history]);
+        setHistory([entry, ...(Array.isArray(history) ? history : [])]);
         if (hapticsEnabled) triggerHaptic([50, 100, 50, 100]);
         playChime([523.25, 659.25, 783.99, 1046.50], 0.4, audioVolume);
         speakPrompt("Congratulations! Workout complete", audioMode, speechSettings);
@@ -643,7 +865,9 @@
         
         const nextDay = workoutDay === "A" ? "B" : workoutDay === "B" ? "C" : "A";
         setWorkoutDay(nextDay);
-        setFocusedId(EXERCISE_DATA[difficulty][nextDay][0].id);
+        if (tierData[nextDay] && tierData[nextDay][0]) {
+          setFocusedId(tierData[nextDay][0].id);
+        }
       };
 
       const completeOnboarding = () => {
@@ -719,10 +943,11 @@
         }
       };
 
-      const totalHistoricalTonnage = history.reduce((sum, h) => sum + (h.tonnage || 0), 0) + liveSessionVolume;
+      const safeHistory = Array.isArray(history) ? history.filter(h => h && typeof h === 'object') : [];
+      const totalHistoricalTonnage = safeHistory.reduce((sum, h) => sum + (Number(h.tonnage) || 0), 0) + liveSessionVolume;
       const badges = [
-        { id: "b1", name: "Radiant Starter", desc: "Finished 1+ workout session", icon: "✨", unlocked: history.length >= 1 },
-        { id: "b2", name: "Grace in Momentum", desc: "Completed 3+ workouts", icon: "🌸", unlocked: history.length >= 3 },
+        { id: "b1", name: "Radiant Starter", desc: "Finished 1+ workout session", icon: "✨", unlocked: safeHistory.length >= 1 },
+        { id: "b2", name: "Grace in Momentum", desc: "Completed 3+ workouts", icon: "🌸", unlocked: safeHistory.length >= 3 },
         { id: "b3", name: "10k kg Sculpt Club", desc: "Moved 10,000+ kg sculpted load", icon: "👑", unlocked: totalHistoricalTonnage >= 10000 },
         { id: "b4", name: "Hydration Radiance", desc: "Drank 3L water today (8/8 glasses)", icon: "💧", unlocked: waterGlasses >= 8 },
         { id: "b5", name: "Hormonal Symphony", desc: "Menstrual cycle engine synchronized", icon: "🌙", unlocked: !!periodStart }
@@ -837,11 +1062,13 @@
                       onClick={() => {
                         setDifficulty(tier);
                         setUserProfile(prev => ({ ...prev, experience: tier.charAt(0).toUpperCase() + tier.slice(1) }));
-                        setFocusedId(EXERCISE_DATA[tier][workoutDay][0].id);
+                        if (EXERCISE_DATA[tier] && EXERCISE_DATA[tier][workoutDay]) {
+                          setFocusedId(EXERCISE_DATA[tier][workoutDay][0].id);
+                        }
                         if (hapticsEnabled) triggerHaptic(10);
                       }}
                       className={`flex-1 py-1.5 rounded-xl text-xs font-semibold capitalize transition-all ${
-                        difficulty === tier ? "bg-blush-500 text-white shadow-sm font-bold" : "text-mutedMauve hover:text-charcoal"
+                        safeDiffKey === tier ? "bg-blush-500 text-white shadow-sm font-bold" : "text-mutedMauve hover:text-charcoal"
                       }`}
                     >
                       {tier}
@@ -857,7 +1084,9 @@
                           key={d}
                           onClick={() => { 
                             setWorkoutDay(d); 
-                            setFocusedId(EXERCISE_DATA[difficulty][d][0].id);
+                            if (tierData[d] && tierData[d][0]) {
+                              setFocusedId(tierData[d][0].id);
+                            }
                             if (hapticsEnabled) triggerHaptic(10);
                           }}
                           className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all border ${
@@ -947,6 +1176,7 @@
 
                 <div className="space-y-3">
                   {currentList.map(ex => {
+                    if (!ex) return null;
                     const isCurrent = focusedId === ex.id;
                     const loggedKg = weights[ex.id] !== undefined ? weights[ex.id] : ex.defaultKg;
                     
@@ -1098,7 +1328,7 @@
                   </button>
                 </div>
 
-                {/* Recipes View */}
+                {/* Recipes Subtab */}
                 {fuelSubTab === "meals" && (
                   <div className="space-y-3">
                     <div className="flex gap-1.5 overflow-x-auto pb-1">
@@ -1165,7 +1395,7 @@
                   </div>
                 )}
 
-                {/* Grocery Checklist View */}
+                {/* Grocery Checklist Subtab */}
                 {fuelSubTab === "checklist" && (
                   <div className="card-light p-4 rounded-3xl space-y-3.5">
                     <div className="flex justify-between items-center pb-1 border-b border-blush-100">
@@ -1212,7 +1442,7 @@
                   </div>
                 )}
 
-                {/* Swaps View */}
+                {/* Swaps Subtab */}
                 {fuelSubTab === "swaps" && (
                   <div className="card-light p-4 rounded-3xl space-y-3">
                     <h3 className="text-xs font-serif font-bold text-charcoal uppercase tracking-wider">Lifestyle Substitution Matrix</h3>
@@ -1244,7 +1474,7 @@
                       <h3 className="text-sm font-serif font-bold text-charcoal">{monthName} {currentYear}</h3>
                     </div>
                     <span className="text-[10px] font-bold text-blush-600 bg-blush-50 px-2.5 py-0.5 rounded-full border border-blush-200">
-                      {history.filter(h => h.fullDate && h.fullDate.startsWith(`${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`)).length} Workouts Done
+                      {safeHistory.filter(h => h.fullDate && h.fullDate.startsWith(`${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`)).length} Workouts Done
                     </span>
                   </div>
 
@@ -1259,7 +1489,7 @@
                       {Array.from({ length: daysInMonth }).map((_, dayIdx) => {
                         const dayNum = dayIdx + 1;
                         const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
-                        const workoutDone = history.find(h => h.fullDate === dateStr);
+                        const workoutDone = safeHistory.find(h => h.fullDate === dateStr);
                         const isToday = now.getDate() === dayNum;
 
                         return (
@@ -1298,18 +1528,18 @@
                       <h3 className="text-sm font-serif font-bold text-charcoal">Challenge Timeline</h3>
                     </div>
                     <span className="text-xs font-mono font-bold text-blush-600 bg-blush-50 px-2.5 py-1 rounded-xl border border-blush-200">
-                      {history.length} / 60 Days
+                      {safeHistory.length} / 60 Days
                     </span>
                   </div>
 
                   <div className="space-y-1.5">
                     <div className="flex justify-between text-[10px] font-semibold text-mutedMauve">
                       <span>Phase 1: Metabolic Sculpt (Days 1–30)</span>
-                      <span className="text-blush-600">{Math.min(30, history.length)} / 30</span>
+                      <span className="text-blush-600">{Math.min(30, safeHistory.length)} / 30</span>
                     </div>
                     <div className="grid grid-cols-10 gap-1 bg-blush-50/60 p-2.5 rounded-2xl border border-blush-100">
                       {Array.from({ length: 30 }).map((_, i) => {
-                        const isDone = i < history.length;
+                        const isDone = i < safeHistory.length;
                         return (
                           <div
                             key={i}
@@ -1327,11 +1557,11 @@
                   <div className="space-y-1.5 pt-1">
                     <div className="flex justify-between text-[10px] font-semibold text-mutedMauve">
                       <span>Phase 2: Glute Lift & Waist Taper (Days 31–60)</span>
-                      <span className="text-roseGold">{Math.max(0, Math.min(30, history.length - 30))} / 30</span>
+                      <span className="text-roseGold">{Math.max(0, Math.min(30, safeHistory.length - 30))} / 30</span>
                     </div>
                     <div className="grid grid-cols-10 gap-1 bg-blush-50/60 p-2.5 rounded-2xl border border-blush-100">
                       {Array.from({ length: 30 }).map((_, i) => {
-                        const isDone = (i + 30) < history.length;
+                        const isDone = (i + 30) < safeHistory.length;
                         return (
                           <div
                             key={i + 30}
@@ -1552,7 +1782,7 @@
                         onChange={e => setSelectedVoiceURI(e.target.value)}
                         className="w-full bg-blush-50 border border-blush-200 text-charcoal text-xs font-medium p-2 rounded-xl focus:outline-none"
                       >
-                        {availableVoices.filter(v => v.lang.startsWith('en')).map(v => (
+                        {availableVoices.filter(v => v.lang && v.lang.startsWith('en')).map(v => (
                           <option key={v.voiceURI} value={v.voiceURI}>{v.name} ({v.lang})</option>
                         ))}
                       </select>
@@ -2257,7 +2487,7 @@
             </div>
           )}
 
-          {/* BOTTOM NAVIGATION DOCK (6 EQUAL TABS) */}
+          {/* BOTTOM NAVIGATION DOCK (6 TABS) */}
           <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur border-t border-blush-200 px-2 py-2 flex justify-around items-center z-40 shadow-sm">
             <button onClick={() => { setTab("train"); if (hapticsEnabled) triggerHaptic(10); }} className={`flex flex-col items-center gap-0.5 text-xs ${tab === "train" ? "text-blush-600 font-bold" : "text-mutedMauve"}`}>
               <span className="text-base">🌸</span><span className="text-[9px]">Train</span>
@@ -2283,7 +2513,11 @@
       );
     }
 
-    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    ReactDOM.createRoot(document.getElementById('root')).render(
+      <ErrorBoundary>
+        <App />
+      </ErrorBoundary>
+    );
   </script>
 
   <!-- PWA Service Worker Registration -->
